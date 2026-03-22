@@ -14,6 +14,50 @@ export interface ProductVariant {
     media: any[];
     createdAt: string;
     updatedAt: string;
+
+  inventories: {
+    id: string;
+    variantId: string;
+    locationId: string;
+    quantity: number;
+    reservedQuantity: number;
+    reorderLevel: number | null;
+    createdAt: string;
+    updatedAt: string;
+    location: {
+      id: string;
+      shopId: string;
+      name: string;
+      addressLine1: string;
+      addressLine2: string;
+      city: string;
+      state: string;
+      country: string;
+      postalCode: string;
+      latitude: number;
+      longitude: number;
+      phone: string;
+      createdAt: string;
+    };
+  }[];
+
+  variantOptionValues: {
+    id: string;
+    variantId: string;
+    optionValueId: string;
+    optionValue: {
+      id: string;
+      value: string;
+      optionId: string;
+      createdAt: string;
+      option: {
+        id: string;
+        name: string;
+        createdAt: string;
+        updatedAt: string;
+      };
+    };
+  }[];
   }
   
   export interface Product {
@@ -66,4 +110,17 @@ export interface ProductVariant {
     active: number;
     draft: number;
     archived: number;
+  };
+
+  export type ProductVariantsSummary = {
+    totalVariants: number;
+    activeVariants: number;
+    pricing: {
+      minPrice: number;
+      maxPrice: number;
+      avgPrice: number;
+      avgComparePrice: number;
+      avgCostPrice: number;
+      avgWeight: number;
+    };
   };

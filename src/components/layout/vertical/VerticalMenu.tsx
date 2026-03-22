@@ -113,8 +113,20 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
           <SubMenu label={dictionary['navigation'].eCommerce} icon={<i className='ri-shopping-bag-3-line' />}>
             <MenuItem href={`/${locale}/apps/ecommerce/dashboard`}>{dictionary['navigation'].dashboard}</MenuItem>
             <SubMenu label={dictionary['navigation'].products}>
-              <MenuItem href={`/${locale}/apps/ecommerce/products/list`}>{dictionary['navigation'].list}</MenuItem>
+              <MenuItem href={`/${locale}/apps/ecommerce/products/list`}
+              exactMatch={false}
+                activeUrl={`/${locale}/apps/ecommerce/products/list`}
+
+              >{dictionary['navigation'].list}</MenuItem>
               <MenuItem href={`/${locale}/apps/ecommerce/products/add`}>{dictionary['navigation'].add}</MenuItem>
+              {/* <MenuItem href={`/${locale}/apps/ecommerce/products/1`} exactMatch={false} activeUrl='/apps/ecommerce/products/:detail'>{dictionary['navigation'].detail}</MenuItem> */}
+              {/* <MenuItem
+  href={`/${locale}/apps/ecommerce/products/list`}
+  exactMatch={false}
+  activeUrl='/apps/ecommerce/products'
+>
+  {dictionary['navigation'].detail}
+</MenuItem> */}
               <MenuItem href={`/${locale}/apps/ecommerce/products/category`}>
                 {dictionary['navigation'].category}
               </MenuItem>

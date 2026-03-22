@@ -231,6 +231,16 @@ const ProductListTable = () => {
           />
         )
       },
+      // columnHelper.accessor('order', {
+      //   header: 'Order',
+      //   cell: ({ row }) => (
+      //     <Typography
+      //       component={Link}
+      //       href={getLocalizedUrl(`/apps/ecommerce/orders/details/${row.original.order}`, locale as Locale)}
+      //       color='primary.main'
+      //     >{`#${row.original.order}`}</Typography>
+      //   )
+      // }),
       columnHelper.accessor('name', {
         header: 'Product',
         cell: ({ row }) => {
@@ -244,7 +254,11 @@ const ProductListTable = () => {
                 <img src={firstImage} width={38} height={38} className='rounded-md bg-actionHover' alt={row.original.name} />
               )}
               <div className='flex flex-col'>
-                <Typography className='font-medium' color='text.primary'>
+                <Typography className='font-medium' 
+                component={Link}
+                href={getLocalizedUrl(`/apps/ecommerce/products/list/${encodeURIComponent(row.original.id)}`, locale as Locale)}
+                color='primary.main'
+                >
                   {row.original.name}
                 </Typography>
                 <Typography variant='body2'>{row.original.brand?.name}</Typography>
