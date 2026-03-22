@@ -1,7 +1,8 @@
 'use client'
 
-// React Imports
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useDropzone } from 'react-dropzone'
+import { useFormContext } from 'react-hook-form'
 
 // MUI Imports
 import Card from '@mui/material/Card'
@@ -15,14 +16,9 @@ import Typography from '@mui/material/Typography'
 import { styled } from '@mui/material/styles'
 import type { BoxProps } from '@mui/material/Box'
 
-// Third-party Imports
-import { useDropzone } from 'react-dropzone'
-
 // Component Imports
 import Link from '@components/Link'
 import CustomAvatar from '@core/components/mui/Avatar'
-
-// Styled Component Imports
 import AppReactDropzone from '@/libs/styles/AppReactDropzone'
 
 type FileProp = {
@@ -31,7 +27,7 @@ type FileProp = {
   size: number
 }
 
-// Styled Dropzone Component
+// Styled Dropzone
 const Dropzone = styled(AppReactDropzone)<BoxProps>(({ theme }) => ({
   '& .dropzone': {
     minHeight: 'unset',
@@ -46,32 +42,36 @@ const Dropzone = styled(AppReactDropzone)<BoxProps>(({ theme }) => ({
 }))
 
 const ProductImage = () => {
-  // States
-  const [files, setFiles] = useState<File[]>([])
+  const { setValue, getValues } = useFormContext() // access form
+  const [files, setFiles] = useState<File[]>(getValues('image') || [])
 
-  // Hooks
+  // Update form whenever files change
+  useEffect(() => {
+    setValue('image', files[0]) // store in react-hook-form
+  }, [files, setValue])
+
   const { getRootProps, getInputProps } = useDropzone({
     onDrop: (acceptedFiles: File[]) => {
-      setFiles(acceptedFiles.map((file: File) => Object.assign(file)))
+      setFiles(prev => [...prev, ...acceptedFiles])
     }
   })
 
-  const renderFilePreview = (file: FileProp) => {
-    if (file.type.startsWith('image')) {
-      return <img width={38} height={38} alt={file.name} src={URL.createObjectURL(file as any)} />
-    } else {
-      return <i className='ri-file-text-line' />
-    }
-  }
-
   const handleRemoveFile = (file: FileProp) => {
-    const uploadedFiles = files
-    const filtered = uploadedFiles.filter((i: FileProp) => i.name !== file.name)
-
-    setFiles([...filtered])
+    setFiles(prev => prev.filter(f => f.name !== file.name))
   }
 
-  const fileList = files.map((file: FileProp) => (
+  const handleRemoveAllFiles = () => {
+    setFiles([])
+  }
+
+  const renderFilePreview = (file: FileProp) =>
+    file.type.startsWith('image') ? (
+      <img width={38} height={38} alt={file.name} src={URL.createObjectURL(file as any)} />
+    ) : (
+      <i className='ri-file-text-line' />
+    )
+
+  const fileList = files.map(file => (
     <ListItem key={file.name} className='pis-4 plb-3'>
       <div className='file-details'>
         <div className='file-preview'>{renderFilePreview(file)}</div>
@@ -91,10 +91,6 @@ const ProductImage = () => {
       </IconButton>
     </ListItem>
   ))
-
-  const handleRemoveAllFiles = () => {
-    setFiles([])
-  }
 
   return (
     <Dropzone>
@@ -122,17 +118,17 @@ const ProductImage = () => {
               </Button>
             </div>
           </div>
-          {files.length ? (
+
+          {files.length > 0 && (
             <>
               <List>{fileList}</List>
-              <div className='buttons'>
+              <div className='buttons flex gap-2 mt-2'>
                 <Button color='error' variant='outlined' onClick={handleRemoveAllFiles}>
                   Remove All
                 </Button>
-                <Button variant='contained'>Upload Files</Button>
               </div>
             </>
-          ) : null}
+          )}
         </CardContent>
       </Card>
     </Dropzone>

@@ -114,6 +114,9 @@ const HorizontalMenu = ({ dictionary }: { dictionary: Awaited<ReturnType<typeof 
               <MenuItem href={`/${locale}/apps/ecommerce/products/category`}>
                 {dictionary['navigation'].category}
               </MenuItem>
+              <MenuItem href={`/${locale}/apps/ecommerce/products/options`}>
+                {dictionary['navigation'].variantOptions}
+              </MenuItem>
             </SubMenu>
             <SubMenu label={dictionary['navigation'].orders}>
               <MenuItem href={`/${locale}/apps/ecommerce/orders/list`}>{dictionary['navigation'].list}</MenuItem>

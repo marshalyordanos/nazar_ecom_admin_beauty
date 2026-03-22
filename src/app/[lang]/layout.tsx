@@ -27,6 +27,7 @@ import '@/app/globals.css'
 
 // Generated Icon CSS Imports
 import '@assets/iconify-icons/generated-icons.css'
+import ReactQueryProvider from '@/providers/ReactQueryProvider'
 
 export const metadata = {
   title: 'Materialize - Material Next.js Admin Template',
@@ -51,7 +52,9 @@ const RootLayout = async (props: ChildrenType & { params: Promise<{ lang: string
       <html id='__next' lang={lang} dir={direction} suppressHydrationWarning>
         <body className='flex is-full min-bs-full flex-auto flex-col'>
           <InitColorSchemeScript attribute='data' defaultMode={systemMode} />
-          {children}
+          <ReactQueryProvider>
+            {children}
+          </ReactQueryProvider>
         </body>
       </html>
     </TranslationWrapper>

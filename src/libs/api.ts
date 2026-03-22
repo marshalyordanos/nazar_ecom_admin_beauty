@@ -1,0 +1,121 @@
+import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios'
+
+import {
+  clearAuthCookies,
+  getAccessTokenFromCookies,
+  getRefreshTokenFromCookies,
+  persistAuthTokens
+} from '@/libs/backendAuth'
+
+const baseURL = process.env.NEXT_PUBLIC_API_URL
+
+export const api = axios.create({
+  baseURL,
+  headers: { 'Content-Type': 'application/json' },
+  withCredentials: false
+})
+
+type RetryConfig = InternalAxiosRequestConfig & { _retry?: boolean }
+
+let refreshInFlight: Promise<string> | null = null
+
+function getLoginPath() {
+  if (typeof window === 'undefined') return '/en/login'
+
+  const seg = window.location.pathname.split('/').filter(Boolean)[0]
+
+  return seg ? `/${seg}/login` : '/en/login'
+}
+
+async function doRefresh(): Promise<string> {
+  const rt = getRefreshTokenFromCookies()
+
+  if (!rt || !baseURL) {
+    throw new Error('No refresh token')
+  }
+
+  const { data } = await axios.post<{
+    accessToken: string
+    refreshToken: string
+    expiresIn?: number
+  }>(`${baseURL}/auth/refresh`, {
+    refreshToken: rt
+  })
+
+  if (!data?.accessToken || !data?.refreshToken) {
+    throw new Error('Invalid refresh response')
+  }
+
+  persistAuthTokens(data.accessToken, data.refreshToken, data.expiresIn)
+
+  return data.accessToken
+}
+
+function setAuthorizationHeader(config: InternalAxiosRequestConfig, token: string) {
+  const value = `Bearer ${token}`
+  const headers = config.headers
+
+  if (headers && typeof (headers as { set?: (k: string, v: string) => void }).set === 'function') {
+    ;(headers as { set: (k: string, v: string) => void }).set('Authorization', value)
+  } else if (headers) {
+    ;(headers as Record<string, string>).Authorization = value
+  }
+}
+
+api.interceptors.request.use(config => {
+  if (typeof window === 'undefined') {
+    return config
+  }
+
+  const token = getAccessTokenFromCookies()
+
+  if (token) {
+    setAuthorizationHeader(config, token)
+  }
+
+  return config
+})
+
+api.interceptors.response.use(
+  res => res,
+  async (error: AxiosError) => {
+    const original = error.config as RetryConfig | undefined
+
+    if (!original || original._retry) {
+      return Promise.reject(error)
+    }
+
+    if (error.response?.status !== 401) {
+      return Promise.reject(error)
+    }
+
+    const url = String(original.url || '')
+
+    if (url.includes('/auth/refresh') || url.includes('/auth/login')) {
+      return Promise.reject(error)
+    }
+
+    try {
+      if (!refreshInFlight) {
+        refreshInFlight = doRefresh().finally(() => {
+          refreshInFlight = null
+        })
+      }
+
+      const newAccess = await refreshInFlight
+
+      original._retry = true
+      setAuthorizationHeader(original, newAccess)
+
+      return api(original)
+    } catch {
+      clearAuthCookies()
+
+      if (typeof window !== 'undefined') {
+        window.location.assign(getLoginPath())
+      }
+
+      return Promise.reject(error)
+    }
+  }
+)

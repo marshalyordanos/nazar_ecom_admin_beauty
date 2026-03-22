@@ -36,7 +36,7 @@ const eCommerceProductsList = async () => {
         <ProductCard />
       </Grid>
       <Grid size={{ xs: 12 }}>
-        <ProductListTable productData={data?.products} />
+        <ProductListTable />
       </Grid>
     </Grid>
   )

@@ -2,30 +2,76 @@
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
-import Checkbox from '@mui/material/Checkbox'
-import Divider from '@mui/material/Divider'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import Switch from '@mui/material/Switch'
+import MenuItem from '@mui/material/MenuItem'
 import TextField from '@mui/material/TextField'
-import Typography from '@mui/material/Typography'
 
 // Component Imports
 import Form from '@components/Form'
+import { useFormContext } from 'react-hook-form'
+
+const PRODUCT_STATUS_OPTIONS = [
+  { value: 'DRAFT', label: 'Draft' },
+  { value: 'ACTIVE', label: 'Active' },
+  { value: 'ARCHIVED', label: 'Archived' }
+]
 
 const ProductPricing = () => {
+  const { register , setValue} = useFormContext()
   return (
     <Card>
       <CardHeader title='Pricing' />
       <CardContent>
         <Form>
-          <TextField fullWidth label='Base Price' placeholder='Enter Base Price' className='mbe-5' />
-          <TextField fullWidth label='Discounted Price' placeholder='$499' className='mbe-5' />
-          <FormControlLabel control={<Checkbox defaultChecked />} label='Charge tax on this product' />
-          <Divider className='mlb-2' />
-          <div className='flex items-center justify-between'>
-            <Typography>In stock</Typography>
-            <Switch defaultChecked />
-          </div>
+          <TextField
+            {...register('sku')}
+            fullWidth
+            label='SKU'
+            name='sku'
+            placeholder='Enter SKU'
+            className='mbe-5'
+          />
+          <TextField
+            {...register('price')}
+            fullWidth
+            type='number'
+            label='Price'
+            name='price'
+            placeholder='Enter Price'
+            className='mbe-5'
+          />
+          <TextField
+            {...register('comparePrice')}
+            fullWidth
+            type='number'
+            label='Compare Price'
+            name='comparePrice'
+            placeholder='Enter Compare Price'
+            className='mbe-5'
+          />
+          <TextField
+            {...register('costPrice')}
+            fullWidth
+            type='number'
+            label='Cost Price'
+            name='costPrice'
+            placeholder='Enter Cost Price'
+            className='mbe-5'
+          />
+          <TextField
+            {...register('variantStatus')}
+            select
+            fullWidth
+            label='Status'
+            name='status'
+            defaultValue='DRAFT'
+            className='mbe-5'
+          >
+            {PRODUCT_STATUS_OPTIONS.map(option => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </TextField>
         </Form>
       </CardContent>
     </Card>

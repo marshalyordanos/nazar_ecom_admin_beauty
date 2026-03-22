@@ -62,7 +62,11 @@ const horizontalMenuData = (dictionary: Awaited<ReturnType<typeof getDictionary>
               {
                 label: dictionary['navigation'].category,
                 href: '/apps/ecommerce/products/category'
-              }
+              },
+              // {
+              //   label: dictionary['navigation'].variantOptions,
+              //   href: '/apps/ecommerce/products/options'
+              // }
             ]
           },
           {

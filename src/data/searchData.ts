@@ -113,6 +113,13 @@ const data: SearchData[] = [
     section: 'Apps'
   },
   {
+    id: '14b',
+    name: 'eCommerce - Variant options',
+    url: '/apps/ecommerce/products/options',
+    icon: 'ri-settings-3-line',
+    section: 'Apps'
+  },
+  {
     id: '15',
     name: 'eCommerce - Order List',
     url: '/apps/ecommerce/orders/list',

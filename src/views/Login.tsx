@@ -19,7 +19,6 @@ import Divider from '@mui/material/Divider'
 import Alert from '@mui/material/Alert'
 
 // Third-party Imports
-// import { signIn } from 'next-auth/react'
 import { Controller, useForm } from 'react-hook-form'
 import { valibotResolver } from '@hookform/resolvers/valibot'
 import { object, minLength, string, email, pipe, nonEmpty } from 'valibot'
@@ -33,6 +32,7 @@ import type { Locale } from '@/configs/i18n'
 
 // Component Imports
 import Logo from '@components/layout/shared/Logo'
+import { loginWithBackend } from '@/libs/backendAuth'
 
 // Config Imports
 import themeConfig from '@configs/themeConfig'
@@ -85,8 +85,8 @@ const Login = ({ mode }: { mode: Mode }) => {
   } = useForm<FormData>({
     resolver: valibotResolver(schema),
     defaultValues: {
-      email: 'admin@materialize.com',
-      password: 'admin'
+      email: 'admin@gmail.com',
+      password: 'admin1111'
     }
   })
 
@@ -103,32 +103,26 @@ const Login = ({ mode }: { mode: Mode }) => {
   const handleClickShowPassword = () => setIsPasswordShown(show => !show)
 
   const onSubmit: SubmitHandler<FormData> = async (data: FormData) => {
-    // const res = await signIn('credentials', {
-    //   email: data.email,
-    //   password: data.password,
-    //   redirect: false
-    // })
+    setErrorState(null)
 
-    // if (res && res.ok && res.error === null) {
-    //   // Vars
+    try {
+      await loginWithBackend(data.email, data.password)
+
       const redirectURL = searchParams.get('redirectTo') ?? '/'
 
       router.replace(getLocalizedUrl(redirectURL, locale as Locale))
-    // } else {
-    //   if (res?.error) {
-    //     console.log(res,"===========")
-    //     const error = JSON.parse(res.error)
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Login failed'
 
-    //     setErrorState(error)
-    //   }
-    // }
+      setErrorState({ message: [message] })
+    }
   }
 
   return (
     <div className='flex bs-full justify-center'>
       <div
         className={classnames(
-          'flex bs-full items-center justify-center flex-1 min-bs-[100dvh] relative p-6 max-md:hidden',
+          'flex bs-full items-center justify-center flex-1 min-bs-dvh relative p-6 max-md:hidden',
           {
             'border-ie': settings.skin === 'bordered'
           }
@@ -143,8 +137,8 @@ const Login = ({ mode }: { mode: Mode }) => {
         </div>
         <img src={authBackground} className='absolute bottom-[4%] z-[-1] is-full max-md:hidden' />
       </div>
-      <div className='flex justify-center items-center bs-full bg-backgroundPaper !min-is-full p-6 md:!min-is-[unset] md:p-12 md:is-[480px]'>
-        <div className='absolute block-start-5 sm:block-start-[38px] inline-start-6 sm:inline-start-[38px]'>
+      <div className='flex justify-center items-center bs-full bg-backgroundPaper min-is-full! p-6 md:min-is-[unset]! md:p-12 md:is-[480px]'>
+        <div className='absolute block-start-5 sm:block-start-[38px] inline-start-6 sm:start-[38px]'>
           <Logo />
         </div>
         <div className='flex flex-col gap-5 is-full sm:is-auto md:is-full sm:max-is-[400px] md:max-is-[unset]'>
@@ -152,7 +146,7 @@ const Login = ({ mode }: { mode: Mode }) => {
             <Typography variant='h4'>{`Welcome to ${themeConfig.templateName}!👋🏻`}</Typography>
             <Typography>Please sign-in to your account and start the adventure</Typography>
           </div>
-          <Alert icon={false} className='bg-[var(--mui-palette-primary-lightOpacity)]'>
+          <Alert icon={false} className='bg-(--mui-palette-primary-lightOpacity)'>
             <Typography variant='body2' color='primary.main'>
               Email: <span className='font-medium'>admin@materialize.com</span> / Pass:{' '}
               <span className='font-medium'>admin</span>
@@ -250,6 +244,7 @@ const Login = ({ mode }: { mode: Mode }) => {
             className='self-center text-textPrimary'
             startIcon={<img src='/images/logos/google.png' alt='Google' width={22} />}
             sx={{ '& .MuiButton-startIcon': { marginInlineEnd: 3 } }}
+
             // onClick={() => signIn('google')}
           >
             Sign in with Google

@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import type { MouseEvent } from 'react'
 
 // Next Imports
@@ -22,8 +22,6 @@ import MenuItem from '@mui/material/MenuItem'
 import Button from '@mui/material/Button'
 
 // Third-party Imports
-import { signOut, useSession } from 'next-auth/react'
-
 // Type Imports
 import type { Locale } from '@configs/i18n'
 
@@ -32,6 +30,7 @@ import { useSettings } from '@core/hooks/useSettings'
 
 // Util Imports
 import { getLocalizedUrl } from '@/utils/i18n'
+import { decodeAccessToken, getAccessTokenFromCookies, getStoredAuthUser, logoutWithBackend } from '@/libs/backendAuth'
 
 // Styled component for badge content
 const BadgeContentSpan = styled('span')({
@@ -46,15 +45,36 @@ const BadgeContentSpan = styled('span')({
 const UserDropdown = () => {
   // States
   const [open, setOpen] = useState(false)
+  const [userName, setUserName] = useState('')
+  const [userEmail, setUserEmail] = useState('')
 
   // Refs
   const anchorRef = useRef<HTMLDivElement>(null)
 
   // Hooks
   const router = useRouter()
-  const { data: session } = useSession()
   const { settings } = useSettings()
   const { lang: locale } = useParams()
+
+  useEffect(() => {
+    const storedUser = getStoredAuthUser()
+
+    if (storedUser) {
+
+      const name = storedUser.firstName && storedUser.lastName ? `${storedUser.firstName} ${storedUser.lastName}` : storedUser.email
+
+      setUserName(name || '')
+      setUserEmail(storedUser.email || '')
+
+      return
+    }
+
+    const accessToken = getAccessTokenFromCookies()
+    const decoded = accessToken ? decodeAccessToken(accessToken) : null
+
+    setUserName(decoded?.email || '')
+    setUserEmail(decoded?.email || '')
+  }, [])
 
   const handleDropdownOpen = () => {
     !open ? setOpen(true) : setOpen(false)
@@ -74,8 +94,8 @@ const UserDropdown = () => {
 
   const handleUserLogout = async () => {
     try {
-      // Sign out from the app
-      await signOut({ callbackUrl: process.env.NEXT_PUBLIC_APP_URL })
+      await logoutWithBackend()
+      router.push(getLocalizedUrl('/login', locale as Locale))
     } catch (error) {
       console.error(error)
 
@@ -95,8 +115,8 @@ const UserDropdown = () => {
       >
         <Avatar
           ref={anchorRef}
-          alt={session?.user?.name || ''}
-          src={session?.user?.image || ''}
+          alt={userName || ''}
+          src=''
           onClick={handleDropdownOpen}
           className='cursor-pointer bs-[38px] is-[38px]'
         />
@@ -107,7 +127,7 @@ const UserDropdown = () => {
         disablePortal
         placement='bottom-end'
         anchorEl={anchorRef.current}
-        className='min-is-[240px] !mbs-4 z-[1]'
+        className='min-is-[240px] mbs-4! z-1'
       >
         {({ TransitionProps, placement }) => (
           <Fade
@@ -123,12 +143,12 @@ const UserDropdown = () => {
               <ClickAwayListener onClickAway={e => handleDropdownClose(e as MouseEvent | TouchEvent)}>
                 <MenuList>
                   <div className='flex items-center plb-2 pli-4 gap-2' tabIndex={-1}>
-                    <Avatar alt={session?.user?.name || ''} src={session?.user?.image || ''} />
+                    <Avatar alt={userName || ''} src='' />
                     <div className='flex items-start flex-col'>
                       <Typography variant='body2' className='font-medium' color='text.primary'>
-                        {session?.user?.name || ''}
+                        {userName || ''}
                       </Typography>
-                      <Typography variant='caption'>{session?.user?.email || ''}</Typography>
+                      <Typography variant='caption'>{userEmail || ''}</Typography>
                     </div>
                   </div>
                   <Divider className='mlb-1' />

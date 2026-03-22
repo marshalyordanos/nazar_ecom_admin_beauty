@@ -1,3 +1,4 @@
+
 // MUI Imports
 import Button from '@mui/material/Button'
 
@@ -20,6 +21,7 @@ import HorizontalFooter from '@components/layout/horizontal/Footer'
 import Customizer from '@core/components/customizer'
 import ScrollToTop from '@core/components/scroll-to-top'
 import AuthGuard from '@/hocs/AuthGuard'
+import AuthenticatedShopSync from '@/components/AuthenticatedShopSync'
 
 // Config Imports
 import { i18n } from '@configs/i18n'
@@ -45,6 +47,7 @@ const Layout = async (props: ChildrenType & { params: Promise<{ lang: string }> 
   return (
     <Providers direction={direction}>
       <AuthGuard locale={lang}>
+        <AuthenticatedShopSync />
         <LayoutWrapper
           systemMode={systemMode}
           verticalLayout={

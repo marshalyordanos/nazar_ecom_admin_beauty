@@ -1,8 +1,8 @@
 'use client'
 
 // React Imports
-import { useState } from 'react'
-import type { SyntheticEvent } from 'react'
+import { useEffect, useState } from 'react'
+import type { SyntheticEvent, ChangeEvent } from 'react'
 
 // MUI Imports
 import Grid from '@mui/material/Grid'
@@ -18,16 +18,60 @@ import TextField from '@mui/material/TextField'
 
 // Components Imports
 import CustomIconButton from '@core/components/mui/IconButton'
+import { useOptions } from '@/api/options/useOptions'
+import type { ProductOption, OptionValue } from '@/types/option'
+import { useFormContext } from 'react-hook-form'
+
+interface VariantRow {
+  optionId: string | null
+  valueId: string | null
+}
 
 const ProductVariants = () => {
-  // States
-  const [count, setCount] = useState(1)
+  const { register , setValue} = useFormContext()
+  // State for variant rows, default 1 with no selection
+  const [rows, setRows] = useState<VariantRow[]>([{ optionId: null, valueId: null }])
 
-  const deleteForm = (e: SyntheticEvent) => {
+  console.log("rows ----------",rows)
+  const { data: options } = useOptions()
+
+  // Calculate all selected optionIds except for the current row
+  const getSelectedOptionIds = (excludeIndex: number): string[] => {
+    return rows
+      .filter((row, idx) => idx !== excludeIndex && row.optionId)
+      .map(row => row.optionId as string)
+  }
+
+  const handleOptionChange = (index: number, e: ChangeEvent<{ value: unknown }>) => {
+    const optionId = e.target.value as string
+    setRows(prev => {
+      const newRows = [...prev]
+      newRows[index] = { optionId, valueId: null }
+      return newRows
+    })
+  }
+
+  const handleValueChange = (index: number, e: ChangeEvent<{ value: unknown }>) => {
+    const valueId = e.target.value as string
+    setRows(prev => {
+      const newRows = [...prev]
+      newRows[index] = { ...newRows[index], valueId }
+      return newRows
+    })
+    console.log("valueId 222; ",valueId)
+  }
+  useEffect(()=>{
+    setValue(`optionValueIds`, [...rows.map(row => row.valueId as string)])
+    
+  },[rows])
+
+  const deleteForm = (e: SyntheticEvent, index: number) => {
     e.preventDefault()
+    setRows(prev => prev.length === 1 ? prev : prev.filter((_, i) => i !== index))
+  }
 
-    // @ts-ignore
-    e.target.closest('.repeater-item').remove()
+  const addRow = () => {
+    setRows(prev => [...prev, { optionId: null, valueId: null }])
   }
 
   return (
@@ -35,33 +79,78 @@ const ProductVariants = () => {
       <CardHeader title='Variants' />
       <CardContent>
         <Grid container spacing={6}>
-          {Array.from(Array(count).keys()).map((item, index) => (
-            <Grid key={index} size={{ xs: 12 }} className='repeater-item'>
-              <Grid container spacing={6}>
-                <Grid size={{ xs: 12, sm: 4 }}>
-                  <FormControl fullWidth>
-                    <InputLabel>Select Variant</InputLabel>
-                    <Select label='Select Variant' defaultValue='Size'>
-                      <MenuItem value='Size'>Size</MenuItem>
-                      <MenuItem value='Color'>Color</MenuItem>
-                      <MenuItem value='Weight'>Weight</MenuItem>
-                      <MenuItem value='Smell'>Smell</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Grid>
-                <Grid size={{ xs: 12, sm: 8 }}>
-                  <div className='flex items-center gap-6'>
-                    <TextField fullWidth label='Variant Value' placeholder='Enter Variant Value' />
-                    <CustomIconButton onClick={deleteForm} className='min-is-fit'>
-                      <i className='ri-close-line' />
-                    </CustomIconButton>
-                  </div>
+          {rows.map((row, index) => {
+            // options could be null/undefined or not an array
+            const optionList: ProductOption[] = Array.isArray(options) ? options : []
+            const selectedOption = row.optionId
+              ? optionList.find(opt => opt.id === row.optionId)
+              : undefined
+
+            // Get all optionIds selected in *other* rows for disabling
+            const selectedOptionIds = getSelectedOptionIds(index)
+
+            return (
+              <Grid key={index} size={{ xs: 12 }} className='repeater-item'>
+                <Grid container spacing={6}>
+                  <Grid size={{ xs: 12, sm: 4 }}>
+                    <FormControl fullWidth>
+                      <InputLabel>Select Variant</InputLabel>
+                      <Select
+                        label='Select Variant'
+                        value={row.optionId || ''}
+                        onChange={e => handleOptionChange(index, e as any)}
+                      >
+                        {optionList.map(option => (
+                          <MenuItem
+                            key={option.id}
+                            value={option.id}
+                            disabled={selectedOptionIds.includes(option.id)}
+                          >
+                            {option.name}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </FormControl>
+                  </Grid>
+                  <Grid size={{ xs: 12, sm: 8 }}>
+                    <div className='flex items-center gap-6'>
+                      <FormControl fullWidth>
+                        <InputLabel>Variant Value</InputLabel>
+                        <Select
+                          label='Variant Value'
+                          value={row.valueId || ''}
+                          onChange={e => handleValueChange(index, e as any)}
+                          disabled={!row.optionId}
+                        >
+                          {selectedOption && Array.isArray(selectedOption.values) && selectedOption.values.length
+                            ? selectedOption.values.map((val: OptionValue) => (
+                                <MenuItem key={val.id} value={val.id}>
+                                  {val.value}
+                                </MenuItem>
+                              ))
+                            : <MenuItem value="" disabled>No Values Available</MenuItem>
+                          }
+                        </Select>
+                      </FormControl>
+                      <CustomIconButton
+                        onClick={e => deleteForm(e, index)}
+                        className='min-is-fit'
+                        disabled={rows.length === 1}
+                      >
+                        <i className='ri-close-line' />
+                      </CustomIconButton>
+                    </div>
+                  </Grid>
                 </Grid>
               </Grid>
-            </Grid>
-          ))}
+            )
+          })}
           <Grid size={{ xs: 12 }}>
-            <Button variant='contained' onClick={() => setCount(count + 1)} startIcon={<i className='ri-add-line' />}>
+            <Button
+              variant='contained'
+              onClick={addRow}
+              startIcon={<i className='ri-add-line' />}
+            >
               Add Another Option
             </Button>
           </Grid>
