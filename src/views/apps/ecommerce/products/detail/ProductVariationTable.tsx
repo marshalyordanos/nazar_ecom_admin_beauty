@@ -291,7 +291,7 @@ const ProductVariationDetailTable = () => {
               onClick={() =>
                 router.push(
                   getLocalizedUrl(
-                    `/apps/ecommerce/products/add?isUpdate=true&variantId=${encodeURIComponent(row.original.id)}`,
+                    `/apps/ecommerce/products/add?only_variation=true&isUpdate=true&variantId=${encodeURIComponent(row.original.id)}`,
                     locale as Locale
                   )
                 )

@@ -1,19 +1,34 @@
 export interface Category {
-    id: string;
-    name: string;
-    slug?: string;
-    description?: string | null;
-    image?: string;
-    parentId?: string | null;
-    createdAt?: string;
-    track?: string;
-    parent?: {
-      id: string;
-      name: string;
-      slug: string;
-    };
-    children?: Category[];
-  }
+  id: string
+  name: string
+  slug?: string
+  description?: string | null
+  image?: string | null
+  parentId?: string | null
+  createdAt?: string
+  track?: string | null
+  parent?: {
+    id: string
+    name: string
+    slug: string
+  } | null
+  children?: Pick<Category, 'id' | 'name' | 'slug'>[]
+}
+
+/** Response shape from GET /categories?tree=true */
+export interface CategoryTreeNode {
+  id: string
+  parentId: string | null
+  name: string
+  slug: string
+  description: string | null
+  image: string | null
+  track: string
+  totalSalesAmount: number
+  totalProductsSold: number
+  totalProducts: number
+  children?: CategoryTreeNode[]
+}
   
   export interface Pagination {
     total: number;

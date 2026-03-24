@@ -134,6 +134,16 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
                 {dictionary['navigation'].variantOptions}
               </MenuItem>
             </SubMenu>
+            <MenuItem href={`/${locale}/apps/ecommerce/categories`}>{dictionary['navigation'].categories}</MenuItem>
+            <MenuItem href={`/${locale}/apps/ecommerce/branches`}>{dictionary['navigation'].branches}</MenuItem>
+            <MenuItem href={`/${locale}/apps/ecommerce/brands`}>Brands (Admin)</MenuItem>
+            <MenuItem href={`/${locale}/apps/ecommerce/inventory`}>Inventory (Admin)</MenuItem>
+            <MenuItem href={`/${locale}/apps/ecommerce/orders-admin`}>Orders (Admin)</MenuItem>
+            <MenuItem href={`/${locale}/apps/ecommerce/payments`}>Payments (Admin)</MenuItem>
+            <MenuItem href={`/${locale}/apps/ecommerce/shipments`}>Shipments (Admin)</MenuItem>
+            <MenuItem href={`/${locale}/apps/ecommerce/reviews`}>Reviews (Admin)</MenuItem>
+            <MenuItem href={`/${locale}/apps/ecommerce/access`}>Access Control</MenuItem>
+
             <SubMenu label={dictionary['navigation'].orders}>
               <MenuItem href={`/${locale}/apps/ecommerce/orders/list`}>{dictionary['navigation'].list}</MenuItem>
               <MenuItem

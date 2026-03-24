@@ -1,17 +1,19 @@
+
+
 import { api } from "@/libs/api"; 
-import {  ProductVariantsSummary } from '../../types/products';
+import {  ProductVariant } from '../../types/products';
 import { useQuery } from "@tanstack/react-query";
 
-export const getProductVariationSummary = async (shopId: string): Promise<ProductVariantsSummary> => {
+export const getProductVariationById = async (variantId: string): Promise<ProductVariant> => {
  
-  const response = await api.get(`/dashboard/products/variants/summary?shopId=${shopId}`);
+  const response = await api.get(`/products/variants/${variantId}`);
   return response.data;
 };
 
-export const useProductVariationSummary = (shopId: string) => {
-  return useQuery<ProductVariantsSummary, Error>({
-    queryKey: ["product-variants-summary", shopId],
-    queryFn: () => getProductVariationSummary(shopId),
+export const useProductVariation = (variantId: string) => {
+  return useQuery<ProductVariant, Error>({
+    queryKey: ["product-variants-summary", variantId],
+    queryFn: () =>  getProductVariationById(variantId),
     staleTime: 1000 * 2, // 1 min cache
 
   });

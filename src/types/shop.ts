@@ -37,4 +37,8 @@ export interface ShopResponse {
     createdAt: string; // ISO date string
   }
   
-  
+  export interface ShopSummary {
+    totalShops: number;
+    activeShops: number;
+    locationsCount: number;
+  }

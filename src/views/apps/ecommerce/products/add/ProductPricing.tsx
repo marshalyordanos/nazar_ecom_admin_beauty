@@ -15,7 +15,7 @@ const PRODUCT_STATUS_OPTIONS = [
   { value: 'ARCHIVED', label: 'Archived' }
 ]
 
-const ProductPricing = () => {
+const ProductPricing = ({variantStatus}: {variantStatus: string}) => {
   const { register , setValue} = useFormContext()
   return (
     <Card>
@@ -58,12 +58,13 @@ const ProductPricing = () => {
             className='mbe-5'
           />
           <TextField
-            {...register('variantStatus')}
+            // {...register('variantStatus')}
             select
+            onChange={(e) => setValue('variantStatus', e.target.value)}
             fullWidth
             label='Status'
-            name='status'
-            defaultValue='DRAFT'
+            name='variantStatus'
+            defaultValue={variantStatus ?? 'DRAFT'}
             className='mbe-5'
           >
             {PRODUCT_STATUS_OPTIONS.map(option => (

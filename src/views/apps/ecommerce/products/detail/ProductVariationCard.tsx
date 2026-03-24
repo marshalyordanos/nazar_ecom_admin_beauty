@@ -20,7 +20,7 @@ import { Icon } from '@iconify/react'
 import CustomAvatar from '@core/components/mui/Avatar'
 import { RootState } from '@/redux-store'
 import { useSelector } from 'react-redux'
-import { useProductVariationSummary } from '@/api/productVariation/useProductVariation'
+import { useProductVariationSummary } from '@/api/productVariation/useProductVariationSummary' 
 
 type CardStat = {
   title: string

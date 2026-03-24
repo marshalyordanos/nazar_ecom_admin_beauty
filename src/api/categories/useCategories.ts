@@ -1,43 +1,76 @@
-import { api } from "@/libs/api"; 
-import { CategoriesResponse, CategoriesQueryParams } from '@/types/category';
-import { useQuery, UseQueryOptions } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
-export const getCategories = async (params: CategoriesQueryParams): Promise<CategoriesResponse> => {
-  const searchParams: string[] = [];
+import {
+  categoryKeys,
+  createCategory,
+  deleteCategory,
+  fetchCategoriesList,
+  fetchCategoriesTree,
+  updateCategory
+} from '@/api/categories/categoryApi'
 
-  if (params.search) {
-    const searchStrings = Object.entries(params.search).map(([k, v]) => `${k}:${v}`);
-    searchParams.push(`search=${searchStrings.join(',')}`);
-  }
-  if (params.tree) {
-    searchParams.push(`tree=${params.tree}`);
-  }
+import type {
+  CategoriesQueryParams,
+  CategoriesResponse,
+  CategoryTreeNode
+} from '@/types/category'
 
-  if (params.filter) {
-    const filterStrings = Object.entries(params.filter).map(([k, v]) =>
-      Array.isArray(v) ? `${k}:[${v.join('|')}]` : `${k}:${v}`
-    );
-    searchParams.push(`filter=${filterStrings.join(',')}`);
-  }
+export function useCategoriesTree() {
+  return useQuery<CategoryTreeNode[], Error>({
+    queryKey: categoryKeys.tree(),
+    queryFn: fetchCategoriesTree,
+    staleTime: 1000 * 60
+  })
+}
 
-  if (params.sort) {
-    const sortStrings = Object.entries(params.sort).map(([k, v]) => `${k}:${v}`);
-    searchParams.push(`sort=${sortStrings.join(',')}`);
-  }
+export function useCategoriesList(params: Omit<CategoriesQueryParams, 'tree'>) {
+  return useQuery<CategoriesResponse, Error>({
+    queryKey: categoryKeys.list(params),
+    queryFn: () => fetchCategoriesList(params),
+    staleTime: 1000 * 60
+  })
+}
 
-  if (params.page) searchParams.push(`page=${params.page}`);
-  if (params.pageSize) searchParams.push(`pageSize=${params.pageSize}`);
+/**
+ * @deprecated Prefer useCategoriesTree or useCategoriesList for clearer types.
+ * When `tree: true`, data is CategoryTreeNode[]. Otherwise CategoriesResponse.
+ */
+export function useCategories(params: CategoriesQueryParams) {
+  const isTree = params.tree === true
+  const { tree, ...listParams } = params
 
-  const queryString = searchParams.length ? `?${searchParams.join('&')}` : '';
-  const response = await api.get(`/categories${queryString}`);
-  return response.data;
-};
+  void tree
 
+  return useQuery<CategoriesResponse | CategoryTreeNode[], Error>({
+    queryKey: isTree ? categoryKeys.tree() : categoryKeys.list(listParams),
+    queryFn: async () => (isTree ? fetchCategoriesTree() : fetchCategoriesList(listParams)),
+    staleTime: 1000 * 60
+  })
+}
 
-export const useCategories = (params: CategoriesQueryParams) => {
-    return useQuery<CategoriesResponse|any, Error>({
-      queryKey: ["categories", params],
-      queryFn: () => getCategories(params),
-      staleTime: 1000 * 60, // 1 min cache
-    });
-  };
+export function useCreateCategory() {
+  const qc = useQueryClient()
+
+  return useMutation({
+    mutationFn: (formData: FormData) => createCategory(formData),
+    onSuccess: () => qc.invalidateQueries({ queryKey: categoryKeys.all })
+  })
+}
+
+export function useUpdateCategory() {
+  const qc = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ id, formData }: { id: string; formData: FormData }) => updateCategory(id, formData),
+    onSuccess: () => qc.invalidateQueries({ queryKey: categoryKeys.all })
+  })
+}
+
+export function useDeleteCategory() {
+  const qc = useQueryClient()
+
+  return useMutation({
+    mutationFn: (id: string) => deleteCategory(id),
+    onSuccess: () => qc.invalidateQueries({ queryKey: categoryKeys.all })
+  })
+}

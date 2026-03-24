@@ -27,15 +27,30 @@ interface VariantRow {
   valueId: string | null
 }
 
-const ProductVariants = () => {
+const ProductVariants = ({ optionValue, isUpdate=false }: { optionValue: any, isUpdate: boolean }) => {
+  console.log("optionValue ----------",optionValue)
   const { register , setValue} = useFormContext()
-  // State for variant rows, default 1 with no selection
-  const [rows, setRows] = useState<VariantRow[]>([{ optionId: null, valueId: null }])
 
-  console.log("rows ----------",rows)
+  const [rows, setRows] = useState<VariantRow[]>([
+    { optionId: null, valueId: null }
+  ])
+
   const { data: options } = useOptions()
 
-  // Calculate all selected optionIds except for the current row
+  console.log("rows ----------",rows)
+
+  // ✅ Populate rows when editing
+  useEffect(() => {
+    if (isUpdate && Array.isArray(optionValue) && optionValue.length) {
+      const mappedRows: VariantRow[] = optionValue.map((item: any) => ({
+        optionId: item?.optionValue?.optionId || null,
+        valueId: item?.optionValueId || null
+      }))
+
+      setRows(mappedRows)
+    }
+  }, [isUpdate, optionValue])
+
   const getSelectedOptionIds = (excludeIndex: number): string[] => {
     return rows
       .filter((row, idx) => idx !== excludeIndex && row.optionId)
@@ -60,9 +75,9 @@ const ProductVariants = () => {
     })
     console.log("valueId 222; ",valueId)
   }
+
   useEffect(()=>{
     setValue(`optionValueIds`, [...rows.map(row => row.valueId as string)])
-    
   },[rows])
 
   const deleteForm = (e: SyntheticEvent, index: number) => {
@@ -80,13 +95,12 @@ const ProductVariants = () => {
       <CardContent>
         <Grid container spacing={6}>
           {rows.map((row, index) => {
-            // options could be null/undefined or not an array
             const optionList: ProductOption[] = Array.isArray(options) ? options : []
+
             const selectedOption = row.optionId
               ? optionList.find(opt => opt.id === row.optionId)
               : undefined
 
-            // Get all optionIds selected in *other* rows for disabling
             const selectedOptionIds = getSelectedOptionIds(index)
 
             return (
@@ -112,6 +126,7 @@ const ProductVariants = () => {
                       </Select>
                     </FormControl>
                   </Grid>
+
                   <Grid size={{ xs: 12, sm: 8 }}>
                     <div className='flex items-center gap-6'>
                       <FormControl fullWidth>
@@ -132,6 +147,7 @@ const ProductVariants = () => {
                           }
                         </Select>
                       </FormControl>
+
                       <CustomIconButton
                         onClick={e => deleteForm(e, index)}
                         className='min-is-fit'
@@ -145,6 +161,7 @@ const ProductVariants = () => {
               </Grid>
             )
           })}
+
           <Grid size={{ xs: 12 }}>
             <Button
               variant='contained'

@@ -25,6 +25,7 @@ type FileProp = {
   name: string
   type: string
   size: number
+  preview?: string // ✅ added for URL preview
 }
 
 // Styled Dropzone
@@ -41,19 +42,41 @@ const Dropzone = styled(AppReactDropzone)<BoxProps>(({ theme }) => ({
   }
 }))
 
-const ProductImage = () => {
-  const { setValue, getValues } = useFormContext() // access form
-  const [files, setFiles] = useState<File[]>(getValues('image') || [])
+const ProductImage = ({ url }: { url: string }) => {
+  console.log("url ----------",url)
+  const { setValue, getValues } = useFormContext()
+
+  // ✅ initialize with existing image if editing
+  const [files, setFiles] = useState<File[]>([])
+
+  useEffect(() => {
+    if (url) {
+      const existingFile: any = {
+        name: url.split('/').pop(),
+        type: 'image/*',
+        size: 0,
+        preview: url
+      }
+
+      setFiles([existingFile])
+    } else {
+      setFiles(getValues('image') || [])
+    }
+  }, [url])
 
   // Update form whenever files change
   useEffect(() => {
-    setValue('image', files[0]) // store in react-hook-form
+    setValue('image', files[0])
   }, [files, setValue])
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop: (acceptedFiles: File[]) => {
-      setFiles(prev => [...prev, ...acceptedFiles])
-    }
+      // Only allow one file: replace previous with the newly selected file
+      if (acceptedFiles && acceptedFiles.length > 0) {
+        setFiles([acceptedFiles[0]])
+      }
+    },
+    multiple: false // Prevent multiple file selection at the input level
   })
 
   const handleRemoveFile = (file: FileProp) => {
@@ -66,7 +89,12 @@ const ProductImage = () => {
 
   const renderFilePreview = (file: FileProp) =>
     file.type.startsWith('image') ? (
-      <img width={38} height={38} alt={file.name} src={URL.createObjectURL(file as any)} />
+      <img
+        width={38}
+        height={38}
+        alt={file.name}
+        src={file.preview || URL.createObjectURL(file as any)} // ✅ support URL
+      />
     ) : (
       <i className='ri-file-text-line' />
     )
