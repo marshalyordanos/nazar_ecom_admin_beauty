@@ -14,7 +14,7 @@ export interface ProductVariant {
     media: any[];
     createdAt: string;
     updatedAt: string;
-
+    product: Product;
   inventories: {
     id: string;
     variantId: string;

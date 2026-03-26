@@ -1,4 +1,6 @@
 import type { Pagination } from '@/types/pagination'
+import { ProductVariant } from '@/types/products'
+import { Location } from '@/types/shop'
 
 export type ApiListResponse<T> = {
   data: T[]
@@ -48,8 +50,8 @@ export type InventoryAdmin = {
   reservedQuantity: number
   reorderLevel?: number | null
   updatedAt: string
-  variant?: { sku?: string; product?: { name?: string; slug?: string } }
-  location?: { name?: string }
+  variant?: ProductVariant
+  location?: Location
 }
 
 export type InventoryMovementAdmin = {

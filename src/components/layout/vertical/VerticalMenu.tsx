@@ -136,7 +136,7 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
             </SubMenu>
             <MenuItem href={`/${locale}/apps/ecommerce/categories`}>{dictionary['navigation'].categories}</MenuItem>
             <MenuItem href={`/${locale}/apps/ecommerce/branches`}>{dictionary['navigation'].branches}</MenuItem>
-            <MenuItem href={`/${locale}/apps/ecommerce/brands`}>Brands (Admin)</MenuItem>
+            <MenuItem href={`/${locale}/apps/ecommerce/brands`}>Brands</MenuItem>
             <MenuItem href={`/${locale}/apps/ecommerce/inventory`}>Inventory (Admin)</MenuItem>
             <MenuItem href={`/${locale}/apps/ecommerce/orders-admin`}>Orders (Admin)</MenuItem>
             <MenuItem href={`/${locale}/apps/ecommerce/payments`}>Payments (Admin)</MenuItem>

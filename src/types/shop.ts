@@ -23,6 +23,7 @@ export interface ShopResponse {
   
   export interface Location {
     id: string;
+    
     shopId: string;
     name: string;
     addressLine1: string;

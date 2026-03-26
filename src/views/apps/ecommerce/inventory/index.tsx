@@ -1,87 +1,375 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-
+import Link from 'next/link'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
+import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
+import Divider from '@mui/material/Divider'
 import Grid from '@mui/material/Grid'
-import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableHead from '@mui/material/TableHead'
+import IconButton from '@mui/material/IconButton'
 import TablePagination from '@mui/material/TablePagination'
-import TableRow from '@mui/material/TableRow'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
+import Chip from '@mui/material/Chip'
+import Table from '@mui/material/Table'
+import TableHead from '@mui/material/TableHead'
+import TableRow from '@mui/material/TableRow'
+import TableCell from '@mui/material/TableCell'
+import TableBody from '@mui/material/TableBody'
+import DialogContentText from '@mui/material/DialogContentText'
+import MenuItem from '@mui/material/MenuItem'
+import Select from '@mui/material/Select'
+import InputLabel from '@mui/material/InputLabel'
+import FormControl from '@mui/material/FormControl'
 
-import { useAddMovement, useAdminInventory, useAdminMovements, useUpdateInventory } from '@/api/admin/inventory'
+import OptionMenu from '@core/components/option-menu'
+import tableStyles from '@core/styles/table.module.css'
+import { useAdminInventory, useUpdateInventory, useAddMovement } from '@/api/admin/inventory'
+
+const MOVEMENT_TYPES = [
+  'PURCHASE',
+  'SALE',
+  'RETURN',
+  'ADJUSTMENT',
+  'TRANSFER',
+]
 
 const InventoryManagement = () => {
   const [page, setPage] = useState(0)
   const [pageSize, setPageSize] = useState(10)
   const [search, setSearch] = useState('')
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
+  const [deleteTarget, setDeleteTarget] = useState<{ variantId: string, locationId: string } | null>(null)
+  const [deleting, setDeleting] = useState(false)
 
-  const [openMove, setOpenMove] = useState(false)
-  const [movementJson, setMovementJson] = useState('{"variantId":"","locationId":"","type":"PURCHASE","quantity":1}')
+  // For per-row add movement dialog
+  const [moveDialogOpen, setMoveDialogOpen] = useState(false)
+  const [selectedRow, setSelectedRow] = useState<{
+    variantId: string
+    locationId: string
+    variant?: any
+    location?: any
+  } | null>(null)
+  const [movementType, setMovementType] = useState('PURCHASE')
+  const [movementQuantity, setMovementQuantity] = useState<number>(1)
 
-  const params = useMemo(() => ({ page: page + 1, pageSize, ...(search.trim() ? { search: { all: search.trim() } } : {}) }), [page, pageSize, search])
-  const { data } = useAdminInventory(params)
-  const { data: movementData } = useAdminMovements({ page: 1, pageSize: 5 })
-  const addMovement = useAddMovement()
+  const addMovementMutation = useAddMovement()
+
+  // Not implemented: actual delete, as deleteInventory API is not shown in context. Placeholder here.
+  const handleDelete = async () => {
+    if (!deleteTarget) return;
+    setDeleting(true);
+    // TODO: implement inventory delete API call.
+    setTimeout(() => {
+      setDeleting(false)
+      setDeleteDialogOpen(false)
+      setDeleteTarget(null)
+    }, 1000)
+  }
+
+  const params = useMemo(
+    () => ({
+      page: page + 1,
+      pageSize,
+      ...(search.trim() ? { search: { all: search.trim() } } : {})
+    }),
+    [page, pageSize, search]
+  )
+
+  const { data, isLoading, isFetching } = useAdminInventory(params)
   const updateInventory = useUpdateInventory()
 
   const rows = data?.data ?? []
   const total = data?.pagination.total ?? 0
 
+  // Handlers for add movement dialog on a row
+  const openAddMovementForRow = (variantId: string, locationId: string, variant?: any, location?: any) => {
+    setSelectedRow({ variantId, locationId, variant, location })
+    setMovementType('PURCHASE')
+    setMovementQuantity(1)
+    setMoveDialogOpen(true)
+  }
+
+  const handleAddMovement = async () => {
+    if (!selectedRow) return
+    await addMovementMutation.mutateAsync({
+      variantId: selectedRow.variantId,
+      locationId: selectedRow.locationId,
+      type: movementType,
+      quantity: movementQuantity
+    })
+    setMoveDialogOpen(false)
+  }
+
+  // Render
   return (
-    <Grid container spacing={6}>
-      <Grid size={{ xs: 12 }}><Typography variant='h4'>Inventory Management</Typography></Grid>
-      <Grid size={{ xs: 12 }}>
-        <Card><CardContent>
-          <div className='flex justify-between mb-4'>
-            <TextField size='small' placeholder='Search...' value={search} onChange={e => { setSearch(e.target.value); setPage(0) }} />
-            <Button variant='contained' onClick={() => setOpenMove(true)}>Add Movement</Button>
+    <>
+      <Card>
+        <CardHeader title='Inventory Management' />
+        <Divider />
+        <CardContent>
+          <div className="flex justify-between flex-col items-start sm:flex-row sm:items-center gap-y-4 mb-5">
+            <TextField
+              size="small"
+              placeholder="Search Inventory"
+              value={search}
+              onChange={e => {
+                setSearch(e.target.value)
+                setPage(0)
+              }}
+              style={{ maxWidth: 300 }}
+            />
           </div>
-          <Table size='small'>
-            <TableHead><TableRow><TableCell>Product</TableCell><TableCell>SKU</TableCell><TableCell>Location</TableCell><TableCell>Qty</TableCell><TableCell align='right'>Actions</TableCell></TableRow></TableHead>
-            <TableBody>
-              {rows.map(r => (
-                <TableRow key={r.id}>
-                  <TableCell>{r.variant?.product?.name || '—'}</TableCell>
-                  <TableCell>{r.variant?.sku || '—'}</TableCell>
-                  <TableCell>{r.location?.name || r.locationId}</TableCell>
-                  <TableCell>{r.quantity}</TableCell>
-                  <TableCell align='right'>
-                    <Button size='small' onClick={() => updateInventory.mutate({ variantId: r.variantId, payload: { locationId: r.locationId, quantity: r.quantity + 1 } })}>+1</Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-          <TablePagination component='div' count={total} page={page} rowsPerPage={pageSize} onPageChange={(_, p) => setPage(p)} onRowsPerPageChange={e => { setPageSize(Number(e.target.value)); setPage(0) }} />
+          <div className='overflow-x-auto'>
+            <table className={tableStyles.table}>
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>SKU</th>
+                  <th>Options</th>
+                  <th>Location</th>
+                  <th>Qty</th>
+                  <th>Reserved</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              {(isLoading || isFetching) ? (
+                <tbody>
+                  <tr>
+                    <td className="text-center" colSpan={8}>Loading...</td>
+                  </tr>
+                </tbody>
+              ) : rows.length === 0 ? (
+                <tbody>
+                  <tr>
+                    <td className="text-center" colSpan={8}>No data available</td>
+                  </tr>
+                </tbody>
+              ) : (
+                <tbody>
+                  {rows.map(r => (
+                    <tr key={r.id}>
+                      {/* Product - optionally link if you have product slug */}
+                      <td>
+                        <div className='flex flex-col gap-0.5'>
+                          <Typography className='font-medium'>
+                            {r.variant?.product?.name || '—'}
+                          </Typography>
+                          <Typography variant="body2" color="text.secondary">
+                            {r.variant?.product?.slug}
+                          </Typography>
+                        </div>
+                      </td>
+                      <td>
+                        <Typography>{r.variant?.sku || '—'}</Typography>
+                      </td>
+                      {/* VARIANT OPTION VALUE COLUMN */}
+                      <td>
+                        <Typography>
+                          {(r.variant?.variantOptionValues?.length
+                            ? r.variant.variantOptionValues
+                                .map(vov =>
+                                  vov?.optionValue?.value
+                                    ? vov.optionValue.value
+                                    : null
+                                )
+                                .filter(x => x)
+                                .join(' | ')
+                            : '—'
+                          )}
+                        </Typography>
+                      </td>
+                      <td>
+                        <Typography>{r.location?.name || r.locationId}</Typography>
+                      </td>
+                      <td>
+                        <Typography>{r.quantity}</Typography>
+                      </td>
+                      <td>
+                        <Typography>{r.reservedQuantity}</Typography>
+                      </td>
+                      <td>
+                        <Chip
+                          size="small"
+                          variant="tonal"
+                          color={r.variant?.status === 'ACTIVE' ? 'success' : r.variant?.status === 'ARCHIVED' ? 'error' : 'secondary'}
+                          label={r.variant?.status || 'Unknown'}
+                        />
+                      </td>
+                      <td>
+                        {/* Replace plus icon with "Add Movement" button for each row */}
+                        <div className='flex items-center gap-2'>
+                          <Button
+                            size='small'
+                            variant="outlined"
+                            onClick={() => openAddMovementForRow(r.variantId, r.locationId, r.variant, r.location)}
+                          >
+                            Add Movement
+                          </Button>
+                          <OptionMenu
+                            iconButtonProps={{ size: 'medium' }}
+                            iconClassName='text-textSecondary text-[22px]'
+                            options={[
+                              {
+                                text: 'Edit',
+                                icon: 'ri-pencil-line',
+                                menuItemProps: {
+                                  onClick: () => {
+                                    // You can open an edit dialog here with more actions
+                                  }
+                                }
+                              },
+                             
+                            ]}
+                          />
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              )}
+            </table>
+          </div>
+          <TablePagination
+            rowsPerPageOptions={[10, 25, 50]}
+            component='div'
+            className='border-bs'
+            count={total}
+            rowsPerPage={pageSize}
+            page={page}
+            onPageChange={(_, p) => setPage(p)}
+            onRowsPerPageChange={e => {
+              setPageSize(Number(e.target.value))
+              setPage(0)
+            }}
+          />
+        </CardContent>
+      </Card>
 
-          <Typography variant='h6' className='mt-6 mb-2'>Recent Movements</Typography>
-          <Table size='small'>
-            <TableHead><TableRow><TableCell>Type</TableCell><TableCell>Qty</TableCell><TableCell>Variant</TableCell><TableCell>Created</TableCell></TableRow></TableHead>
-            <TableBody>{(movementData?.data || []).map(m => <TableRow key={m.id}><TableCell>{m.type}</TableCell><TableCell>{m.quantity}</TableCell><TableCell>{m.variantId}</TableCell><TableCell>{new Date(m.createdAt).toLocaleString()}</TableCell></TableRow>)}</TableBody>
-          </Table>
-        </CardContent></Card>
-      </Grid>
-
-      <Dialog open={openMove} onClose={() => setOpenMove(false)} fullWidth maxWidth='md'>
+      {/* Per-row Add Movement Dialog */}
+      <Dialog open={moveDialogOpen} onClose={() => setMoveDialogOpen(false)} fullWidth maxWidth='xs'>
         <DialogTitle>Add Inventory Movement</DialogTitle>
-        <DialogContent><TextField fullWidth multiline minRows={8} value={movementJson} onChange={e => setMovementJson(e.target.value)} /></DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenMove(false)}>Cancel</Button>
-          <Button variant='contained' onClick={async () => { await addMovement.mutateAsync(JSON.parse(movementJson)); setOpenMove(false) }}>Submit</Button>
+        <DialogContent>
+          <Grid container spacing={2} sx={{ p: 1, mt: 0.5 }}>
+            {/* Product Info Section */}
+            <Grid size={{ xs: 12 }}>
+              <div
+                style={{
+                  // background: "#f8f9fd",
+                  borderRadius: 8,
+                  padding: "16px 20px",
+                  marginBottom: 16,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 5
+                }}
+              >
+                <Typography className='font-semibold mb-1' sx={{ fontSize: 16, fontWeight: 600, mb: 1 }}>
+                  Product Overview
+                </Typography>
+                <Typography sx={{ fontSize: 14, color: "text.secondary" }}>
+                  {selectedRow?.variant?.product?.name || '—'}
+                  {selectedRow?.variant?.sku ? ` · SKU: ${selectedRow?.variant?.sku}` : ""}
+                </Typography>
+                {Boolean(selectedRow?.variant?.variantOptionValues?.length) && (
+                  <Typography sx={{ fontSize: 13, color: "text.secondary" }}>
+                    {selectedRow?.variant?.variantOptionValues
+                      .map((vov: any) => vov?.optionValue?.value ?? null)
+                      .filter(Boolean)
+                      .join(' | ')}
+                  </Typography>
+                )}
+                {selectedRow?.location?.name && (
+                  <Typography sx={{ fontSize: 13, color: "text.secondary" }}>
+                    Location: {selectedRow.location.name}
+                  </Typography>
+                )}
+              </div>
+            </Grid>
+            {/* Movement Type */}
+            <Grid size={{ xs: 12, sm: 12 }}>
+              <FormControl fullWidth variant="outlined">
+                <InputLabel id="movement-type-label">Type</InputLabel>
+                <Select
+                  labelId="movement-type-label"
+                  value={movementType}
+                  label="Type"
+                  onChange={e => setMovementType(e.target.value)}
+                >
+                  {MOVEMENT_TYPES.map(opt => (
+                    <MenuItem key={opt} value={opt}>{opt}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            {/* Quantity */}
+
+            <Grid className='mt-4' size={{ xs: 12, sm: 12 }}>
+              <TextField
+                fullWidth
+                label="Quantity"
+                type="number"
+                inputProps={{ min: 1 }}
+                value={movementQuantity}
+                onChange={e => setMovementQuantity(Number(e.target.value))}
+                variant="outlined"
+              />
+            </Grid>
+            {/* Status */}
+            {/* <Grid size={{ xs: 12, sm: 4 }}>
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                height: "100%",
+                gap: 8,
+                marginTop: 8,
+              }}>
+                <Typography variant="body2" sx={{ fontWeight: 500, minWidth: 48 }}>
+                  Status:
+                </Typography>
+                <Chip
+                  size="small"
+                  variant="tonal"
+                  color={selectedRow?.variant?.status === 'ACTIVE' ? 'success'
+                    : selectedRow?.variant?.status === 'ARCHIVED' ? 'error'
+                      : 'secondary'
+                  }
+                  label={selectedRow?.variant?.status || 'Unknown'}
+                  sx={{ height: 24, fontSize: 13 }}
+                />
+              </div>
+            </Grid> */}
+          </Grid>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2, pt: 1 }}>
+          <Button
+            onClick={() => setMoveDialogOpen(false)}
+            disabled={addMovementMutation.isLoading}
+            variant="outlined"
+            sx={{ minWidth: 96 }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant='contained'
+            onClick={handleAddMovement}
+            disabled={addMovementMutation.isLoading}
+            sx={{ minWidth: 120, boxShadow: "0 1px 6px 0 rgba(99,102,241,0.11)" }}
+          >
+            {addMovementMutation.isLoading ? 'Adding...' : 'Submit'}
+          </Button>
         </DialogActions>
       </Dialog>
-    </Grid>
+
+     
+    </>
   )
 }
 
