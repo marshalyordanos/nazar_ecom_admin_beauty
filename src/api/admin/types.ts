@@ -98,4 +98,13 @@ export type PermissionAdmin = {
   id: string
   resource: string
   description?: string | null
+  createdAt: string
+  updatedAt: string
+  rolePermissions?: Array<{
+    id: string
+    roleId: string
+    role: { id: string; name: string }
+    permissionId: string
+    permission: { id: string; resource: string }
+  }>
 }
