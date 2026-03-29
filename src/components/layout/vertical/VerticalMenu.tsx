@@ -121,12 +121,12 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
               <MenuItem href={`/${locale}/apps/ecommerce/products/add`}>{dictionary['navigation'].add}</MenuItem>
               {/* <MenuItem href={`/${locale}/apps/ecommerce/products/1`} exactMatch={false} activeUrl='/apps/ecommerce/products/:detail'>{dictionary['navigation'].detail}</MenuItem> */}
               {/* <MenuItem
-  href={`/${locale}/apps/ecommerce/products/list`}
-  exactMatch={false}
-  activeUrl='/apps/ecommerce/products'
->
-  {dictionary['navigation'].detail}
-</MenuItem> */}
+                  href={`/${locale}/apps/ecommerce/products/list`}
+                  exactMatch={false}
+                  activeUrl='/apps/ecommerce/products'
+                >
+                  {dictionary['navigation'].detail}
+                </MenuItem> */}
               <MenuItem href={`/${locale}/apps/ecommerce/products/category`}>
                 {dictionary['navigation'].category}
               </MenuItem>
@@ -137,10 +137,14 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
             <MenuItem href={`/${locale}/apps/ecommerce/categories`}>{dictionary['navigation'].categories}</MenuItem>
             <MenuItem href={`/${locale}/apps/ecommerce/branches`}>{dictionary['navigation'].branches}</MenuItem>
             <MenuItem href={`/${locale}/apps/ecommerce/brands`}>Brands</MenuItem>
-            <MenuItem href={`/${locale}/apps/ecommerce/inventory`}>Inventory (Admin)</MenuItem>
+            <MenuItem href={`/${locale}/apps/ecommerce/inventory`} 
+              exactMatch={false}
+              activeUrl={`/${locale}/apps/ecommerce/inventory`}
+
+            >Inventory</MenuItem>
             <MenuItem href={`/${locale}/apps/ecommerce/orders-admin`}>Orders (Admin)</MenuItem>
             <MenuItem href={`/${locale}/apps/ecommerce/payments`}>Payments (Admin)</MenuItem>
-            <MenuItem href={`/${locale}/apps/ecommerce/shipments`}>Shipments (Admin)</MenuItem>
+            {/* <MenuItem href={`/${locale}/apps/ecommerce/shipments`}>Shipments (Admin)</MenuItem> */}
             <MenuItem href={`/${locale}/apps/ecommerce/reviews`}>Reviews (Admin)</MenuItem>
             <MenuItem href={`/${locale}/apps/ecommerce/access`}>Access Control</MenuItem>
 

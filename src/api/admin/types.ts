@@ -62,6 +62,8 @@ export type InventoryMovementAdmin = {
   quantity: number
   referenceId?: string | null
   createdAt: string
+  variant:ProductVariant
+  location:Location
 }
 
 export type ReviewAdmin = {

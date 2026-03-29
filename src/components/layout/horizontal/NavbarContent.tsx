@@ -26,6 +26,7 @@ import useHorizontalNav from '@menu/hooks/useHorizontalNav'
 // Util Imports
 import { horizontalLayoutClasses } from '@layouts/utils/layoutClasses'
 import { getLocalizedUrl } from '@/utils/i18n'
+import { Button } from '@mui/material'
 
 // Vars
 const shortcuts: ShortcutsType[] = [
@@ -132,7 +133,7 @@ const NavbarContent = () => {
           </Link>
         )}
       </div>
-
+    
       <div className='flex items-center'>
         <NavSearch />
         <LanguageDropdown />

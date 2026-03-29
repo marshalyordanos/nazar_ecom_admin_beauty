@@ -124,3 +124,10 @@ export interface ProductVariant {
       avgWeight: number;
     };
   };
+
+
+  export interface ProductVariationsResponse {
+    data: ProductVariant[];
+    pagination: Pagination;
+  }
+  

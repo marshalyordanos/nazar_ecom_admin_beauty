@@ -31,6 +31,8 @@ import FormControl from '@mui/material/FormControl'
 import OptionMenu from '@core/components/option-menu'
 import tableStyles from '@core/styles/table.module.css'
 import { useAdminInventory, useUpdateInventory, useAddMovement } from '@/api/admin/inventory'
+import { useShops } from '@/api/shops/useShops'
+import { useParams } from 'next/navigation'
 
 const MOVEMENT_TYPES = [
   'PURCHASE',
@@ -47,6 +49,8 @@ const InventoryManagement = () => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<{ variantId: string, locationId: string } | null>(null)
   const [deleting, setDeleting] = useState(false)
+  const { data: shops } = useShops({})
+ 
 
   // For per-row add movement dialog
   const [moveDialogOpen, setMoveDialogOpen] = useState(false)
@@ -59,13 +63,27 @@ const InventoryManagement = () => {
   const [movementType, setMovementType] = useState('PURCHASE')
   const [movementQuantity, setMovementQuantity] = useState<number>(1)
 
+  // For Inventory Edit Dialog (applies to all rows, opened via OptionMenu)
+  const [editDialogOpen, setEditDialogOpen] = useState(false)
+  const [editTarget, setEditTarget] = useState<{
+    variantId: string
+    locationId: string
+    variant?: any
+    location?: any
+    quantity?: number
+    reservedQuantity?: number
+  } | null>(null)
+  const [editLocationId, setEditLocationId] = useState<string>('')
+  const [editQuantity, setEditQuantity] = useState<number>(0)
+  const [editReservedQuantity, setEditReservedQuantity] = useState<number>(0)
+
+  const updateInventory = useUpdateInventory()
   const addMovementMutation = useAddMovement()
 
   // Not implemented: actual delete, as deleteInventory API is not shown in context. Placeholder here.
   const handleDelete = async () => {
     if (!deleteTarget) return;
     setDeleting(true);
-    // TODO: implement inventory delete API call.
     setTimeout(() => {
       setDeleting(false)
       setDeleteDialogOpen(false)
@@ -83,7 +101,6 @@ const InventoryManagement = () => {
   )
 
   const { data, isLoading, isFetching } = useAdminInventory(params)
-  const updateInventory = useUpdateInventory()
 
   const rows = data?.data ?? []
   const total = data?.pagination.total ?? 0
@@ -94,6 +111,36 @@ const InventoryManagement = () => {
     setMovementType('PURCHASE')
     setMovementQuantity(1)
     setMoveDialogOpen(true)
+  }
+
+  // Open Edit Inventory Dialog
+  const openEditDialog = (row: any) => {
+    setEditTarget({
+      variantId: row.variantId,
+      locationId: row.locationId,
+      variant: row.variant,
+      location: row.location,
+      quantity: row.quantity,
+      reservedQuantity: row.reservedQuantity
+    })
+    setEditLocationId(row.locationId)
+    setEditQuantity(Number(row.quantity) || 0)
+    setEditReservedQuantity(Number(row.reservedQuantity) || 0)
+    setEditDialogOpen(true)
+  }
+
+  const handleEditInventory = async () => {
+    if (!editTarget) return
+    await updateInventory.mutateAsync({
+      variantId: editTarget.variantId,
+      payload: {
+        locationId: editLocationId,
+        quantity: editQuantity,
+        reservedQuantity: editReservedQuantity,
+      }
+    })
+    setEditDialogOpen(false)
+    setEditTarget(null)
   }
 
   const handleAddMovement = async () => {
@@ -156,12 +203,25 @@ const InventoryManagement = () => {
                 <tbody>
                   {rows.map(r => (
                     <tr key={r.id}>
-                      {/* Product - optionally link if you have product slug */}
+                      {/* Product - clickable link with theme color */}
                       <td>
                         <div className='flex flex-col gap-0.5'>
-                          <Typography className='font-medium'>
-                            {r.variant?.product?.name || '—'}
-                          </Typography>
+                          <Link href={`/apps/ecommerce/inventory/${r.id}`} passHref>
+                            <Typography
+                              className='font-medium'
+                              sx={{
+                                color: 'primary.main',
+                                cursor: 'pointer',
+                                textDecoration: 'none',
+                                '&:hover': {
+                                  textDecoration: 'underline'
+                                }
+                              }}
+                              component="a"
+                            >
+                              {r.variant?.product?.name || '—'}
+                            </Typography>
+                          </Link>
                           <Typography variant="body2" color="text.secondary">
                             {r.variant?.product?.slug}
                           </Typography>
@@ -222,11 +282,10 @@ const InventoryManagement = () => {
                                 icon: 'ri-pencil-line',
                                 menuItemProps: {
                                   onClick: () => {
-                                    // You can open an edit dialog here with more actions
+                                    openEditDialog(r)
                                   }
                                 }
                               },
-                             
                             ]}
                           />
                         </div>
@@ -310,7 +369,6 @@ const InventoryManagement = () => {
               </FormControl>
             </Grid>
             {/* Quantity */}
-
             <Grid className='mt-4' size={{ xs: 12, sm: 12 }}>
               <TextField
                 fullWidth
@@ -322,36 +380,12 @@ const InventoryManagement = () => {
                 variant="outlined"
               />
             </Grid>
-            {/* Status */}
-            {/* <Grid size={{ xs: 12, sm: 4 }}>
-              <div style={{
-                display: "flex",
-                alignItems: "center",
-                height: "100%",
-                gap: 8,
-                marginTop: 8,
-              }}>
-                <Typography variant="body2" sx={{ fontWeight: 500, minWidth: 48 }}>
-                  Status:
-                </Typography>
-                <Chip
-                  size="small"
-                  variant="tonal"
-                  color={selectedRow?.variant?.status === 'ACTIVE' ? 'success'
-                    : selectedRow?.variant?.status === 'ARCHIVED' ? 'error'
-                      : 'secondary'
-                  }
-                  label={selectedRow?.variant?.status || 'Unknown'}
-                  sx={{ height: 24, fontSize: 13 }}
-                />
-              </div>
-            </Grid> */}
           </Grid>
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2, pt: 1 }}>
           <Button
             onClick={() => setMoveDialogOpen(false)}
-            disabled={addMovementMutation.isLoading}
+            disabled={addMovementMutation.isPending}
             variant="outlined"
             sx={{ minWidth: 96 }}
           >
@@ -360,15 +394,110 @@ const InventoryManagement = () => {
           <Button
             variant='contained'
             onClick={handleAddMovement}
-            disabled={addMovementMutation.isLoading}
+            disabled={addMovementMutation.isPending}
             sx={{ minWidth: 120, boxShadow: "0 1px 6px 0 rgba(99,102,241,0.11)" }}
           >
-            {addMovementMutation.isLoading ? 'Adding...' : 'Submit'}
+            {addMovementMutation.isPending ? 'Adding...' : 'Submit'}
           </Button>
         </DialogActions>
       </Dialog>
 
-     
+      {/* Inventory Edit Dialog */}
+      <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} fullWidth maxWidth='xs'>
+        <DialogTitle>Edit Inventory</DialogTitle>
+        <DialogContent>
+          <Grid container spacing={2} sx={{ p: 1, mt: 0.5 }}>
+            {/* Product Info Section */}
+            <Grid size={{ xs: 12 }}>
+              <div
+                style={{
+                  borderRadius: 8,
+                  padding: "16px 20px",
+                  marginBottom: 16,
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: 5
+                }}
+              >
+                <Typography className='font-semibold mb-1' sx={{ fontSize: 16, fontWeight: 600, mb: 1 }}>
+                  Product Overview
+                </Typography>
+                <Typography sx={{ fontSize: 14, color: "text.secondary" }}>
+                  {editTarget?.variant?.product?.name || (editTarget?.variantId ?? '—')}
+                  {editTarget?.variant?.sku ? ` · SKU: ${editTarget?.variant?.sku}` : ""}
+                </Typography>
+                {Boolean(editTarget?.variant?.variantOptionValues?.length) && (
+                  <Typography sx={{ fontSize: 13, color: "text.secondary" }}>
+                    {editTarget?.variant?.variantOptionValues
+                      .map((vov: any) => vov?.optionValue?.value ?? null)
+                      .filter(Boolean)
+                      .join(' | ')}
+                  </Typography>
+                )}
+              </div>
+            </Grid>
+            {/* Location */}
+            <Grid size={{ xs: 12, sm: 12 }}>
+              <FormControl fullWidth variant="outlined">
+                <InputLabel id="edit-inventory-location-label">Location</InputLabel>
+                <Select
+                  labelId="edit-inventory-location-label"
+                  value={editLocationId}
+                  label="Location"
+                  onChange={e => setEditLocationId(e.target.value)}
+                  // For safety in shops data: get from first shop's locations
+                >
+                  {(shops?.data?.[0]?.locations || []).map((loc: any) => (
+                    <MenuItem key={loc.id} value={loc.id}>{loc.name}</MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            {/* Quantity */}
+            <Grid className='mt-4' size={{ xs: 12, sm: 12 }}>
+              <TextField
+                fullWidth
+                label="Quantity"
+                type="number"
+                inputProps={{ min: 0 }}
+                value={editQuantity}
+                onChange={e => setEditQuantity(Number(e.target.value))}
+                variant="outlined"
+              />
+            </Grid>
+            {/* Reserved Quantity */}
+            <Grid className='mt-4' size={{ xs: 12, sm: 12 }}>
+              <TextField
+                fullWidth
+                label="Reserved Quantity"
+                type="number"
+                inputProps={{ min: 0 }}
+                value={editReservedQuantity}
+                onChange={e => setEditReservedQuantity(Number(e.target.value))}
+                variant="outlined"
+              />
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, pb: 2, pt: 1 }}>
+          <Button
+            onClick={() => setEditDialogOpen(false)}
+            disabled={updateInventory.isPending}
+            variant="outlined"
+            sx={{ minWidth: 96 }}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant='contained'
+            onClick={handleEditInventory}
+            disabled={updateInventory.isPending}
+            sx={{ minWidth: 120, boxShadow: "0 1px 6px 0 rgba(99,102,241,0.11)" }}
+          >
+            {updateInventory.isPending ? 'Saving...' : 'Submit'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   )
 }

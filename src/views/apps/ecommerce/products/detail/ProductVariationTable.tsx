@@ -138,7 +138,7 @@ const columnHelper = createColumnHelper<VariantRowType>()
 const ProductVariationDetailTable = () => {
   // Table states
   const params = useParams()
-  const id = params.detail as string
+  const id = params.detail as string 
   const {data:product}=useProduct(id,true)
   console.log("product details in page file",product)
   const [rowSelection, setRowSelection] = useState({})

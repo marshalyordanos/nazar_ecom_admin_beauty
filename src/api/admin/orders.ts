@@ -34,6 +34,16 @@ export function useCompleteOrder() {
   })
 }
 
+export function useCancleOrder() {
+  const qc = useQueryClient()
+
+  return useMutation({
+    mutationFn: async (id: string) => (await api.post(`/orders/${id}/cancel`)).data,
+    onSuccess: () => qc.invalidateQueries({ queryKey: orderKeys.all })
+  })
+}
+
+
 export function useCreateAdminOrder() {
   const qc = useQueryClient()
 

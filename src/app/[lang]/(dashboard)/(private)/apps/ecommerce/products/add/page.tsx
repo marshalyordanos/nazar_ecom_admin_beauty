@@ -168,7 +168,8 @@ const eCommerceProductsAdd = () => {
       console.log('✅ All requests successful');
     }
     console.log("variantId 222; ",variantId)
-    if (onlyVariation || isUpdate) {
+    if (onlyVariation && isUpdate) {
+      
       // 2️⃣ Create Variant for that product, send FormData if image present
       const formData = new FormData();
       formData.append('sku', data.sku);
