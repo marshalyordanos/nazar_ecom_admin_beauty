@@ -12,23 +12,35 @@ import Select from '@mui/material/Select'
 // Type Imports
 import type { UsersType } from '@/types/apps/userTypes'
 
-const TableFilters = ({ setData, tableData }: { setData: (data: UsersType[]) => void; tableData?: UsersType[] }) => {
+const TableFilters = ({
+  setData,
+  tableData,
+  onFilterChange
+}: {
+  setData: (data: UsersType[]) => void
+  tableData?: UsersType[]
+  /** When set, parent handles list fetching; role/plan still filter client-side on current page */
+  onFilterChange?: (filters: { role: string; plan: string; status: string }) => void
+}) => {
   // States
   const [role, setRole] = useState<UsersType['role']>('')
   const [plan, setPlan] = useState<UsersType['currentPlan']>('')
   const [status, setStatus] = useState<UsersType['status']>('')
 
   useEffect(() => {
+    if (onFilterChange) {
+      onFilterChange({ role, plan, status })
+    }
     const filteredData = tableData?.filter(user => {
       if (role && user.role !== role) return false
       if (plan && user.currentPlan !== plan) return false
-      if (status && user.status !== status) return false
+      if (!onFilterChange && status && user.status !== status) return false
 
       return true
     })
 
     setData(filteredData || [])
-  }, [role, plan, status, tableData, setData])
+  }, [role, plan, status, tableData, setData, onFilterChange])
 
   return (
     <CardContent>
@@ -90,6 +102,7 @@ const TableFilters = ({ setData, tableData }: { setData: (data: UsersType[]) => 
               <MenuItem value='pending'>Pending</MenuItem>
               <MenuItem value='active'>Active</MenuItem>
               <MenuItem value='inactive'>Inactive</MenuItem>
+              <MenuItem value='suspended'>Suspended</MenuItem>
             </Select>
           </FormControl>
         </Grid>

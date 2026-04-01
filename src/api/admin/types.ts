@@ -104,6 +104,10 @@ export type PermissionAdmin = {
     id: string
     roleId: string
     role: { id: string; name: string }
+    createAction: boolean
+    readAction: boolean
+    updateAction: boolean
+    deleteAction: boolean
     permissionId: string
     permission: { id: string; resource: string }
   }>

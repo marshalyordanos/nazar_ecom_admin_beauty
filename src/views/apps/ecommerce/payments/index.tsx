@@ -17,6 +17,9 @@ import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import tableStyles from '@core/styles/table.module.css'
 import { useAdminPayments, useCapturePayment, useRefundPayment } from '@/api/admin/payments'
+import { useDashboardSummary } from '@/api/admin/dashboard'
+import Grid from '@mui/material/Grid'
+import HorizontalWithSubtitle from '@components/card-statistics/HorizontalWithSubtitle'
 
 // Payment status map for styled chips
 const paymentStatusObj = {
@@ -190,6 +193,9 @@ const PaymentsManagement = () => {
   const [pageSize, setPageSize] = useState(10)
   const [search, setSearch] = useState('')
 
+  const { data: summary, isLoading: sumLoading, isError: sumError } = useDashboardSummary()
+  const pay = summary?.data?.payments
+
   const params = useMemo(
     () => ({
       page: page + 1,
@@ -208,6 +214,70 @@ const PaymentsManagement = () => {
 
   return (
     <div className="p-0 md:p-6">
+      <Grid container spacing={6} className='mb-6'>
+        {sumLoading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <Grid key={`pay-s-${i}`} size={{ xs: 12, sm: 6, md: 3 }}>
+              <div className='p-4 border rounded'>
+                <div className='h-6 w-32 bg-actionHover rounded mb-2' />
+                <div className='h-5 w-24 bg-actionHover rounded mb-1' />
+                <div className='h-4 w-20 bg-actionHover rounded' />
+              </div>
+            </Grid>
+          ))
+        ) : pay ? (
+          <>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <HorizontalWithSubtitle
+                title='Payments'
+                stats={String(pay.totalPayments)}
+                avatarIcon='ri-bill-line'
+                avatarColor='primary'
+                trend={pay.percentChange >= 0 ? 'positive' : 'negative'}
+                trendNumber={`${Math.abs(pay.percentChange).toFixed(1)}%`}
+                subtitle='Total count'
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <HorizontalWithSubtitle
+                title='Paid'
+                stats={String(pay.paidPayments)}
+                avatarIcon='ri-check-double-line'
+                avatarColor='success'
+                trend='positive'
+                trendNumber='—'
+                subtitle='Successful'
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <HorizontalWithSubtitle
+                title='Failed'
+                stats={String(pay.failedPayments)}
+                avatarIcon='ri-close-circle-line'
+                avatarColor='error'
+                trend='negative'
+                trendNumber='—'
+                subtitle='Errors'
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <HorizontalWithSubtitle
+                title='Amount'
+                stats={summary?.data ? String(pay.totalPaymentAmount.toFixed(2)) : '0'}
+                avatarIcon='ri-money-dollar-circle-line'
+                avatarColor='info'
+                trend={pay.amountChange >= 0 ? 'positive' : 'negative'}
+                trendNumber={`${Math.abs(pay.amountChange).toFixed(1)}%`}
+                subtitle='Total volume'
+              />
+            </Grid>
+          </>
+        ) : sumError ? (
+          <Grid size={{ xs: 12 }}>
+            <Typography color='error'>Failed to load payments summary</Typography>
+          </Grid>
+        ) : null}
+      </Grid>
       <Typography variant="h4" className="mb-6 font-medium">Payment Management</Typography>
       <Card>
         <CardContent>

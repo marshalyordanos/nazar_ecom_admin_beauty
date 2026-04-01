@@ -16,9 +16,29 @@ import IconButton from '@mui/material/IconButton'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import { useAdminOrders, useCompleteOrder, useCancleOrder, useCreateAdminOrder } from '@/api/admin/orders'
+import { useDashboardSummary } from '@/api/admin/dashboard'
 
 import classnames from 'classnames'
 import tableStyles from '@core/styles/table.module.css'
+import Grid from '@mui/material/Grid'
+import HorizontalWithSubtitle from '@components/card-statistics/HorizontalWithSubtitle'
+
+import { useRef, useEffect } from 'react'
+
+// Utility: get standardized date string (UTC, YYYY-MM-DD), less likely to cause hydration errors
+function formatDateISO(dateStr: string) {
+  if (!dateStr) return ''
+  try {
+    const date = new Date(dateStr)
+    // Use getUTC* so SSR and CSR match regardless of env locale/timezone
+    const yyyy = date.getUTCFullYear()
+    const mm = (date.getUTCMonth() + 1).toString().padStart(2, '0')
+    const dd = date.getUTCDate().toString().padStart(2, '0')
+    return `${yyyy}-${mm}-${dd}`
+  } catch {
+    return dateStr
+  }
+}
 
 // Custom OptionMenu implementation, following the style in inventory/index.tsx
 const OptionMenu = ({
@@ -107,8 +127,12 @@ function VariantOptions({ values }: { values: any[] }) {
 }
 
 // Util: Format currency (very simple, could use Intl.NumberFormat)
+// SSR/CSR-safe: don't use browser locale, always use en-US so SSR and CSR match
 const formatCurrency = (amount: number, currency: string) =>
-  `${typeof amount === "number" ? amount.toLocaleString() : amount} ${currency}`
+  `${typeof amount === "number"
+    ? amount.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+    : amount
+  } ${currency}`
 
 // Order actions menu and confirmation dialogs
 function OrderActions({
@@ -216,6 +240,9 @@ const OrdersAdminManagement = () => {
   const [pageSize, setPageSize] = useState(10)
   const [search, setSearch] = useState('')
 
+  const { data: summary, isLoading: sumLoading, isError: sumError } = useDashboardSummary()
+  const ord = summary?.data?.orders
+
   const [openCreate, setOpenCreate] = useState(false)
   const [payload, setPayload] = useState(
     '{\n  "shopId": "",\n  "userId": "",\n  "subtotal": 0,\n  "grandTotal": 0,\n  "currency": "USD",\n  "items": [],\n  "address": {\n    "name": "",\n    "phone": "",\n    "addressLine1": "",\n    "city": "",\n    "country": ""\n  }\n}'
@@ -237,8 +264,95 @@ const OrdersAdminManagement = () => {
   const rows = data?.data ?? []
   const total = data?.pagination?.total ?? 0
 
+  // Fix for hydration errors: Store rendered creation row dates in ref at first render (which is client side)
+  // Only show formatted date as plain yyyy-mm-dd so SSR and CSR match
+  // (if want to show custom locale, must suppressHydrationWarning)
   return (
     <div className="p-0 md:p-6">
+      <Grid container spacing={6} className='mb-6'>
+        {sumLoading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <Grid key={`ord-s-${i}`} size={{ xs: 12, sm: 6, md: 3 }}>
+              <div className='p-4 border rounded'>
+                <div className='h-6 w-32 bg-actionHover rounded mb-2' />
+                <div className='h-5 w-24 bg-actionHover rounded mb-1' />
+                <div className='h-4 w-20 bg-actionHover rounded' />
+              </div>
+            </Grid>
+          ))
+        ) : ord ? (
+          <>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <HorizontalWithSubtitle
+                title='Orders'
+                stats={String(ord.totalOrders)}
+                avatarIcon='ri-shopping-cart-line'
+                avatarColor='primary'
+                trend={
+                  typeof ord.percentChange === "number"
+                    ? (ord.percentChange >= 0 ? 'positive' : 'negative')
+                    : undefined
+                }
+                trendNumber={
+                  typeof ord.percentChange === "number"
+                    ? `${Math.abs(ord.percentChange).toFixed(1)}%`
+                    : '—'
+                }
+                subtitle='Total'
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <HorizontalWithSubtitle
+                title='Completed'
+                stats={String(ord.completedOrders)}
+                avatarIcon='ri-checkbox-circle-line'
+                avatarColor='success'
+                trend='positive'
+                trendNumber='—'
+                subtitle='Fulfilled'
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <HorizontalWithSubtitle
+                title='Pending'
+                stats={String(ord.pendingOrders)}
+                avatarIcon='ri-time-line'
+                avatarColor='warning'
+                trend='negative'
+                trendNumber='—'
+                subtitle='Awaiting'
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <HorizontalWithSubtitle
+                title='Revenue'
+                stats={
+                  typeof ord.totalRevenue === "number"
+                  ? ord.totalRevenue.toFixed(2)
+                  : (ord.totalRevenue ?? '—')
+                }
+                avatarIcon='ri-bar-chart-2-line'
+                avatarColor='info'
+                trend={
+                  typeof ord.revenueChange === "number"
+                    ? (ord.revenueChange >= 0 ? 'positive' : 'negative')
+                    : undefined
+                }
+                trendNumber={
+                  typeof ord.revenueChange === "number"
+                    ? `${Math.abs(ord.revenueChange).toFixed(1)}%`
+                    : '—'
+                }
+                subtitle='Gross'
+              />
+            </Grid>
+          </>
+        ) : sumError ? (
+          <Grid size={{ xs: 12 }}>
+            <Typography color='error'>Failed to load orders summary</Typography>
+          </Grid>
+        ) : null}
+      </Grid>
       <Typography variant="h4" className="mb-6 font-medium">Order Management</Typography>
       <Card>
         <CardContent>
@@ -327,6 +441,7 @@ const OrdersAdminManagement = () => {
                             <div key={item.id} className="flex items-center gap-2 min-w-[180px]">
                               {/* Product image */}
                               {item.variant?.image && (
+                                // eslint-disable-next-line @next/next/no-img-element
                                 <img
                                   src={item.variant.image}
                                   alt={item.productName}
@@ -365,7 +480,7 @@ const OrdersAdminManagement = () => {
                       {/* Created */}
                       <td>
                         <Typography variant="caption" title={row.createdAt}>
-                          {new Date(row.createdAt).toLocaleDateString()}
+                          {formatDateISO(row.createdAt)}
                         </Typography>
                       </td>
                       {/* Actions */}

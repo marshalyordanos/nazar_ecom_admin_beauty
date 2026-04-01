@@ -5,6 +5,7 @@ import type { QueryParams } from '@/types/common'
 
 import { buildQuery } from './query'
 import type { ApiListResponse, OrderAdmin } from './types'
+import { dashboardKeys } from './dashboard'
 
 export const orderKeys = {
   all: ['admin-orders'] as const,
@@ -30,7 +31,10 @@ export function useCompleteOrder() {
 
   return useMutation({
     mutationFn: async (id: string) => (await api.post(`/orders/${id}/complete`)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: orderKeys.all })
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: orderKeys.all })
+      qc.invalidateQueries({ queryKey: dashboardKeys.all })
+    }
   })
 }
 
@@ -39,7 +43,10 @@ export function useCancleOrder() {
 
   return useMutation({
     mutationFn: async (id: string) => (await api.post(`/orders/${id}/cancel`)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: orderKeys.all })
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: orderKeys.all })
+      qc.invalidateQueries({ queryKey: dashboardKeys.all })
+    }
   })
 }
 
@@ -49,6 +56,9 @@ export function useCreateAdminOrder() {
 
   return useMutation({
     mutationFn: async (payload: Record<string, unknown>) => (await api.post('/orders/admin/create', payload)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: orderKeys.all })
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: orderKeys.all })
+      qc.invalidateQueries({ queryKey: dashboardKeys.all })
+    }
   })
 }

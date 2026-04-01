@@ -33,7 +33,6 @@ import {
   getFacetedRowModel,
   getFacetedUniqueValues,
   getFacetedMinMaxValues,
-  getPaginationRowModel,
   getSortedRowModel
 } from '@tanstack/react-table'
 import type { ColumnDef, FilterFn } from '@tanstack/react-table'
@@ -57,6 +56,9 @@ import { getLocalizedUrl } from '@/utils/i18n'
 // Style Imports
 import tableStyles from '@core/styles/table.module.css'
 
+import { useAdminUsers } from '@/api/admin/users'
+import type { UserAdmin } from '@/api/admin/users'
+
 declare module '@tanstack/table-core' {
   interface FilterFns {
     fuzzy: FilterFn<unknown>
@@ -68,6 +70,7 @@ declare module '@tanstack/table-core' {
 
 type UsersTypeWithAction = UsersType & {
   action?: string
+  serverId?: string
 }
 
 type UserRoleType = {
@@ -135,7 +138,38 @@ const userRoleObj: UserRoleType = {
 const userStatusObj: UserStatusType = {
   active: 'success',
   pending: 'warning',
-  inactive: 'secondary'
+  inactive: 'secondary',
+  suspended: 'error'
+}
+
+function mapApiUser(u: UserAdmin): UsersTypeWithAction {
+  const roleName = u.roles?.[0]?.name ?? u.role ?? 'subscriber'
+  const rawStatus = String(u.status ?? 'inactive').toLowerCase()
+  const statusKey =
+    rawStatus === 'active'
+      ? 'active'
+      : rawStatus === 'suspended'
+        ? 'suspended'
+        : rawStatus === 'pending'
+          ? 'pending'
+          : 'inactive'
+  const fullName = [u.firstName, u.lastName].filter(Boolean).join(' ').trim() || u.email
+
+  return {
+    id: u.id as unknown as number,
+    serverId: u.id,
+    fullName,
+    username: u.email,
+    email: u.email,
+    role: roleName,
+    status: statusKey,
+    avatar: u.avatarUrl ?? u.avatar ?? '',
+    company: '',
+    country: '',
+    contact: u.phone ?? '',
+    currentPlan: u.currentPlan ?? 'basic',
+    action: ''
+  }
 }
 
 // Column Definitions
@@ -145,12 +179,51 @@ const UserListTable = ({ tableData }: { tableData?: UsersType[] }) => {
   // States
   const [addUserOpen, setAddUserOpen] = useState(false)
   const [rowSelection, setRowSelection] = useState({})
-  const [data, setData] = useState(...[tableData])
-  const [filteredData, setFilteredData] = useState(data)
+  const [page, setPage] = useState(0)
+  const [pageSize, setPageSize] = useState(10)
   const [globalFilter, setGlobalFilter] = useState('')
+  const [debouncedSearch, setDebouncedSearch] = useState('')
+  const [listFilters, setListFilters] = useState({ role: '', plan: '', status: '' })
+
+  const [data, setData] = useState<UsersType[]>(tableData ?? [])
+  const [filteredData, setFilteredData] = useState<UsersType[]>(tableData ?? [])
+
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(globalFilter.trim()), 400)
+    return () => clearTimeout(t)
+  }, [globalFilter])
+
+  const listParams = useMemo(() => {
+    const filter: Record<string, string> = {}
+    if (listFilters.status === 'active') filter.status = 'ACTIVE'
+    else if (listFilters.status === 'inactive') filter.status = 'INACTIVE'
+    else if (listFilters.status === 'pending') filter.status = 'INACTIVE'
+    else if (listFilters.status === 'suspended') filter.status = 'SUSPENDED'
+
+    return {
+      page: page + 1,
+      pageSize,
+      ...(debouncedSearch ? { search: { all: debouncedSearch } } : {}),
+      ...(Object.keys(filter).length ? { filter } : {})
+    }
+  }, [page, pageSize, debouncedSearch, listFilters.status])
+
+  const { data: listRes, isLoading, isFetching, isError } = useAdminUsers(listParams)
+
+  useEffect(() => {
+    const rows = (listRes?.data ?? []).map(mapApiUser)
+    setData(rows)
+    setFilteredData(rows)
+  }, [listRes])
+
+  useEffect(() => {
+    setPage(0)
+  }, [debouncedSearch])
 
   // Hooks
   const { lang: locale } = useParams()
+
+  const totalRows = listRes?.pagination?.total ?? 0
 
   const columns = useMemo<ColumnDef<UsersTypeWithAction, any>[]>(
     () => [
@@ -199,8 +272,13 @@ const UserListTable = ({ tableData }: { tableData?: UsersType[] }) => {
         cell: ({ row }) => (
           <div className='flex items-center gap-2'>
             <Icon
-              className={classnames('text-[22px]', userRoleObj[row.original.role].icon)}
-              sx={{ color: `var(--mui-palette-${userRoleObj[row.original.role].color}-main)` }}
+              className={classnames(
+                'text-[22px]',
+                (userRoleObj[row.original.role] ?? userRoleObj.subscriber).icon
+              )}
+              sx={{
+                color: `var(--mui-palette-${(userRoleObj[row.original.role] ?? userRoleObj.subscriber).color}-main)`
+              }}
             />
             <Typography className='capitalize' color='text.primary'>
               {row.original.role}
@@ -224,7 +302,7 @@ const UserListTable = ({ tableData }: { tableData?: UsersType[] }) => {
               variant='tonal'
               label={row.original.status}
               size='small'
-              color={userStatusObj[row.original.status]}
+              color={userStatusObj[row.original.status] ?? 'secondary'}
               className='capitalize'
             />
           </div>
@@ -234,7 +312,12 @@ const UserListTable = ({ tableData }: { tableData?: UsersType[] }) => {
         header: 'Action',
         cell: ({ row }) => (
           <div className='flex items-center gap-0.5'>
-            <IconButton size='small' onClick={() => setData(data?.filter(product => product.id !== row.original.id))}>
+            <IconButton
+              size='small'
+              onClick={() =>
+                setData(data?.filter(product => (product as UsersTypeWithAction).serverId !== row.original.serverId))
+              }
+            >
               <i className='ri-delete-bin-7-line text-textSecondary' />
             </IconButton>
             <IconButton size='small'>
@@ -274,20 +357,13 @@ const UserListTable = ({ tableData }: { tableData?: UsersType[] }) => {
       rowSelection,
       globalFilter
     },
-    initialState: {
-      pagination: {
-        pageSize: 10
-      }
-    },
-    enableRowSelection: true, //enable row selection for all rows
-    // enableRowSelection: row => row.original.age > 18, // or enable row selection conditionally per row
+    enableRowSelection: true,
     globalFilterFn: fuzzyFilter,
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
     onGlobalFilterChange: setGlobalFilter,
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
     getFacetedMinMaxValues: getFacetedMinMaxValues()
@@ -311,7 +387,14 @@ const UserListTable = ({ tableData }: { tableData?: UsersType[] }) => {
     <>
       <Card>
         <CardHeader title='Filters' className='pbe-4' />
-        <TableFilters setData={setFilteredData} tableData={data} />
+        <TableFilters
+          setData={setFilteredData}
+          tableData={data}
+          onFilterChange={f => {
+            setListFilters(f)
+            setPage(0)
+          }}
+        />
         <Divider />
         <div className='flex justify-between gap-4 p-5 flex-col items-start sm:flex-row sm:items-center'>
           <Button
@@ -325,7 +408,10 @@ const UserListTable = ({ tableData }: { tableData?: UsersType[] }) => {
           <div className='flex items-center gap-x-4 max-sm:gap-y-4 flex-col max-sm:is-full sm:flex-row'>
             <DebouncedInput
               value={globalFilter ?? ''}
-              onChange={value => setGlobalFilter(String(value))}
+              onChange={value => {
+                setGlobalFilter(String(value))
+                setPage(0)
+              }}
               placeholder='Search User'
               className='max-sm:is-full'
             />
@@ -363,7 +449,23 @@ const UserListTable = ({ tableData }: { tableData?: UsersType[] }) => {
                 </tr>
               ))}
             </thead>
-            {table.getFilteredRowModel().rows.length === 0 ? (
+            {isError ? (
+              <tbody>
+                <tr>
+                  <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>
+                    Failed to load users
+                  </td>
+                </tr>
+              </tbody>
+            ) : isLoading || isFetching ? (
+              <tbody>
+                <tr>
+                  <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>
+                    Loading...
+                  </td>
+                </tr>
+              </tbody>
+            ) : table.getFilteredRowModel().rows.length === 0 ? (
               <tbody>
                 <tr>
                   <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>
@@ -373,10 +475,7 @@ const UserListTable = ({ tableData }: { tableData?: UsersType[] }) => {
               </tbody>
             ) : (
               <tbody>
-                {table
-                  .getRowModel()
-                  .rows.slice(0, table.getState().pagination.pageSize)
-                  .map(row => {
+                {table.getRowModel().rows.map(row => {
                     return (
                       <tr key={row.id} className={classnames({ selected: row.getIsSelected() })}>
                         {row.getVisibleCells().map(cell => (
@@ -393,16 +492,17 @@ const UserListTable = ({ tableData }: { tableData?: UsersType[] }) => {
           rowsPerPageOptions={[10, 25, 50]}
           component='div'
           className='border-bs'
-          count={table.getFilteredRowModel().rows.length}
-          rowsPerPage={table.getState().pagination.pageSize}
-          page={table.getState().pagination.pageIndex}
+          count={totalRows}
+          rowsPerPage={pageSize}
+          page={page}
           SelectProps={{
             inputProps: { 'aria-label': 'rows per page' }
           }}
-          onPageChange={(_, page) => {
-            table.setPageIndex(page)
+          onPageChange={(_, p) => setPage(p)}
+          onRowsPerPageChange={e => {
+            setPageSize(Number(e.target.value))
+            setPage(0)
           }}
-          onRowsPerPageChange={e => table.setPageSize(Number(e.target.value))}
         />
       </Card>
       <AddUserDrawer

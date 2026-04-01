@@ -16,7 +16,7 @@ import UserTable from '@views/dashboards/ecommerce/UserTable'
 import VisitsByDay from '@views/dashboards/ecommerce/VisitsByDay'
 
 // Data Imports
-import { getUserData } from '@/app/server/actions'
+// import { getUserData } from '@/app/server/actions'
 
 /**
  * ! If you need data using an API call, uncomment the below API code, update the `process.env.API_URL` variable in the
@@ -37,7 +37,14 @@ import { getUserData } from '@/app/server/actions'
 } */
 const DashboardECommerce = async () => {
   // Vars
-  const data = await getUserData()
+  let data: any = []
+  try {
+    const res = await fetch(`${process.env.API_URL}/stats/ecommerce/users`, { cache: 'no-store' })
+    const json = await res.json()
+    data = json?.data ?? []
+  } catch (e) {
+    data = []
+  }
 
   return (
     <Grid container spacing={6}>

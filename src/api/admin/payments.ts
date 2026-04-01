@@ -5,6 +5,7 @@ import type { QueryParams } from '@/types/common'
 
 import { buildQuery } from './query'
 import type { ApiListResponse, PaymentAdmin } from './types'
+import { dashboardKeys } from './dashboard'
 
 export const paymentKeys = {
   all: ['admin-payments'] as const,
@@ -25,7 +26,10 @@ return (await api.get(`/payments${qs}`)).data
 }
 
 function invalidate(qc: ReturnType<typeof useQueryClient>) {
-  return () => qc.invalidateQueries({ queryKey: paymentKeys.all })
+  return () => {
+    qc.invalidateQueries({ queryKey: paymentKeys.all })
+    qc.invalidateQueries({ queryKey: dashboardKeys.all })
+  }
 }
 
 export function useCapturePayment() {

@@ -31,6 +31,8 @@ import FormControl from '@mui/material/FormControl'
 import OptionMenu from '@core/components/option-menu'
 import tableStyles from '@core/styles/table.module.css'
 import { useAdminInventory, useUpdateInventory, useAddMovement } from '@/api/admin/inventory'
+import { useDashboardSummary } from '@/api/admin/dashboard'
+import HorizontalWithSubtitle from '@components/card-statistics/HorizontalWithSubtitle'
 import { useShops } from '@/api/shops/useShops'
 import { useParams } from 'next/navigation'
 
@@ -43,6 +45,8 @@ const MOVEMENT_TYPES = [
 ]
 
 const InventoryManagement = () => {
+  const { data: summary, isLoading: sumLoading, isError: sumError } = useDashboardSummary()
+  const inv = summary?.data?.inventory
   const [page, setPage] = useState(0)
   const [pageSize, setPageSize] = useState(10)
   const [search, setSearch] = useState('')
@@ -157,6 +161,70 @@ const InventoryManagement = () => {
   // Render
   return (
     <>
+      <Grid container spacing={6} className='mb-6'>
+        {sumLoading ? (
+          Array.from({ length: 4 }).map((_, i) => (
+            <Grid key={`inv-s-${i}`} size={{ xs: 12, sm: 6, md: 3 }}>
+              <div className='p-4 border rounded'>
+                <div className='h-6 w-32 bg-actionHover rounded mb-2' />
+                <div className='h-5 w-24 bg-actionHover rounded mb-1' />
+                <div className='h-4 w-20 bg-actionHover rounded' />
+              </div>
+            </Grid>
+          ))
+        ) : inv ? (
+          <>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <HorizontalWithSubtitle
+                title='Total Stock'
+                stats={String(inv.totalStock)}
+                avatarIcon='ri-archive-2-line'
+                avatarColor='primary'
+                trend={inv.percentChange >= 0 ? 'positive' : 'negative'}
+                trendNumber={`${Math.abs(inv.percentChange).toFixed(1)}%`}
+                subtitle='Current period'
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <HorizontalWithSubtitle
+                title='Reserved'
+                stats={String(inv.reservedQuantity)}
+                avatarIcon='ri-lock-2-line'
+                avatarColor='warning'
+                trend='negative'
+                trendNumber='—'
+                subtitle='Current period'
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <HorizontalWithSubtitle
+                title='Low Stock'
+                stats={String(inv.lowStockAlerts)}
+                avatarIcon='ri-alert-line'
+                avatarColor='error'
+                trend='negative'
+                trendNumber='—'
+                subtitle='Reorder alerts'
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+              <HorizontalWithSubtitle
+                title='Variants'
+                stats={String(inv.totalVariants)}
+                avatarIcon='ri-shapes-line'
+                avatarColor='info'
+                trend='positive'
+                trendNumber='—'
+                subtitle='Catalog size'
+              />
+            </Grid>
+          </>
+        ) : sumError ? (
+          <Grid size={{ xs: 12 }}>
+            <Typography color='error'>Failed to load inventory summary</Typography>
+          </Grid>
+        ) : null}
+      </Grid>
       <Card>
         <CardHeader title='Inventory Management' />
         <Divider />

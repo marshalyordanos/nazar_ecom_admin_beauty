@@ -5,6 +5,7 @@ import type { QueryParams } from '@/types/common'
 
 import { buildQuery } from './query'
 import type { ApiListResponse, InventoryAdmin, InventoryMovementAdmin } from './types'
+import { dashboardKeys } from './dashboard'
 
 export const inventoryKeys = {
   all: ['admin-inventory'] as const,
@@ -39,7 +40,10 @@ export function useAddMovement() {
       quantity: number
       referenceId?: string
     }) => (await api.post('/inventory/movements', payload)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: inventoryKeys.all })
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: inventoryKeys.all })
+      qc.invalidateQueries({ queryKey: dashboardKeys.all })
+    }
   })
 }
 
@@ -49,6 +53,9 @@ export function useUpdateInventory() {
   return useMutation({
     mutationFn: async ({ variantId, payload }: { variantId: string; payload: Record<string, unknown> }) =>
       (await api.patch(`/inventory/${variantId}`, payload)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: inventoryKeys.all })
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: inventoryKeys.all })
+      qc.invalidateQueries({ queryKey: dashboardKeys.all })
+    }
   })
 }

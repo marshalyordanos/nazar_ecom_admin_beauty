@@ -1,12 +1,10 @@
 'use client'
 
-// React Imports
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 
 // Next Imports
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-
 // MUI Imports
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
@@ -50,6 +48,7 @@ import type { Locale } from '@configs/i18n'
 // Component Imports
 import OptionMenu from '@core/components/option-menu'
 import CustomAvatar from '@core/components/mui/Avatar'
+import AssignRoleDialog from '@components/dialogs/assign-role'
 
 // Util Imports
 import { getInitials } from '@/utils/getInitials'
@@ -57,6 +56,10 @@ import { getLocalizedUrl } from '@/utils/i18n'
 
 // Style Imports
 import tableStyles from '@core/styles/table.module.css'
+
+// API Imports
+import { useAdminUsers, useUpdateUserRole, type UserAdmin } from '@/api/admin/users'
+import type { ApiListResponse } from '@/api/admin/types'
 
 declare module '@tanstack/table-core' {
   interface FilterFns {
@@ -83,15 +86,8 @@ type UserStatusType = {
 const Icon = styled('i')({})
 
 const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
-  // Rank the item
   const itemRank = rankItem(row.getValue(columnId), value)
-
-  // Store the itemRank info
-  addMeta({
-    itemRank
-  })
-
-  // Return if the item should be filtered in/out
+  addMeta({ itemRank })
   return itemRank.passed
 }
 
@@ -105,7 +101,6 @@ const DebouncedInput = ({
   onChange: (value: string | number) => void
   debounce?: number
 } & Omit<TextFieldProps, 'onChange'>) => {
-  // States
   const [value, setValue] = useState(initialValue)
 
   useEffect(() => {
@@ -116,7 +111,6 @@ const DebouncedInput = ({
     const timeout = setTimeout(() => {
       onChange(value)
     }, debounce)
-
     return () => clearTimeout(timeout)
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value])
@@ -124,7 +118,6 @@ const DebouncedInput = ({
   return <TextField {...props} value={value} onChange={e => setValue(e.target.value)} size='small' />
 }
 
-// Vars
 const userRoleObj: UserRoleType = {
   admin: { icon: 'ri-vip-crown-line', color: 'error' },
   author: { icon: 'ri-computer-line', color: 'warning' },
@@ -139,19 +132,84 @@ const userStatusObj: UserStatusType = {
   inactive: 'secondary'
 }
 
-// Column Definitions
 const columnHelper = createColumnHelper<UsersTypeWithAction>()
 
+const getAvatar = (params: Pick<UsersType, 'avatar' | 'fullName'>) => {
+  const { avatar, fullName } = params
+  if (avatar) {
+    return <CustomAvatar src={avatar} size={34} />
+  }
+  return <CustomAvatar>{getInitials(fullName as string)}</CustomAvatar>
+}
+
 const RolesTable = ({ tableData }: { tableData?: UsersType[] }) => {
-  // States
   const [role, setRole] = useState<UsersType['role']>('')
   const [rowSelection, setRowSelection] = useState({})
-  const [data, setData] = useState(...[tableData])
+  const [data, setData] = useState(tableData || [])
   const [filteredData, setFilteredData] = useState(data)
   const [globalFilter, setGlobalFilter] = useState('')
+  const [page, setPage] = useState(0)
+  const [pageSize, setPageSize] = useState(10)
+  const [assignOpen, setAssignOpen] = useState(false)
+  const [assignUserId, setAssignUserId] = useState<string | undefined>(undefined)
+  const [assignUserRole, setAssignUserRole] = useState<string | null | undefined>(undefined)
 
-  // Hooks
   const { lang: locale } = useParams()
+  const { mutateAsync: updateUserRole } = useUpdateUserRole()
+
+  // Server Data
+  const usersQuery = useAdminUsers({
+    page: page + 1,
+    pageSize,
+    search: globalFilter
+      ? {
+          name: globalFilter as string,
+          email: globalFilter as string,
+          username: globalFilter as string
+        }
+      : undefined,
+    filter: role ? { role } : undefined,
+    sort: { createdAt: 'desc' }
+  })
+  const usersResp = usersQuery.data as ApiListResponse<UserAdmin> | undefined
+  const serverData = usersResp?.data ?? []
+
+  const mapUserToRow = useCallback((u: UserAdmin, idx: number): UsersType => {
+    const fullName =
+      `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim() || (u.username as string) || u.email || 'User'
+    const username = (u.username as string) || (u.email ? u.email.split('@')[0] : 'user')
+    const numericId = page * pageSize + idx + 1
+    return {
+      id: numericId,
+      role: (u.role as string) || 'subscriber',
+      email: u.email,
+      status: (u.status as string) || 'active',
+      avatar: (u.avatar as string) || '',
+      company: '',
+      country: '',
+      contact: '',
+      fullName,
+      username,
+      currentPlan: (u.currentPlan as string) || 'standard',
+      avatarColor: undefined
+    }
+  }, [page, pageSize])
+
+  useEffect(() => {
+    const mapped = serverData.map(mapUserToRow)
+    setData(mapped)
+    setFilteredData(mapped)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [serverData, page, pageSize, mapUserToRow])
+
+  // Only filter by role here. Filtering by search comes from the backend.
+  useEffect(() => {
+    let filtered = data
+    if (role) {
+      filtered = data?.filter(user => user.role === role)
+    }
+    setFilteredData(filtered)
+  }, [role, data])
 
   const columns = useMemo<ColumnDef<UsersTypeWithAction, any>[]>(
     () => [
@@ -159,21 +217,17 @@ const RolesTable = ({ tableData }: { tableData?: UsersType[] }) => {
         id: 'select',
         header: ({ table }) => (
           <Checkbox
-            {...{
-              checked: table.getIsAllRowsSelected(),
-              indeterminate: table.getIsSomeRowsSelected(),
-              onChange: table.getToggleAllRowsSelectedHandler()
-            }}
+            checked={table.getIsAllRowsSelected()}
+            indeterminate={table.getIsSomeRowsSelected()}
+            onChange={table.getToggleAllRowsSelectedHandler()}
           />
         ),
         cell: ({ row }) => (
           <Checkbox
-            {...{
-              checked: row.getIsSelected(),
-              disabled: !row.getCanSelect(),
-              indeterminate: row.getIsSomeSelected(),
-              onChange: row.getToggleSelectedHandler()
-            }}
+            checked={row.getIsSelected()}
+            disabled={!row.getCanSelect()}
+            indeterminate={row.getIsSomeSelected()}
+            onChange={row.getToggleSelectedHandler()}
           />
         )
       },
@@ -200,8 +254,8 @@ const RolesTable = ({ tableData }: { tableData?: UsersType[] }) => {
         cell: ({ row }) => (
           <div className='flex items-center gap-2'>
             <Icon
-              className={userRoleObj[row.original.role].icon}
-              sx={{ color: `var(--mui-palette-${userRoleObj[row.original.role].color}-main)`, fontSize: '1.375rem' }}
+              className={userRoleObj[row.original.role]?.icon || 'ri-user-3-line'}
+              sx={{ color: `var(--mui-palette-${userRoleObj[row.original.role]?.color || 'primary'}-main)`, fontSize: '1.375rem' }}
             />
             <Typography color='text.primary' className='capitalize'>
               {row.original.role}
@@ -235,13 +289,24 @@ const RolesTable = ({ tableData }: { tableData?: UsersType[] }) => {
         header: 'Actions',
         cell: ({ row }) => (
           <div className='flex items-center gap-0.5'>
-            <IconButton size='small' onClick={() => setData(data?.filter(product => product.id !== row.original.id))}>
+            <IconButton size='small' onClick={() => setData(curr => curr?.filter(product => product.id !== row.original.id))}>
               <i className='ri-delete-bin-7-line text-textSecondary' />
             </IconButton>
             <IconButton size='small'>
               <Link href={getLocalizedUrl('/apps/user/view', locale as Locale)} className='flex'>
                 <i className='ri-eye-line text-textSecondary' />
               </Link>
+            </IconButton>
+            <IconButton
+              size='small'
+              onClick={() => {
+                const src = serverData?.[row.index]
+                setAssignUserId(src?.id)
+                setAssignUserRole((src?.role as string) || null)
+                setAssignOpen(true)
+              }}
+            >
+              <i className='ri-user-settings-line text-textSecondary' />
             </IconButton>
             <OptionMenu
               iconClassName='text-textSecondary'
@@ -254,7 +319,18 @@ const RolesTable = ({ tableData }: { tableData?: UsersType[] }) => {
                 {
                   text: 'Edit',
                   icon: 'ri-edit-box-line',
-                  linkProps: { className: 'flex items-center' }
+                  menuItemProps: {
+                    className: 'flex items-center',
+                    onClick: async () => {
+                      const newRole = window.prompt('Enter new role for user', row.original.role)
+                      if (newRole !== null && newRole !== row.original.role) {
+                        const src = serverData?.[row.index]
+                        if (src?.id) {
+                          await updateUserRole({ id: src.id, role: newRole })
+                        }
+                      }
+                    }
+                  }
                 }
               ]}
             />
@@ -263,8 +339,7 @@ const RolesTable = ({ tableData }: { tableData?: UsersType[] }) => {
         enableSorting: false
       })
     ],
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data, filteredData]
+    [data, serverData, locale, updateUserRole]
   )
 
   const table = useReactTable({
@@ -279,11 +354,10 @@ const RolesTable = ({ tableData }: { tableData?: UsersType[] }) => {
     },
     initialState: {
       pagination: {
-        pageSize: 10
+        pageSize
       }
     },
-    enableRowSelection: true, //enable row selection for all rows
-    // enableRowSelection: row => row.original.age > 18, // or enable row selection conditionally per row
+    enableRowSelection: true,
     globalFilterFn: fuzzyFilter,
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
@@ -295,26 +369,6 @@ const RolesTable = ({ tableData }: { tableData?: UsersType[] }) => {
     getFacetedUniqueValues: getFacetedUniqueValues(),
     getFacetedMinMaxValues: getFacetedMinMaxValues()
   })
-
-  const getAvatar = (params: Pick<UsersType, 'avatar' | 'fullName'>) => {
-    const { avatar, fullName } = params
-
-    if (avatar) {
-      return <CustomAvatar src={avatar} size={34} />
-    } else {
-      return <CustomAvatar>{getInitials(fullName as string)}</CustomAvatar>
-    }
-  }
-
-  useEffect(() => {
-    const filteredData = data?.filter(user => {
-      if (role && user.role !== role) return false
-
-      return true
-    })
-
-    setFilteredData(filteredData)
-  }, [role, data, setFilteredData])
 
   return (
     <Card>
@@ -362,28 +416,26 @@ const RolesTable = ({ tableData }: { tableData?: UsersType[] }) => {
                 {headerGroup.headers.map(header => (
                   <th key={header.id}>
                     {header.isPlaceholder ? null : (
-                      <>
-                        <div
-                          className={classnames({
-                            'flex items-center': header.column.getIsSorted(),
-                            'cursor-pointer select-none': header.column.getCanSort()
-                          })}
-                          onClick={header.column.getToggleSortingHandler()}
-                        >
-                          {flexRender(header.column.columnDef.header, header.getContext())}
-                          {{
-                            asc: <i className='ri-arrow-up-s-line text-xl' />,
-                            desc: <i className='ri-arrow-down-s-line text-xl' />
-                          }[header.column.getIsSorted() as 'asc' | 'desc'] ?? null}
-                        </div>
-                      </>
+                      <div
+                        className={classnames({
+                          'flex items-center': header.column.getIsSorted(),
+                          'cursor-pointer select-none': header.column.getCanSort()
+                        })}
+                        onClick={header.column.getToggleSortingHandler()}
+                      >
+                        {flexRender(header.column.columnDef.header, header.getContext())}
+                        {{
+                          asc: <i className='ri-arrow-up-s-line text-xl' />,
+                          desc: <i className='ri-arrow-down-s-line text-xl' />
+                        }[header.column.getIsSorted() as 'asc' | 'desc'] ?? null}
+                      </div>
                     )}
                   </th>
                 ))}
               </tr>
             ))}
           </thead>
-          {table.getFilteredRowModel().rows.length === 0 ? (
+          {(table.getFilteredRowModel().rows?.length ?? 0) === 0 ? (
             <tbody>
               <tr>
                 <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>
@@ -396,15 +448,13 @@ const RolesTable = ({ tableData }: { tableData?: UsersType[] }) => {
               {table
                 .getRowModel()
                 .rows.slice(0, table.getState().pagination.pageSize)
-                .map(row => {
-                  return (
-                    <tr key={row.id} className={classnames({ selected: row.getIsSelected() })}>
-                      {row.getVisibleCells().map(cell => (
-                        <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
-                      ))}
-                    </tr>
-                  )
-                })}
+                .map(row => (
+                  <tr key={row.id} className={classnames({ selected: row.getIsSelected() })}>
+                    {row.getVisibleCells().map(cell => (
+                      <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+                    ))}
+                  </tr>
+                ))}
             </tbody>
           )}
         </table>
@@ -413,16 +463,31 @@ const RolesTable = ({ tableData }: { tableData?: UsersType[] }) => {
         rowsPerPageOptions={[10, 25, 50]}
         component='div'
         className='border-bs'
-        count={table.getFilteredRowModel().rows.length}
+        count={usersResp?.pagination?.total ?? (table.getFilteredRowModel().rows?.length ?? 0)}
         rowsPerPage={table.getState().pagination.pageSize}
-        page={table.getState().pagination.pageIndex}
+        page={page}
         SelectProps={{
           inputProps: { 'aria-label': 'rows per page' }
         }}
         onPageChange={(_, page) => {
+          setPage(page)
           table.setPageIndex(page)
         }}
-        onRowsPerPageChange={e => table.setPageSize(Number(e.target.value))}
+        onRowsPerPageChange={e => {
+          const newSize = Number(e.target.value)
+          setPageSize(newSize)
+          table.setPageSize(newSize)
+          setPage(0)
+        }}
+      />
+      <AssignRoleDialog
+        open={assignOpen}
+        setOpen={setAssignOpen}
+        userId={assignUserId}
+        currentRole={assignUserRole || undefined}
+        onSuccess={() => {
+          // no-op: query invalidation happens in mutation hook
+        }}
       />
     </Card>
   )

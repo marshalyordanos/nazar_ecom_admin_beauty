@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useEffect, useState, useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 // MUI Imports
 import Card from '@mui/material/Card'
@@ -17,25 +17,18 @@ import type { ButtonProps } from '@mui/material/Button'
 
 // Third-party Imports
 import classnames from 'classnames'
-import { rankItem } from '@tanstack/match-sorter-utils'
 import {
   createColumnHelper,
   flexRender,
-  getCoreRowModel,
   useReactTable,
-  getFilteredRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getFacetedMinMaxValues,
-  getPaginationRowModel,
-  getSortedRowModel
+  getCoreRowModel,
+  getSortedRowModel,
+  type FilterFn
 } from '@tanstack/react-table'
-import type { ColumnDef, FilterFn } from '@tanstack/react-table'
-import type { RankingInfo } from '@tanstack/match-sorter-utils'
+import type { ColumnDef } from '@tanstack/react-table'
 
 // Type Imports
 import type { ThemeColor } from '@core/types'
-import type { PermissionRowType } from '@/types/apps/permissionTypes'
 
 // Component Imports
 import PermissionDialog from '@components/dialogs/permission-dialog'
@@ -43,46 +36,20 @@ import OpenDialogOnElementClick from '@components/dialogs/OpenDialogOnElementCli
 
 // Style Imports
 import tableStyles from '@core/styles/table.module.css'
+import { useGetAllPermissions } from '@/api/acl/usePermissions'
 
-declare module '@tanstack/table-core' {
-  interface FilterFns {
-    fuzzy: FilterFn<unknown>
-  }
-  interface FilterMeta {
-    itemRank: RankingInfo
-  }
-}
-
-type PermissionsTypeWithAction = PermissionRowType & {
-  action?: string
-}
-
-type Colors = {
-  [key: string]: ThemeColor
-}
-
-// Vars
-const colors: Colors = {
+// for color chips example role name => color
+const colors: { [key: string]: ThemeColor } = {
   support: 'info',
   users: 'success',
   manager: 'warning',
   administrator: 'primary',
-  'restricted-user': 'error'
+  'restricted-user': 'error',
+  admin: 'primary',
+  user: 'success'
 }
 
-const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
-  // Rank the item
-  const itemRank = rankItem(row.getValue(columnId), value)
-
-  // Store the itemRank info
-  addMeta({
-    itemRank
-  })
-
-  // Return if the item should be filtered in/out
-  return itemRank.passed
-}
-
+// DebouncedInput
 const DebouncedInput = ({
   value: initialValue,
   onChange,
@@ -93,7 +60,6 @@ const DebouncedInput = ({
   onChange: (value: string | number) => void
   debounce?: number
 } & Omit<TextFieldProps, 'onChange'>) => {
-  // States
   const [value, setValue] = useState(initialValue)
 
   useEffect(() => {
@@ -112,66 +78,156 @@ const DebouncedInput = ({
   return <TextField {...props} value={value} onChange={e => setValue(e.target.value)} size='small' />
 }
 
-// Column Definitions
-const columnHelper = createColumnHelper<PermissionsTypeWithAction>()
+// Table type for rows
+type PermissionTableRow = {
+  id: string
+  resource: string
+  description: string
+  createdAt: string
+  roles: {
+    name: string
+    actions: {
+      create: boolean
+      read: boolean
+      update: boolean
+      delete: boolean
+    }
+  }[]
+}
 
-const Permissions = ({ permissionsData }: { permissionsData?: PermissionRowType[] }) => {
-  // States
+const columnHelper = createColumnHelper<PermissionTableRow>()
+
+// Simple "fuzzy" filter function implementation (case-insensitive substring match)
+const fuzzyFilter: FilterFn<PermissionTableRow> = (row, columnId, filterValue) => {
+  const rowValue = row.getValue(columnId)
+  if (typeof rowValue === 'string') {
+    return rowValue.toLowerCase().includes(String(filterValue).toLowerCase())
+  }
+  return false
+}
+
+const Permissions = () => {
+  // Table and search/pagination state
   const [open, setOpen] = useState(false)
   const [rowSelection, setRowSelection] = useState({})
   const [editValue, setEditValue] = useState<string>('')
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [data, setData] = useState(...[permissionsData])
   const [globalFilter, setGlobalFilter] = useState('')
+  // Pagination
+  const [page, setPage] = useState(0) // 0-indexed for TablePagination
+  const [pageSize, setPageSize] = useState(10)
 
-  // Vars
-  const buttonProps: ButtonProps = {
-    variant: 'contained',
-    children: 'Add Permission',
-    onClick: () => handleAddPermission(),
-    className: 'max-sm:is-full'
+  // Query params for the API
+  const params = {
+    page: page + 1,
+    pageSize,
+    search: globalFilter ? { all: globalFilter } : undefined
   }
 
-  // Hooks
-  const columns = useMemo<ColumnDef<PermissionsTypeWithAction, any>[]>(
+  // Get permissions from API
+  const { data: permissions, isLoading } = useGetAllPermissions(params)
+
+  // Normalize API to table rows
+  const tableRows: PermissionTableRow[] = useMemo(() => {
+    if (!permissions?.data) return []
+    return permissions.data.map(perm => ({
+      id: perm.id,
+      resource: perm.resource,
+      description: String(perm.description ?? ''),
+      createdAt: perm.createdAt,
+      roles: (perm.rolePermissions || []).map(rp => ({
+        name: rp.role?.name || '',
+        actions: {
+          create: rp.createAction,
+          read: rp.readAction,
+          update: rp.updateAction,
+          delete: rp.deleteAction
+        }
+      }))
+    }))
+  }, [permissions])
+
+  // Column definitions
+  const columns = useMemo<ColumnDef<PermissionTableRow, any>[]>(
     () => [
-      columnHelper.accessor('name', {
-        header: 'Name',
-        cell: ({ row }) => <Typography color='text.primary'>{row.original.name}</Typography>
+      columnHelper.accessor('resource', {
+        header: 'Resource',
+        cell: ({ row }) => <Typography color='text.primary'>{row.original.resource}</Typography>
       }),
-      columnHelper.accessor('assignedTo', {
-        header: 'Assigned To',
+      columnHelper.accessor('roles', {
+        header: 'Role(s)',
         cell: ({ row }) =>
-          typeof row.original.assignedTo === 'string' ? (
-            <Chip
-              variant='tonal'
-              label={row.original.assignedTo}
-              color={colors[row.original.assignedTo]}
-              size='small'
-              className='capitalize'
-            />
-          ) : (
-            row.original.assignedTo.map((item, index) => (
-              <Chip
-                variant='tonal'
-                className='capitalize mie-4'
-                key={index}
-                label={item}
-                color={colors[item]}
-                size='small'
-              />
-            ))
-          )
+          row.original.roles.length > 0
+            ? row.original.roles.map((role, idx) => (
+                <Chip
+                  key={role.name + idx}
+                  label={role.name}
+                  color={colors[role.name] || 'secondary'}
+                  className='capitalize mie-2'
+                  size='small'
+                />
+              ))
+            : <Chip label="None" color="default" size="small" />
       }),
-      columnHelper.accessor('createdDate', {
-        header: 'Created Date',
-        cell: ({ row }) => <Typography>{row.original.createdDate}</Typography>
+      // --- REWRITTEN Permissions column ---
+      columnHelper.accessor('roles', {
+        header: 'Permissions',
+        cell: ({ row }) => (
+          <div className='flex flex-col gap-1'>
+            {row.original.roles.length > 0 ? (
+              row.original.roles.map((role, idx) => (
+                <div key={role.name + idx} className="flex gap-1 items-center">
+                  <Typography variant="caption" sx={{ minWidth: 60 }}>{role.name}</Typography>
+                  {['create', 'read', 'update', 'delete'].map(action => {
+                    const hasPerm = role.actions[action as keyof typeof role.actions]
+                    // Make as tag: very small, rectangle, minimal padding, sharp corners, new color (blue for enabled)
+                    return (
+                      <span
+                        key={action}
+                        style={{
+                          display: 'inline-block',
+                          minWidth: 12,
+                          fontSize: '0.60rem',
+                          fontWeight: 600,
+                          borderRadius: 2,
+                          padding: '0px 4px',
+                          height: 18,
+                          boxSizing: 'border-box',
+                          background: hasPerm ? '#2563eb' : '#e5e7eb',
+                          color: hasPerm ? '#fff' : '#64748b',
+                          marginInlineEnd: 4,
+                          lineHeight: '18px',
+                          textAlign: 'center'
+                        }}
+                      >
+                        {action.charAt(0).toUpperCase()}
+                      </span>
+                    )
+                  })}
+                </div>
+              ))
+            ) : (
+              <Typography variant="caption" color="text.secondary">
+                No roles
+              </Typography>
+            )}
+          </div>
+        )
       }),
-      columnHelper.accessor('action', {
+      // --- END REWRITTEN Permissions column ---
+      columnHelper.accessor('createdAt', {
+        header: 'Created At',
+        cell: ({ row }) => (
+          <Typography variant="caption">
+            {row.original.createdAt ? new Date(row.original.createdAt).toLocaleString() : ''}
+          </Typography>
+        )
+      }),
+      columnHelper.display({
+        id: 'actions',
         header: 'Actions',
         cell: ({ row }) => (
           <div className='flex items-center gap-0.5'>
-            <IconButton size='small' onClick={() => handleEditPermission(row.original.name)}>
+            <IconButton size='small' onClick={() => handleEditPermission(row.original.id)}>
               <i className='ri-edit-box-line text-textSecondary' />
             </IconButton>
             <IconButton size='small'>
@@ -186,59 +242,60 @@ const Permissions = ({ permissionsData }: { permissionsData?: PermissionRowType[
     []
   )
 
+  // Provide the required 'fuzzy' filter function to satisfy the type requirement
+  const filterFns: Record<'fuzzy', FilterFn<PermissionTableRow>> = {
+    fuzzy: fuzzyFilter
+  }
+
+  // react-table instantiation
   const table = useReactTable({
-    data: data as PermissionRowType[],
+    data: tableRows,
     columns,
-    filterFns: {
-      fuzzy: fuzzyFilter
-    },
-    state: {
-      rowSelection,
-      globalFilter
-    },
-    initialState: {
-      pagination: {
-        pageSize: 10
-      }
-    },
-    enableRowSelection: true, //enable row selection for all rows
-    // enableRowSelection: row => row.original.age > 18, // or enable row selection conditionally per row
-    globalFilterFn: fuzzyFilter,
-    onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
-    onGlobalFilterChange: setGlobalFilter,
-    getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-    getFacetedMinMaxValues: getFacetedMinMaxValues()
+    filterFns,
+    state: {
+      rowSelection
+    },
+    enableRowSelection: true,
+    onRowSelectionChange: setRowSelection
   })
 
-  const handleEditPermission = (name: string) => {
+  const handleEditPermission = (id: string) => {
     setOpen(true)
-    setEditValue(name)
+    setEditValue(id)
   }
 
   const handleAddPermission = () => {
     setEditValue('')
+    setOpen(true)
   }
+
+  const paginationTotal = permissions?.pagination?.total ?? 0
 
   return (
     <>
       <Card>
         <CardContent className='flex flex-col sm:flex-row items-start sm:items-center justify-between max-sm:gap-4'>
           <DebouncedInput
-            value={globalFilter ?? ''}
-            onChange={value => setGlobalFilter(String(value))}
+            value={globalFilter}
+            onChange={value => {
+              setGlobalFilter(String(value))
+              setPage(0)
+            }}
             placeholder='Search Permissions'
             className='max-sm:is-full'
           />
           <OpenDialogOnElementClick
             element={Button}
-            elementProps={buttonProps}
+            elementProps={{
+              variant: 'contained',
+              children: 'Add Permission',
+              onClick: handleAddPermission,
+              className: 'max-sm:is-full'
+            }}
             dialog={PermissionDialog}
-            dialogProps={{ editValue }}
+            dialogProps={{ editValue, open, setOpen }}
           />
         </CardContent>
         <div className='overflow-x-auto'>
@@ -249,67 +306,57 @@ const Permissions = ({ permissionsData }: { permissionsData?: PermissionRowType[
                   {headerGroup.headers.map(header => (
                     <th key={header.id}>
                       {header.isPlaceholder ? null : (
-                        <>
-                          <div
-                            className={classnames({
-                              'flex items-center': header.column.getIsSorted(),
-                              'cursor-pointer select-none': header.column.getCanSort()
-                            })}
-                            onClick={header.column.getToggleSortingHandler()}
-                          >
-                            {flexRender(header.column.columnDef.header, header.getContext())}
-                            {{
-                              asc: <i className='ri-arrow-up-s-line text-xl' />,
-                              desc: <i className='ri-arrow-down-s-line text-xl' />
-                            }[header.column.getIsSorted() as 'asc' | 'desc'] ?? null}
-                          </div>
-                        </>
+                        <div>
+                          {flexRender(header.column.columnDef.header, header.getContext())}
+                        </div>
                       )}
                     </th>
                   ))}
                 </tr>
               ))}
             </thead>
-            {table.getFilteredRowModel().rows.length === 0 ? (
-              <tbody>
+            <tbody>
+              {isLoading ? (
                 <tr>
-                  <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>
+                  <td colSpan={columns.length} className='text-center'>
+                    Loading...
+                  </td>
+                </tr>
+              ) : tableRows.length === 0 ? (
+                <tr>
+                  <td colSpan={columns.length} className='text-center'>
                     No data available
                   </td>
                 </tr>
-              </tbody>
-            ) : (
-              <tbody>
-                {table
-                  .getRowModel()
-                  .rows.slice(0, table.getState().pagination.pageSize)
-                  .map(row => {
-                    return (
-                      <tr key={row.id} className={classnames({ selected: row.getIsSelected() })}>
-                        {row.getVisibleCells().map(cell => (
-                          <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
-                        ))}
-                      </tr>
-                    )
-                  })}
-              </tbody>
-            )}
+              ) : (
+                table.getRowModel().rows.map(row => (
+                  <tr key={row.id} className={classnames({ selected: row.getIsSelected() })}>
+                    {row.getVisibleCells().map(cell => (
+                      <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+                    ))}
+                  </tr>
+                ))
+              )}
+            </tbody>
           </table>
         </div>
         <TablePagination
-          rowsPerPageOptions={[5, 7, 10]}
+          rowsPerPageOptions={[5, 10, 20]}
           component='div'
           className='border-bs'
-          count={table.getFilteredRowModel().rows.length}
-          rowsPerPage={table.getState().pagination.pageSize}
-          page={table.getState().pagination.pageIndex}
+          count={paginationTotal}
+          rowsPerPage={pageSize}
+          page={page}
           SelectProps={{
             inputProps: { 'aria-label': 'rows per page' }
           }}
-          onPageChange={(_, page) => {
-            table.setPageIndex(page)
+          onPageChange={(_, newPage) => {
+            setPage(newPage)
           }}
-          onRowsPerPageChange={e => table.setPageSize(Number(e.target.value))}
+          onRowsPerPageChange={e => {
+            setPageSize(Number(e.target.value))
+            setPage(0)
+          }}
         />
       </Card>
       <PermissionDialog open={open} setOpen={setOpen} data={editValue} />

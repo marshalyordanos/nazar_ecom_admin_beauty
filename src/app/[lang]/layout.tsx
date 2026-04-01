@@ -48,16 +48,16 @@ const RootLayout = async (props: ChildrenType & { params: Promise<{ lang: string
   const direction = i18n.langDirection[lang]
 
   return (
-    <TranslationWrapper headersList={headersList} lang={lang}>
-      <html id='__next' lang={lang} dir={direction} suppressHydrationWarning>
-        <body className='flex is-full min-bs-full flex-auto flex-col'>
-          <InitColorSchemeScript attribute='data' defaultMode={systemMode} />
+    <html id='__next' lang={lang} dir={direction} suppressHydrationWarning>
+      <body className='flex is-full min-bs-full flex-auto flex-col'>
+        <InitColorSchemeScript attribute='data' defaultMode={systemMode} />
+        <TranslationWrapper headersList={headersList} lang={lang}>
           <ReactQueryProvider>
             {children}
           </ReactQueryProvider>
-        </body>
-      </html>
-    </TranslationWrapper>
+        </TranslationWrapper>
+      </body>
+    </html>
   )
 }
 
