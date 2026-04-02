@@ -20,12 +20,24 @@ const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexChart
 // Vars
 const series = [{ data: [32, 52, 72, 94, 116, 94, 72] }]
 
-const ReviewsStatistics = () => {
+type Props = {
+  weeklyCounts?: number[]
+  positivePercent?: number
+  newReviews?: number
+  isLoading?: boolean
+  isError?: boolean
+}
+
+const ReviewsStatistics = (props: Props) => {
   // Hook
   const theme = useTheme()
 
   // Vars
   const successLightOpacity = 'var(--mui-palette-success-lightOpacity)'
+
+  const weekly = props.weeklyCounts && props.weeklyCounts.length === 7 ? props.weeklyCounts : series[0].data
+  const newReviews = typeof props.newReviews === 'number' ? props.newReviews : 12
+  const positivePercent = typeof props.positivePercent === 'number' ? props.positivePercent : 87
 
   const options: ApexOptions = {
     chart: {
@@ -103,20 +115,20 @@ const ReviewsStatistics = () => {
               <div className='flex flex-col items-start gap-2'>
                 <Typography variant='h5'>Reviews statistics</Typography>
                 <div className='flex items-center gap-2'>
-                  <Typography>12 New reviews</Typography>
+                  <Typography>{newReviews} New reviews</Typography>
                   <Chip label='+8.4%' variant='tonal' size='small' color='success' />
                 </div>
               </div>
               <div className='flex flex-col items-start gap-2'>
                 <Typography color='text.primary'>
-                  <span className='text-success'>87%</span> Positive reviews
+                  <span className='text-success'>{positivePercent}%</span> Positive reviews
                 </Typography>
                 <Typography variant='body2'>Weekly Report</Typography>
               </div>
             </div>
           </Grid>
           <Grid size={{ xs: 12, sm: 6 }} className='flex justify-center'>
-            <AppReactApexCharts type='bar' width='100%' height={152} series={series} options={options} />
+            <AppReactApexCharts type='bar' width='100%' height={152} series={[{ data: weekly }]} options={options} />
           </Grid>
         </Grid>
       </CardContent>

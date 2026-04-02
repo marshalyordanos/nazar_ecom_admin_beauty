@@ -192,7 +192,7 @@ const InventoryManagement = () => {
                 avatarIcon='ri-lock-2-line'
                 avatarColor='warning'
                 trend='negative'
-                trendNumber='—'
+                // trendNumber='0'
                 subtitle='Current period'
               />
             </Grid>
@@ -203,7 +203,7 @@ const InventoryManagement = () => {
                 avatarIcon='ri-alert-line'
                 avatarColor='error'
                 trend='negative'
-                trendNumber='—'
+                // trendNumber='—'
                 subtitle='Reorder alerts'
               />
             </Grid>
@@ -214,7 +214,7 @@ const InventoryManagement = () => {
                 avatarIcon='ri-shapes-line'
                 avatarColor='info'
                 trend='positive'
-                trendNumber='—'
+                // trendNumber='—'
                 subtitle='Catalog size'
               />
             </Grid>

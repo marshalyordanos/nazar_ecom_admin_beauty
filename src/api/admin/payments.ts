@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { api } from '@/libs/api'
+import { getApiErrorMessage } from '@/libs/toastUtils'
 import type { QueryParams } from '@/types/common'
+import { toast } from 'react-toastify'
 
 import { buildQuery } from './query'
 import type { ApiListResponse, PaymentAdmin } from './types'
@@ -37,7 +39,11 @@ export function useCapturePayment() {
 
   return useMutation({
     mutationFn: async (id: string) => (await api.post(`/payments/${id}/capture`)).data,
-    onSuccess: invalidate(qc)
+    onSuccess: () => {
+      toast.success('Payment captured successfully')
+      invalidate(qc)()
+    },
+    onError: error => toast.error(getApiErrorMessage(error, 'Failed to capture payment'))
   })
 }
 
@@ -46,6 +52,10 @@ export function useRefundPayment() {
 
   return useMutation({
     mutationFn: async (id: string) => (await api.post(`/payments/${id}/refund`)).data,
-    onSuccess: invalidate(qc)
+    onSuccess: () => {
+      toast.success('Payment refunded successfully')
+      invalidate(qc)()
+    },
+    onError: error => toast.error(getApiErrorMessage(error, 'Failed to refund payment'))
   })
 }

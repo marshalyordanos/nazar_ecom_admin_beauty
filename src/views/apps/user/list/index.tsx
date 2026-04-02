@@ -15,7 +15,7 @@ const UserList = ({ userData }: { userData?: UsersType[] }) => {
         <UserListCards />
       </Grid>
       <Grid size={{ xs: 12 }}>
-        <UserListTable tableData={userData} />
+        <UserListTable  />
       </Grid>
     </Grid>
   )

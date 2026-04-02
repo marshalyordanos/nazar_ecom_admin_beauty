@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { api } from '@/libs/api'
+import { getApiErrorMessage } from '@/libs/toastUtils'
 import type { QueryParams } from '@/types/common'
+import { toast } from 'react-toastify'
 
 import { buildQuery } from './query'
 import type { ApiListResponse, InventoryAdmin, InventoryMovementAdmin } from './types'
@@ -41,9 +43,11 @@ export function useAddMovement() {
       referenceId?: string
     }) => (await api.post('/inventory/movements', payload)).data,
     onSuccess: () => {
+      toast.success('Inventory movement added successfully')
       qc.invalidateQueries({ queryKey: inventoryKeys.all })
       qc.invalidateQueries({ queryKey: dashboardKeys.all })
-    }
+    },
+    onError: error => toast.error(getApiErrorMessage(error, 'Failed to add inventory movement'))
   })
 }
 
@@ -54,8 +58,10 @@ export function useUpdateInventory() {
     mutationFn: async ({ variantId, payload }: { variantId: string; payload: Record<string, unknown> }) =>
       (await api.patch(`/inventory/${variantId}`, payload)).data,
     onSuccess: () => {
+      toast.success('Inventory updated successfully')
       qc.invalidateQueries({ queryKey: inventoryKeys.all })
       qc.invalidateQueries({ queryKey: dashboardKeys.all })
-    }
+    },
+    onError: error => toast.error(getApiErrorMessage(error, 'Failed to update inventory'))
   })
 }

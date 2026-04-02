@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { api } from '@/libs/api'
+import { toast } from 'react-toastify'
+import { getApiErrorMessage } from '@/libs/toastUtils'
 import type { QueryParams } from '@/types/common'
 
 import { buildQuery } from './query'
@@ -35,16 +37,28 @@ export function useRoleMutations() {
   return {
     createRole: useMutation({
       mutationFn: async (payload: { name: string; description?: string }) => (await api.post('/roles', payload)).data,
-      onSuccess: () => qc.invalidateQueries({ queryKey: accessKeys.rolesAll })
+			onSuccess: () => {
+				toast.success('Role created successfully')
+				qc.invalidateQueries({ queryKey: accessKeys.rolesAll })
+			},
+			onError: error => toast.error(getApiErrorMessage(error, 'Failed to create role'))
     }),
     updateRole: useMutation({
       mutationFn: async ({ id, payload }: { id: string; payload: { name?: string; description?: string } }) =>
         (await api.patch(`/roles/${id}`, payload)).data,
-      onSuccess: () => qc.invalidateQueries({ queryKey: accessKeys.rolesAll })
+			onSuccess: () => {
+				toast.success('Role updated successfully')
+				qc.invalidateQueries({ queryKey: accessKeys.rolesAll })
+			},
+			onError: error => toast.error(getApiErrorMessage(error, 'Failed to update role'))
     }),
     deleteRole: useMutation({
       mutationFn: async (id: string) => (await api.delete(`/roles/${id}`)).data,
-      onSuccess: () => qc.invalidateQueries({ queryKey: accessKeys.rolesAll })
+			onSuccess: () => {
+				toast.success('Role deleted successfully')
+				qc.invalidateQueries({ queryKey: accessKeys.rolesAll })
+			},
+			onError: error => toast.error(getApiErrorMessage(error, 'Failed to delete role'))
     }),
     assignPermissions: useMutation({
       mutationFn: async ({
@@ -60,7 +74,11 @@ export function useRoleMutations() {
           deleteAction?: boolean
         }>
       }) => (await api.post(`/roles/${id}/permissions`, { permissions })).data,
-      onSuccess: () => qc.invalidateQueries({ queryKey: accessKeys.rolesAll })
+			onSuccess: () => {
+				toast.success('Permissions assigned successfully')
+				qc.invalidateQueries({ queryKey: accessKeys.rolesAll })
+			},
+			onError: error => toast.error(getApiErrorMessage(error, 'Failed to assign permissions'))
     })
   }
 }
@@ -72,16 +90,28 @@ export function usePermissionMutations() {
     createPermission: useMutation({
       mutationFn: async (payload: { resource: string; description?: string }) =>
         (await api.post('/permissions', payload)).data,
-      onSuccess: () => qc.invalidateQueries({ queryKey: accessKeys.permissionsAll })
+			onSuccess: () => {
+				toast.success('Permission created successfully')
+				qc.invalidateQueries({ queryKey: accessKeys.permissionsAll })
+			},
+			onError: error => toast.error(getApiErrorMessage(error, 'Failed to create permission'))
     }),
     updatePermission: useMutation({
       mutationFn: async ({ id, payload }: { id: string; payload: { resource?: string; description?: string } }) =>
         (await api.patch(`/permissions/${id}`, payload)).data,
-      onSuccess: () => qc.invalidateQueries({ queryKey: accessKeys.permissionsAll })
+			onSuccess: () => {
+				toast.success('Permission updated successfully')
+				qc.invalidateQueries({ queryKey: accessKeys.permissionsAll })
+			},
+			onError: error => toast.error(getApiErrorMessage(error, 'Failed to update permission'))
     }),
     deletePermission: useMutation({
       mutationFn: async (id: string) => (await api.delete(`/permissions/${id}`)).data,
-      onSuccess: () => qc.invalidateQueries({ queryKey: accessKeys.permissionsAll })
+			onSuccess: () => {
+				toast.success('Permission deleted successfully')
+				qc.invalidateQueries({ queryKey: accessKeys.permissionsAll })
+			},
+			onError: error => toast.error(getApiErrorMessage(error, 'Failed to delete permission'))
     })
   }
 }

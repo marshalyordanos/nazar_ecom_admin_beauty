@@ -291,12 +291,12 @@ const OrdersAdminManagement = () => {
                 trend={
                   typeof ord.percentChange === "number"
                     ? (ord.percentChange >= 0 ? 'positive' : 'negative')
-                    : undefined
+                    : ''
                 }
                 trendNumber={
                   typeof ord.percentChange === "number"
                     ? `${Math.abs(ord.percentChange).toFixed(1)}%`
-                    : '—'
+                    : '0'
                 }
                 subtitle='Total'
               />
@@ -308,7 +308,7 @@ const OrdersAdminManagement = () => {
                 avatarIcon='ri-checkbox-circle-line'
                 avatarColor='success'
                 trend='positive'
-                trendNumber='—'
+                // trendNumber='—'
                 subtitle='Fulfilled'
               />
             </Grid>
@@ -319,7 +319,7 @@ const OrdersAdminManagement = () => {
                 avatarIcon='ri-time-line'
                 avatarColor='warning'
                 trend='negative'
-                trendNumber='—'
+                // trendNumber='—'
                 subtitle='Awaiting'
               />
             </Grid>
@@ -336,12 +336,12 @@ const OrdersAdminManagement = () => {
                 trend={
                   typeof ord.revenueChange === "number"
                     ? (ord.revenueChange >= 0 ? 'positive' : 'negative')
-                    : undefined
+                    : '0'
                 }
                 trendNumber={
                   typeof ord.revenueChange === "number"
                     ? `${Math.abs(ord.revenueChange).toFixed(1)}%`
-                    : '—'
+                    : '0'
                 }
                 subtitle='Gross'
               />

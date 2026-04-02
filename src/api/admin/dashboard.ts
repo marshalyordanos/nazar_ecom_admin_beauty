@@ -16,7 +16,7 @@ export function useDashboardSummary() {
 	return useQuery<{ data: DashboardSummary }, Error>({
 		queryKey: dashboardKeys.all,
 		queryFn: async () => (await api.get('/dashboard/summary')).data,
-		staleTime: 1000 * 30
+		staleTime: 1000 * 1
 	})
 }
 

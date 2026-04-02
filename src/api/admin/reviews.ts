@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { api } from '@/libs/api'
+import { toast } from 'react-toastify'
+import { getApiErrorMessage } from '@/libs/toastUtils'
 import type { QueryParams } from '@/types/common'
 
 import { buildQuery } from './query'
@@ -29,9 +31,18 @@ export function useUpdateReview() {
   const qc = useQueryClient()
 
   return useMutation({
-    mutationFn: async ({ id, payload }: { id: string; payload: { rating?: number; title?: string; comment?: string } }) =>
-      (await api.put(`/reviews/${id}`, payload)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: reviewKeys.all })
+    mutationFn: async ({
+      id,
+      payload
+    }: {
+      id: string
+      payload: { rating?: number; title?: string; comment?: string; status?: 'PENDING' | 'APPROVED' | 'REJECTED' }
+    }) => (await api.put(`/reviews/${id}`, payload)).data,
+    onSuccess: () => {
+      toast.success('Review updated successfully')
+      qc.invalidateQueries({ queryKey: reviewKeys.all })
+    },
+    onError: error => toast.error(getApiErrorMessage(error, 'Failed to update review'))
   })
 }
 
@@ -40,6 +51,10 @@ export function useDeleteReview() {
 
   return useMutation({
     mutationFn: async (id: string) => (await api.delete(`/reviews/${id}`)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: reviewKeys.all })
+    onSuccess: () => {
+      toast.success('Review deleted successfully')
+      qc.invalidateQueries({ queryKey: reviewKeys.all })
+    },
+    onError: error => toast.error(getApiErrorMessage(error, 'Failed to delete review'))
   })
 }

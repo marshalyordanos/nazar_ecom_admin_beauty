@@ -2,6 +2,8 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import * as productsApi from '@/api/ecommerce/productsApi'
 import type { CreateProductBody, ListProductsParams } from '@/api/ecommerce/productsApi'
+import { toast } from 'react-toastify'
+import { getApiErrorMessage } from '@/libs/toastUtils'
 
 export const productKeys = {
   all: ['products'] as const,
@@ -47,7 +49,11 @@ export function useCreateProduct() {
 
   return useMutation({
     mutationFn: (body: CreateProductBody) => productsApi.createProduct(body),
-    onSuccess: () => qc.invalidateQueries({ queryKey: productKeys.all })
+    onSuccess: () => {
+      toast.success('Product created successfully')
+      qc.invalidateQueries({ queryKey: productKeys.all })
+    },
+    onError: error => toast.error(getApiErrorMessage(error, 'Failed to create product'))
   })
 }
 
@@ -56,7 +62,11 @@ export function useUpdateProduct(id: string) {
 
   return useMutation({
     mutationFn: (body: Partial<CreateProductBody>) => productsApi.updateProduct(id, body),
-    onSuccess: () => qc.invalidateQueries({ queryKey: productKeys.all })
+    onSuccess: () => {
+      toast.success('Product updated successfully')
+      qc.invalidateQueries({ queryKey: productKeys.all })
+    },
+    onError: error => toast.error(getApiErrorMessage(error, 'Failed to update product'))
   })
 }
 
@@ -65,7 +75,11 @@ export function useDeleteProduct() {
 
   return useMutation({
     mutationFn: (id: string) => productsApi.deleteProduct(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: productKeys.all })
+    onSuccess: () => {
+      toast.success('Product deleted successfully')
+      qc.invalidateQueries({ queryKey: productKeys.all })
+    },
+    onError: error => toast.error(getApiErrorMessage(error, 'Failed to delete product'))
   })
 }
 
@@ -74,7 +88,11 @@ export function useCreateVariant(productId: string) {
 
   return useMutation({
     mutationFn: (form: FormData) => productsApi.createVariant(productId, form),
-    onSuccess: () => qc.invalidateQueries({ queryKey: productKeys.all })
+    onSuccess: () => {
+      toast.success('Variant created successfully')
+      qc.invalidateQueries({ queryKey: productKeys.all })
+    },
+    onError: error => toast.error(getApiErrorMessage(error, 'Failed to create variant'))
   })
 }
 
@@ -83,7 +101,11 @@ export function useDeleteVariant() {
 
   return useMutation({
     mutationFn: (variantId: string) => productsApi.deleteVariant(variantId),
-    onSuccess: () => qc.invalidateQueries({ queryKey: productKeys.all })
+    onSuccess: () => {
+      toast.success('Variant deleted successfully')
+      qc.invalidateQueries({ queryKey: productKeys.all })
+    },
+    onError: error => toast.error(getApiErrorMessage(error, 'Failed to delete variant'))
   })
 }
 
@@ -93,7 +115,11 @@ export function useSetVariantOptions() {
   return useMutation({
     mutationFn: ({ variantId, optionValueIds }: { variantId: string; optionValueIds: string[] }) =>
       productsApi.setVariantOptionValues(variantId, optionValueIds),
-    onSuccess: () => qc.invalidateQueries({ queryKey: productKeys.all })
+    onSuccess: () => {
+      toast.success('Variant options updated successfully')
+      qc.invalidateQueries({ queryKey: productKeys.all })
+    },
+    onError: error => toast.error(getApiErrorMessage(error, 'Failed to update variant options'))
   })
 }
 
@@ -102,7 +128,11 @@ export function useCreateVariantOption() {
 
   return useMutation({
     mutationFn: (body: { name: string }) => productsApi.createVariantOption(body),
-    onSuccess: () => qc.invalidateQueries({ queryKey: productKeys.options() })
+    onSuccess: () => {
+      toast.success('Option created successfully')
+      qc.invalidateQueries({ queryKey: productKeys.options() })
+    },
+    onError: error => toast.error(getApiErrorMessage(error, 'Failed to create option'))
   })
 }
 
@@ -112,9 +142,11 @@ export function useCreateOptionValue(optionId: string) {
   return useMutation({
     mutationFn: (body: { value: string }) => productsApi.createOptionValue(optionId, body),
     onSuccess: () => {
+      toast.success('Option value created successfully')
       qc.invalidateQueries({ queryKey: productKeys.optionValues(optionId) })
       qc.invalidateQueries({ queryKey: productKeys.options() })
-    }
+    },
+    onError: error => toast.error(getApiErrorMessage(error, 'Failed to create option value'))
   })
 }
 
@@ -124,9 +156,11 @@ export function useDeleteOptionValue(optionId: string) {
   return useMutation({
     mutationFn: (valueId: string) => productsApi.deleteOptionValue(valueId),
     onSuccess: () => {
+      toast.success('Option value deleted successfully')
       qc.invalidateQueries({ queryKey: productKeys.optionValues(optionId) })
       qc.invalidateQueries({ queryKey: productKeys.options() })
-    }
+    },
+    onError: error => toast.error(getApiErrorMessage(error, 'Failed to delete option value'))
   })
 }
 
@@ -135,6 +169,10 @@ export function useDeleteVariantOption() {
 
   return useMutation({
     mutationFn: (optionId: string) => productsApi.deleteVariantOption(optionId),
-    onSuccess: () => qc.invalidateQueries({ queryKey: productKeys.options() })
+    onSuccess: () => {
+      toast.success('Option deleted successfully')
+      qc.invalidateQueries({ queryKey: productKeys.options() })
+    },
+    onError: error => toast.error(getApiErrorMessage(error, 'Failed to delete option'))
   })
 }

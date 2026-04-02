@@ -22,17 +22,17 @@ type DefaultSuggestionsType = {
 
 const defaultSuggestions: DefaultSuggestionsType[] = [
   {
-    sectionLabel: 'Popular Searches',
+    sectionLabel: 'Dashboards',
     items: [
-      {
-        label: 'Analytics',
-        href: '/dashboards/analytics',
-        icon: 'ri-bar-chart-line'
-      },
       {
         label: 'CRM',
         href: '/dashboards/crm',
         icon: 'ri-pie-chart-2-line'
+      },
+      {
+        label: 'Analytics',
+        href: '/dashboards/analytics',
+        icon: 'ri-bar-chart-line'
       },
       {
         label: 'eCommerce',
@@ -40,84 +40,114 @@ const defaultSuggestions: DefaultSuggestionsType[] = [
         icon: 'ri-shopping-bag-3-line'
       },
       {
-        label: 'User List',
-        href: '/apps/user/list',
-        icon: 'ri-file-user-line'
+        label: 'Academy',
+        href: '/dashboards/academy',
+        icon: 'ri-book-open-line'
+      },
+      {
+        label: 'Logistics',
+        href: '/dashboards/logistics',
+        icon: 'ri-truck-line'
       }
     ]
   },
   {
-    sectionLabel: 'Apps',
+    sectionLabel: 'Catalog Management',
     items: [
       {
-        label: 'Calendar',
-        href: '/apps/calendar',
-        icon: 'ri-calendar-line'
+        label: 'Product List',
+        href: '/apps/ecommerce/products/list',
+        icon: 'ri-file-list-line'
       },
+      {
+        label: 'Variant Options',
+        href: '/apps/ecommerce/products/options',
+        icon: 'ri-settings-line'
+      },
+      {
+        label: 'Categories',
+        href: '/apps/ecommerce/categories',
+        icon: 'ri-folder-line'
+      },
+      {
+        label: 'Brands',
+        href: '/apps/ecommerce/brands',
+        icon: 'ri-shopping-bag-3-line'
+      }
+    ]
+  },
+  {
+    sectionLabel: 'Branch & Operations',
+    items: [
+      {
+        label: 'Branches',
+        href: '/apps/ecommerce/branches',
+        icon: 'ri-building-line'
+      },
+      {
+        label: 'Inventory',
+        href: '/apps/ecommerce/inventory',
+        icon: 'ri-file-text-line'
+      }
+    ]
+  },
+  {
+    sectionLabel: 'Sales & Transactions',
+    items: [
       {
         label: 'Invoice List',
         href: '/apps/invoice/list',
         icon: 'ri-file-list-3-line'
       },
       {
+        label: 'Invoice Preview',
+        href: '/apps/invoice/preview/4987',
+        icon: 'ri-file-list-line'
+      },
+      {
+        label: 'Invoice Edit',
+        href: '/apps/invoice/edit/4987',
+        icon: 'ri-file-edit-line'
+      },
+      {
+        label: 'Invoice Add',
+        href: '/apps/invoice/add',
+        icon: 'ri-file-add-line'
+      }
+    ]
+  },
+  {
+    sectionLabel: 'Customer Interaction',
+    items: [
+      {
+        label: 'Manage Reviews',
+        href: '/apps/ecommerce/manage-reviews',
+        icon: 'ri-star-line'
+      }
+    ]
+  },
+  {
+    sectionLabel: 'User Management',
+    items: [
+      {
         label: 'User List',
         href: '/apps/user/list',
         icon: 'ri-file-user-line'
       },
       {
-        label: 'Roles & Permissions',
+        label: 'User View',
+        href: '/apps/user/view',
+        icon: 'ri-file-list-2-line'
+      },
+      {
+        label: 'Roles',
         href: '/apps/roles',
+        icon: 'ri-shield-user-line'
+      },
+      {
+        label: 'Permissions',
+        href: '/apps/permissions',
         icon: 'ri-lock-unlock-line'
-      }
-    ]
-  },
-  {
-    sectionLabel: 'Pages',
-    items: [
-      {
-        label: 'User Profile',
-        href: '/pages/user-profile',
-        icon: 'ri-user-3-line'
-      },
-      {
-        label: 'Account Settings',
-        href: '/pages/account-settings',
-        icon: 'ri-settings-4-line'
-      },
-      {
-        label: 'Pricing',
-        href: '/pages/pricing',
-        icon: 'ri-money-dollar-circle-line'
-      },
-      {
-        label: 'FAQ',
-        href: '/pages/faq',
-        icon: 'ri-question-line'
-      }
-    ]
-  },
-  {
-    sectionLabel: 'Forms & Charts',
-    items: [
-      {
-        label: 'Form Layouts',
-        href: '/forms/form-layouts',
-        icon: 'ri-file-text-line'
-      },
-      {
-        label: 'Form Validation',
-        href: '/forms/form-validation',
-        icon: 'ri-checkbox-multiple-line'
-      },
-      {
-        label: 'Form Wizard',
-        href: '/forms/form-wizard',
-        icon: 'ri-equalizer-line'
-      },
-      {
-        label: 'Apex Charts',
-        href: '/charts/apex-charts',
-        icon: 'ri-line-chart-line'
       }
     ]
   }

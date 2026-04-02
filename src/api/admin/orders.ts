@@ -1,7 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { api } from '@/libs/api'
+import { getApiErrorMessage } from '@/libs/toastUtils'
 import type { QueryParams } from '@/types/common'
+import { toast } from 'react-toastify'
 
 import { buildQuery } from './query'
 import type { ApiListResponse, OrderAdmin } from './types'
@@ -32,9 +34,11 @@ export function useCompleteOrder() {
   return useMutation({
     mutationFn: async (id: string) => (await api.post(`/orders/${id}/complete`)).data,
     onSuccess: () => {
+      toast.success('Order completed successfully')
       qc.invalidateQueries({ queryKey: orderKeys.all })
       qc.invalidateQueries({ queryKey: dashboardKeys.all })
-    }
+    },
+    onError: error => toast.error(getApiErrorMessage(error, 'Failed to complete order'))
   })
 }
 
@@ -44,9 +48,11 @@ export function useCancleOrder() {
   return useMutation({
     mutationFn: async (id: string) => (await api.post(`/orders/${id}/cancel`)).data,
     onSuccess: () => {
+      toast.success('Order cancelled successfully')
       qc.invalidateQueries({ queryKey: orderKeys.all })
       qc.invalidateQueries({ queryKey: dashboardKeys.all })
-    }
+    },
+    onError: error => toast.error(getApiErrorMessage(error, 'Failed to cancel order'))
   })
 }
 
@@ -57,8 +63,10 @@ export function useCreateAdminOrder() {
   return useMutation({
     mutationFn: async (payload: Record<string, unknown>) => (await api.post('/orders/admin/create', payload)).data,
     onSuccess: () => {
+      toast.success('Order created successfully')
       qc.invalidateQueries({ queryKey: orderKeys.all })
       qc.invalidateQueries({ queryKey: dashboardKeys.all })
-    }
+    },
+    onError: error => toast.error(getApiErrorMessage(error, 'Failed to create order'))
   })
 }

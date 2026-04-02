@@ -187,7 +187,7 @@ const NavSearch = () => {
   }
 
   const limitedData = getFilteredResults(filteredData(transformedData, searchValue))
-
+console.log(limitedData)
   // Toggle the menu when ⌘K is pressed
   useEffect(() => {
     const down = (e: KeyboardEvent) => {

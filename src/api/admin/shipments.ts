@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { api } from '@/libs/api'
+import { getApiErrorMessage } from '@/libs/toastUtils'
+import { toast } from 'react-toastify'
 import type { QueryParams } from '@/types/common'
 
 import { buildQuery } from './query'
@@ -26,7 +28,9 @@ return (await api.get(`/shipments${qs}`)).data
 
 export function useTrackShipment() {
   return useMutation({
-    mutationFn: async (id: string) => (await api.get(`/shipments/${id}/track`)).data
+    mutationFn: async (id: string) => (await api.get(`/shipments/${id}/track`)).data,
+    onSuccess: () => toast.success('Shipment tracking updated successfully'),
+    onError: error => toast.error(getApiErrorMessage(error, 'Failed to track shipment'))
   })
 }
 
@@ -36,6 +40,10 @@ export function useUpdateShipment() {
   return useMutation({
     mutationFn: async ({ id, payload }: { id: string; payload: Record<string, unknown> }) =>
       (await api.post(`/shipments/${id}/update-status`, payload)).data,
-    onSuccess: () => qc.invalidateQueries({ queryKey: shipmentKeys.all })
+    onSuccess: () => {
+      toast.success('Shipment status updated successfully')
+      qc.invalidateQueries({ queryKey: shipmentKeys.all })
+    },
+    onError: error => toast.error(getApiErrorMessage(error, 'Failed to update shipment status'))
   })
 }

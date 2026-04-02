@@ -40,7 +40,7 @@ import type { RankingInfo } from '@tanstack/match-sorter-utils'
 
 // Type Imports
 import type { ThemeColor } from '@core/types'
-import type { UsersType } from '@/types/apps/userTypes'
+// Remove UsersType import - we'll define our columns/data shape for this API
 import type { Locale } from '@configs/i18n'
 
 // Component Imports
@@ -68,9 +68,31 @@ declare module '@tanstack/table-core' {
   }
 }
 
-type UsersTypeWithAction = UsersType & {
+type UserAPIItem = {
+  id: string
+  email: string
+  phone?: string
+  firstName?: string
+  lastName?: string
+  avatarUrl?: string | null
+  status?: string
+  roles?: { name: string }[]
+  createdAt?: string
+  updatedAt?: string
+}
+
+type UserRowWithAction = {
+  id: string
+  serverId: string
+  fullName: string
+  email: string
+  phone: string
+  avatar: string
+  status: string
+  role: string
+  createdAt?: string
+  updatedAt?: string
   action?: string
-  serverId?: string
 }
 
 type UserRoleType = {
@@ -132,7 +154,8 @@ const userRoleObj: UserRoleType = {
   author: { icon: 'ri-computer-line', color: 'warning' },
   editor: { icon: 'ri-edit-box-line', color: 'info' },
   maintainer: { icon: 'ri-pie-chart-2-line', color: 'success' },
-  subscriber: { icon: 'ri-user-3-line', color: 'primary' }
+  subscriber: { icon: 'ri-user-3-line', color: 'primary' },
+  user: { icon: 'ri-user-3-line', color: 'primary' }
 }
 
 const userStatusObj: UserStatusType = {
@@ -142,8 +165,9 @@ const userStatusObj: UserStatusType = {
   suspended: 'error'
 }
 
-function mapApiUser(u: UserAdmin): UsersTypeWithAction {
-  const roleName = u.roles?.[0]?.name ?? u.role ?? 'subscriber'
+// To fix: Accept both UserAPIItem and UserAdmin (which allows phone: string | null | undefined)
+function mapApiUserFromAdmin(u: UserAdmin): UserRowWithAction {
+  const roleName = u.roles && u.roles.length > 0 ? u.roles[0].name : 'user'
   const rawStatus = String(u.status ?? 'inactive').toLowerCase()
   const statusKey =
     rawStatus === 'active'
@@ -155,27 +179,26 @@ function mapApiUser(u: UserAdmin): UsersTypeWithAction {
           : 'inactive'
   const fullName = [u.firstName, u.lastName].filter(Boolean).join(' ').trim() || u.email
 
+  // Accept phone as string, use empty string if missing or null.
   return {
-    id: u.id as unknown as number,
+    id: u.id,
     serverId: u.id,
     fullName,
-    username: u.email,
     email: u.email,
-    role: roleName,
+    phone: u.phone ?? '', // safe: phone could be string | null | undefined
+    avatar: (u.avatarUrl ?? '') as string,
     status: statusKey,
-    avatar: u.avatarUrl ?? u.avatar ?? '',
-    company: '',
-    country: '',
-    contact: u.phone ?? '',
-    currentPlan: u.currentPlan ?? 'basic',
+    role: roleName,
+    createdAt: u.createdAt,
+    updatedAt: u.updatedAt,
     action: ''
   }
 }
 
 // Column Definitions
-const columnHelper = createColumnHelper<UsersTypeWithAction>()
+const columnHelper = createColumnHelper<UserRowWithAction>()
 
-const UserListTable = ({ tableData }: { tableData?: UsersType[] }) => {
+const UserListTable = () => {
   // States
   const [addUserOpen, setAddUserOpen] = useState(false)
   const [rowSelection, setRowSelection] = useState({})
@@ -185,8 +208,8 @@ const UserListTable = ({ tableData }: { tableData?: UsersType[] }) => {
   const [debouncedSearch, setDebouncedSearch] = useState('')
   const [listFilters, setListFilters] = useState({ role: '', plan: '', status: '' })
 
-  const [data, setData] = useState<UsersType[]>(tableData ?? [])
-  const [filteredData, setFilteredData] = useState<UsersType[]>(tableData ?? [])
+  const [data, setData] = useState<UserRowWithAction[]>([])
+  const [filteredData, setFilteredData] = useState<UserRowWithAction[]>([])
 
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(globalFilter.trim()), 400)
@@ -211,7 +234,8 @@ const UserListTable = ({ tableData }: { tableData?: UsersType[] }) => {
   const { data: listRes, isLoading, isFetching, isError } = useAdminUsers(listParams)
 
   useEffect(() => {
-    const rows = (listRes?.data ?? []).map(mapApiUser)
+    // Accept UserAdmin as input type for mapping function
+    const rows = (listRes?.data ?? []).map(mapApiUserFromAdmin)
     setData(rows)
     setFilteredData(rows)
   }, [listRes])
@@ -225,7 +249,7 @@ const UserListTable = ({ tableData }: { tableData?: UsersType[] }) => {
 
   const totalRows = listRes?.pagination?.total ?? 0
 
-  const columns = useMemo<ColumnDef<UsersTypeWithAction, any>[]>(
+  const columns = useMemo<ColumnDef<UserRowWithAction, any>[]>(
     () => [
       {
         id: 'select',
@@ -258,7 +282,7 @@ const UserListTable = ({ tableData }: { tableData?: UsersType[] }) => {
               <Typography color='text.primary' className='font-medium'>
                 {row.original.fullName}
               </Typography>
-              <Typography variant='body2'>{row.original.username}</Typography>
+              <Typography variant='body2'>{row.original.email}</Typography>
             </div>
           </div>
         )
@@ -267,6 +291,10 @@ const UserListTable = ({ tableData }: { tableData?: UsersType[] }) => {
         header: 'Email',
         cell: ({ row }) => <Typography>{row.original.email}</Typography>
       }),
+      columnHelper.accessor('phone', {
+        header: 'Phone',
+        cell: ({ row }) => <Typography>{row.original.phone}</Typography>
+      }),
       columnHelper.accessor('role', {
         header: 'Role',
         cell: ({ row }) => (
@@ -274,24 +302,16 @@ const UserListTable = ({ tableData }: { tableData?: UsersType[] }) => {
             <Icon
               className={classnames(
                 'text-[22px]',
-                (userRoleObj[row.original.role] ?? userRoleObj.subscriber).icon
+                (userRoleObj[row.original.role] ?? userRoleObj.user).icon
               )}
               sx={{
-                color: `var(--mui-palette-${(userRoleObj[row.original.role] ?? userRoleObj.subscriber).color}-main)`
+                color: `var(--mui-palette-${(userRoleObj[row.original.role] ?? userRoleObj.user).color}-main)`
               }}
             />
             <Typography className='capitalize' color='text.primary'>
               {row.original.role}
             </Typography>
           </div>
-        )
-      }),
-      columnHelper.accessor('currentPlan', {
-        header: 'Plan',
-        cell: ({ row }) => (
-          <Typography className='capitalize' color='text.primary'>
-            {row.original.currentPlan}
-          </Typography>
         )
       }),
       columnHelper.accessor('status', {
@@ -308,6 +328,22 @@ const UserListTable = ({ tableData }: { tableData?: UsersType[] }) => {
           </div>
         )
       }),
+      columnHelper.accessor('createdAt', {
+        header: 'Created At',
+        cell: ({ row }) => (
+          <Typography>
+            {row.original.createdAt ? new Date(row.original.createdAt).toLocaleString() : ''}
+          </Typography>
+        )
+      }),
+      columnHelper.accessor('updatedAt', {
+        header: 'Updated At',
+        cell: ({ row }) => (
+          <Typography>
+            {row.original.updatedAt ? new Date(row.original.updatedAt).toLocaleString() : ''}
+          </Typography>
+        )
+      }),
       columnHelper.accessor('action', {
         header: 'Action',
         cell: ({ row }) => (
@@ -315,7 +351,7 @@ const UserListTable = ({ tableData }: { tableData?: UsersType[] }) => {
             <IconButton
               size='small'
               onClick={() =>
-                setData(data?.filter(product => (product as UsersTypeWithAction).serverId !== row.original.serverId))
+                setData(data?.filter(product => (product as UserRowWithAction).serverId !== row.original.serverId))
               }
             >
               <i className='ri-delete-bin-7-line text-textSecondary' />
@@ -348,7 +384,7 @@ const UserListTable = ({ tableData }: { tableData?: UsersType[] }) => {
   )
 
   const table = useReactTable({
-    data: filteredData as UsersType[],
+    data: filteredData,
     columns,
     filterFns: {
       fuzzy: fuzzyFilter
@@ -369,7 +405,7 @@ const UserListTable = ({ tableData }: { tableData?: UsersType[] }) => {
     getFacetedMinMaxValues: getFacetedMinMaxValues()
   })
 
-  const getAvatar = (params: Pick<UsersType, 'avatar' | 'fullName'>) => {
+  const getAvatar = (params: { avatar: string | null | undefined, fullName: string }) => {
     const { avatar, fullName } = params
 
     if (avatar) {
@@ -388,8 +424,8 @@ const UserListTable = ({ tableData }: { tableData?: UsersType[] }) => {
       <Card>
         <CardHeader title='Filters' className='pbe-4' />
         <TableFilters
-          setData={setFilteredData}
-          tableData={data}
+          setData={()=>{}}
+          tableData={[]}
           onFilterChange={f => {
             setListFilters(f)
             setPage(0)
@@ -508,8 +544,8 @@ const UserListTable = ({ tableData }: { tableData?: UsersType[] }) => {
       <AddUserDrawer
         open={addUserOpen}
         handleClose={() => setAddUserOpen(!addUserOpen)}
-        userData={data}
-        setData={setData}
+        userData={[]}
+        setData={()=>{}}
       />
     </>
   )

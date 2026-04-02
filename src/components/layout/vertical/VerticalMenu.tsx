@@ -116,13 +116,13 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
         {/* </MenuSection> */}
 
         <MenuSection label='Catalog Management'>
-          <SubMenu icon={<i className='ri-shopping-bag-3-line' />} label={dictionary['navigation'].products}>
+          <SubMenu icon={<i className='ri-shopping-bag-3-line' />} label={dictionary['navigation'].manage_products}>
             <MenuItem href={`/${locale}/apps/ecommerce/products/list`}
             exactMatch={false}
               activeUrl={`/${locale}/apps/ecommerce/products/list`}
 
-            >{dictionary['navigation'].list}</MenuItem>
-            <MenuItem href={`/${locale}/apps/ecommerce/products/add`}>{dictionary['navigation'].add}</MenuItem>
+            >{dictionary['navigation'].products}</MenuItem>
+            {/* <MenuItem href={`/${locale}/apps/ecommerce/products/add`}>{dictionary['navigation'].add}</MenuItem> */}
             {/* <MenuItem href={`/${locale}/apps/ecommerce/products/1`} exactMatch={false} activeUrl='/apps/ecommerce/products/:detail'>{dictionary['navigation'].detail}</MenuItem> */}
             {/* <MenuItem
                 href={`/${locale}/apps/ecommerce/products/list`}
@@ -174,9 +174,9 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
           <MenuItem icon={<i className='ri-star-line' />} href={`/${locale}/apps/ecommerce/manage-reviews`}>
             {dictionary['navigation'].manageReviews}
           </MenuItem>
-          <MenuItem href={`/${locale}/apps/chat`} icon={<i className='ri-wechat-line' />}>
+          {/* <MenuItem href={`/${locale}/apps/chat`} icon={<i className='ri-wechat-line' />}>
             {dictionary['navigation'].chat}
-          </MenuItem>
+          </MenuItem> */}
         </MenuSection>
 
         <MenuSection label='User Management'>

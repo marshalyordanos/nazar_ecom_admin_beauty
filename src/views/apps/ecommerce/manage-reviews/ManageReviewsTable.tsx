@@ -49,6 +49,7 @@ import OptionMenu from '@core/components/option-menu'
 
 // Util Imports
 import { getLocalizedUrl } from '@/utils/i18n'
+import { useDeleteReview, useUpdateReview } from '@/api/admin/reviews'
 
 // Style Imports
 import tableStyles from '@core/styles/table.module.css'
@@ -121,6 +122,8 @@ const ManageReviewsTable = ({ reviewsData }: { reviewsData?: ReviewType[] }) => 
 
   // Hooks
   const { lang: locale } = useParams()
+  const updateMut = useUpdateReview()
+  const deleteMut = useDeleteReview()
 
   const columns = useMemo<ColumnDef<ReviewWithActionsType, any>[]>(
     () => [
@@ -226,7 +229,7 @@ const ManageReviewsTable = ({ reviewsData }: { reviewsData?: ReviewType[] }) => 
             <Chip
               label={row.original.status}
               variant='tonal'
-              color={row.original.status === 'Published' ? 'success' : 'warning'}
+              color={row.original.status === 'APPROVED' ? 'success' : row.original.status === 'REJECTED' ? 'error' : 'warning'}
               size='small'
             />
           </div>
@@ -246,10 +249,41 @@ const ManageReviewsTable = ({ reviewsData }: { reviewsData?: ReviewType[] }) => 
                 linkProps: { className: 'flex items-center gap-2 is-full plb-1.5 pli-4' }
               },
               {
+                text: 'Approve',
+                icon: 'ri-checkbox-circle-line',
+                menuItemProps: {
+                  disabled: updateMut.isPending || String(row.original.status) === 'APPROVED',
+                  onClick: async () => {
+                    const id = String(row.original.id)
+                    await updateMut.mutateAsync({ id, payload: { status: 'APPROVED' } })
+                    setAllData(prev => prev?.map(r => (String(r.id) === id ? { ...r, status: 'APPROVED' } : r)))
+                  },
+                  className: 'flex items-center pli-4'
+                }
+              },
+              {
+                text: 'Reject',
+                icon: 'ri-close-circle-line',
+                menuItemProps: {
+                  disabled: updateMut.isPending || String(row.original.status) === 'REJECTED',
+                  onClick: async () => {
+                    const id = String(row.original.id)
+                    await updateMut.mutateAsync({ id, payload: { status: 'REJECTED' } })
+                    setAllData(prev => prev?.map(r => (String(r.id) === id ? { ...r, status: 'REJECTED' } : r)))
+                  },
+                  className: 'flex items-center pli-4'
+                }
+              },
+              {
                 text: 'Delete',
                 icon: 'ri-delete-bin-7-line',
                 menuItemProps: {
-                  onClick: () => setAllData(allData?.filter(review => review.id !== row.original.id)),
+                  disabled: deleteMut.isPending,
+                  onClick: async () => {
+                    const id = String(row.original.id)
+                    await deleteMut.mutateAsync(id)
+                    setAllData(prev => prev?.filter(review => String(review.id) !== id))
+                  },
                   className: 'flex items-center pli-4'
                 }
               }
@@ -260,7 +294,7 @@ const ManageReviewsTable = ({ reviewsData }: { reviewsData?: ReviewType[] }) => 
       })
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data]
+    [data, locale, updateMut.isPending, deleteMut.isPending]
   )
 
   const table = useReactTable({

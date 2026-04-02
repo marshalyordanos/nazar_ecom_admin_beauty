@@ -25,7 +25,7 @@ export type ReferralsType = {
 }
 
 export type ReviewType = {
-  id: number
+  id: string | number
   product: string
   companyName: string
   productImage: string

@@ -14,6 +14,8 @@ import type {
   CategoriesResponse,
   CategoryTreeNode
 } from '@/types/category'
+import { toast } from 'react-toastify'
+import { getApiErrorMessage } from '@/libs/toastUtils'
 
 export function useCategoriesTree() {
   return useQuery<CategoryTreeNode[], Error>({
@@ -53,7 +55,11 @@ export function useCreateCategory() {
 
   return useMutation({
     mutationFn: (formData: FormData) => createCategory(formData),
-    onSuccess: () => qc.invalidateQueries({ queryKey: categoryKeys.all })
+    onSuccess: () => {
+      toast.success('Category created successfully')
+      qc.invalidateQueries({ queryKey: categoryKeys.all })
+    },
+    onError: error => toast.error(getApiErrorMessage(error, 'Failed to create category'))
   })
 }
 
@@ -62,7 +68,11 @@ export function useUpdateCategory() {
 
   return useMutation({
     mutationFn: ({ id, formData }: { id: string; formData: FormData }) => updateCategory(id, formData),
-    onSuccess: () => qc.invalidateQueries({ queryKey: categoryKeys.all })
+    onSuccess: () => {
+      toast.success('Category updated successfully')
+      qc.invalidateQueries({ queryKey: categoryKeys.all })
+    },
+    onError: error => toast.error(getApiErrorMessage(error, 'Failed to update category'))
   })
 }
 
@@ -71,6 +81,10 @@ export function useDeleteCategory() {
 
   return useMutation({
     mutationFn: (id: string) => deleteCategory(id),
-    onSuccess: () => qc.invalidateQueries({ queryKey: categoryKeys.all })
+    onSuccess: () => {
+      toast.success('Category deleted successfully')
+      qc.invalidateQueries({ queryKey: categoryKeys.all })
+    },
+    onError: error => toast.error(getApiErrorMessage(error, 'Failed to delete category'))
   })
 }

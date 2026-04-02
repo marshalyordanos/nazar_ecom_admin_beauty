@@ -15,6 +15,15 @@ type DataType = {
   value: number
 }
 
+type Props = {
+  averageRating?: number
+  totalReviews?: number
+  thisWeekDelta?: number
+  distribution?: DataType[]
+  isLoading?: boolean
+  isError?: boolean
+}
+
 // Vars
 const totalReviewsData: DataType[] = [
   { rating: 5, value: 109 },
@@ -24,10 +33,16 @@ const totalReviewsData: DataType[] = [
   { rating: 1, value: 8 }
 ]
 
-const TotalReviews = () => {
+const TotalReviews = (props: Props) => {
   // Hooks
   const theme = useTheme()
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'))
+
+  const avg = typeof props.averageRating === 'number' ? props.averageRating : 4.89
+  const total = typeof props.totalReviews === 'number' ? props.totalReviews : 187
+  const weekDelta = typeof props.thisWeekDelta === 'number' ? props.thisWeekDelta : 5
+  const data = props.distribution && props.distribution.length ? props.distribution : totalReviewsData
+  const denom = data.reduce((acc, x) => acc + (x.value || 0), 0) || 1
 
   return (
     <Card>
@@ -36,26 +51,26 @@ const TotalReviews = () => {
           <div className='flex flex-col items-start gap-2 is-full sm:is-6/12'>
             <div className='flex items-center gap-2'>
               <Typography variant='h3' color='primary.main'>
-                4.89
+                {avg.toFixed(2)}
               </Typography>
               <i className='ri-star-smile-line text-[32px] text-primary' />
             </div>
             <Typography className='font-medium' color='text.primary'>
-              Total 187 reviews
+              Total {total} reviews
             </Typography>
             <Typography>All reviews are from genuine customers</Typography>
-            <Chip label='+5 This week' variant='tonal' size='small' color='primary' />
+            <Chip label={`+${weekDelta} This week`} variant='tonal' size='small' color='primary' />
           </div>
           <Divider orientation={isSmallScreen ? 'horizontal' : 'vertical'} flexItem />
           <div className='flex flex-col gap-3 is-full sm:is-6/12'>
-            {totalReviewsData.map((item, index) => (
+            {data.map((item, index) => (
               <div key={index} className='flex items-center gap-2'>
                 <Typography variant='body2' className='text-nowrap'>
                   {item.rating} Star
                 </Typography>
                 <LinearProgress
                   color='primary'
-                  value={Math.floor((item.value / 185) * 100)}
+                  value={Math.floor((item.value / denom) * 100)}
                   variant='determinate'
                   className='bs-2 is-full'
                 />

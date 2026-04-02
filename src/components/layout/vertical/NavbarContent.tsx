@@ -118,11 +118,12 @@ const NavbarContent = () => {
 
       <div className='flex items-center'>
     
-      <SaleFromShop />
-        <LanguageDropdown />
+    <div className='mx-5'>  <SaleFromShop />
+    </div>
+        {/* <LanguageDropdown /> */}
         <ModeDropdown />
-        <ShortcutsDropdown shortcuts={shortcuts} />
-        <NotificationsDropdown notifications={notifications} />
+        {/* <ShortcutsDropdown shortcuts={shortcuts} /> */}
+        {/* <NotificationsDropdown notifications={notifications} /> */}
         <UserDropdown />
       </div>
     </div>

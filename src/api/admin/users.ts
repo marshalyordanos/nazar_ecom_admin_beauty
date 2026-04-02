@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { api } from '@/libs/api'
+import { toast } from 'react-toastify'
+import { getApiErrorMessage } from '@/libs/toastUtils'
 import type { QueryParams } from '@/types/common'
 import { buildQuery } from './query'
 import type { ApiListResponse } from './types'
@@ -19,6 +21,7 @@ export type UserAdmin = {
 	currentPlan?: string | null
 	roles?: { name: string }[]
 	createdAt?: string
+	updatedAt?: string
 }
 
 export const userAdminKeys = {
@@ -42,9 +45,11 @@ export function useUpdateUserRole() {
 		mutationFn: async ({ id, role }: { id: string; role: string | null }) =>
 			(await api.patch(`/users/${id}`, { role })).data,
 		onSuccess: () => {
+			toast.success('User role updated successfully')
 			qc.invalidateQueries({ queryKey: userAdminKeys.all })
 			qc.invalidateQueries({ queryKey: dashboardKeys.all })
-		}
+		},
+		onError: error => toast.error(getApiErrorMessage(error, 'Failed to update user role'))
 	})
 }
 

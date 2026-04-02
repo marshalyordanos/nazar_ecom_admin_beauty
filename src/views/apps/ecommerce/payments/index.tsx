@@ -245,7 +245,7 @@ const PaymentsManagement = () => {
                 avatarIcon='ri-check-double-line'
                 avatarColor='success'
                 trend='positive'
-                trendNumber='—'
+                // trendNumber='—'
                 subtitle='Successful'
               />
             </Grid>
@@ -256,7 +256,7 @@ const PaymentsManagement = () => {
                 avatarIcon='ri-close-circle-line'
                 avatarColor='error'
                 trend='negative'
-                trendNumber='—'
+                // trendNumber='—'
                 subtitle='Errors'
               />
             </Grid>
