@@ -28,6 +28,7 @@ export interface CategoryTreeNode {
   totalProductsSold: number
   totalProducts: number
   children?: CategoryTreeNode[]
+  data?:any
 }
   
   export interface Pagination {
@@ -38,8 +39,8 @@ export interface CategoryTreeNode {
   }
   
   export interface CategoriesResponse {
-    data: Category[];
-    pagination: Pagination;
+    data?: Category[];
+    pagination?: Pagination;
   }
 
 
@@ -51,4 +52,5 @@ export interface CategoryTreeNode {
     page?: number;
     pageSize?: number;
     tree?: boolean;
+    data?:any
   }

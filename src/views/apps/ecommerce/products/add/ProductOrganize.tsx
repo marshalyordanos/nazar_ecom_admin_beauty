@@ -87,7 +87,7 @@ const ProductOrganize = () => {
   // Set category from form when editing a product (populating)
   useEffect(() => {
     if (categoriesData?.data && categoryId) {
-      const match = categoriesData.data.find((c: Category) => c.id === categoryId)
+      const match = categoriesData?.data.find((c: Category) => c.id === categoryId)
       if (match) {
         setCategory(match)
       } else if (categoryName) {

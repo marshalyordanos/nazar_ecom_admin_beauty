@@ -43,7 +43,9 @@ export function useCategories(params: CategoriesQueryParams) {
 
   void tree
 
-  return useQuery<CategoriesResponse | CategoryTreeNode[], Error>({
+  // return useQuery<CategoriesResponse | CategoryTreeNode[], Error>({
+    return useQuery<any, Error>({
+
     queryKey: isTree ? categoryKeys.tree() : categoryKeys.list(listParams),
     queryFn: async () => (isTree ? fetchCategoriesTree() : fetchCategoriesList(listParams)),
     staleTime: 1000 * 60
