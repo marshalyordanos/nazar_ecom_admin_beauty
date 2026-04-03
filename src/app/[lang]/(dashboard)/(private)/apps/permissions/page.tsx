@@ -26,7 +26,7 @@ const PermissionsApp = async () => {
   // Vars
   const data = await getPermissionsData()
 
-  return <Permissions permissionsData={data} />
+  return <Permissions/>
 }
 
 export default PermissionsApp
