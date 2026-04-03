@@ -17,6 +17,7 @@ import Button from '@mui/material/Button'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Divider from '@mui/material/Divider'
 import Alert from '@mui/material/Alert'
+import CircularProgress from '@mui/material/CircularProgress'
 
 // Third-party Imports
 import { Controller, useForm } from 'react-hook-form'
@@ -63,6 +64,7 @@ const Login = ({ mode }: { mode: Mode }) => {
   // States
   const [isPasswordShown, setIsPasswordShown] = useState(false)
   const [errorState, setErrorState] = useState<ErrorType | null>(null)
+  const [isLoggingIn, setIsLoggingIn] = useState(false) // New state for login loading
 
   // Vars
   const darkImg = '/images/pages/auth-v2-mask-1-dark.png'
@@ -104,17 +106,16 @@ const Login = ({ mode }: { mode: Mode }) => {
 
   const onSubmit: SubmitHandler<FormData> = async (data: FormData) => {
     setErrorState(null)
-
+    setIsLoggingIn(true)
     try {
       await loginWithBackend(data.email, data.password)
-
       const redirectURL = searchParams.get('redirectTo') ?? '/'
-
       router.replace(getLocalizedUrl(redirectURL, locale as Locale))
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Login failed'
-
       setErrorState({ message: [message] })
+    } finally {
+      setIsLoggingIn(false)
     }
   }
 
@@ -179,6 +180,7 @@ const Login = ({ mode }: { mode: Mode }) => {
                     error: true,
                     helperText: errors?.email?.message || errorState?.message[0]
                   })}
+                  disabled={isLoggingIn}
                 />
               )}
             />
@@ -206,6 +208,7 @@ const Login = ({ mode }: { mode: Mode }) => {
                             onClick={handleClickShowPassword}
                             onMouseDown={e => e.preventDefault()}
                             aria-label='toggle password visibility'
+                            disabled={isLoggingIn}
                           >
                             <i className={isPasswordShown ? 'ri-eye-off-line' : 'ri-eye-line'} />
                           </IconButton>
@@ -214,11 +217,12 @@ const Login = ({ mode }: { mode: Mode }) => {
                     }
                   }}
                   {...(errors.password && { error: true, helperText: errors.password.message })}
+                  disabled={isLoggingIn}
                 />
               )}
             />
             <div className='flex justify-between items-center flex-wrap gap-x-3 gap-y-1'>
-              <FormControlLabel control={<Checkbox defaultChecked />} label='Remember me' />
+              <FormControlLabel control={<Checkbox defaultChecked disabled={isLoggingIn} />} label='Remember me' />
               <Typography
                 className='text-end'
                 color='primary.main'
@@ -228,8 +232,16 @@ const Login = ({ mode }: { mode: Mode }) => {
                 Forgot password?
               </Typography>
             </div>
-            <Button fullWidth variant='contained' type='submit'>
-              Log In
+            <Button
+              fullWidth
+              variant='contained'
+              type='submit'
+              disabled={isLoggingIn}
+              startIcon={
+                isLoggingIn ? <CircularProgress color="inherit" size={20} /> : null
+              }
+            >
+              {isLoggingIn ? 'Logging In...' : 'Log In'}
             </Button>
             <div className='flex justify-center items-center flex-wrap gap-2'>
               <Typography>New on our platform?</Typography>
@@ -244,7 +256,7 @@ const Login = ({ mode }: { mode: Mode }) => {
             className='self-center text-textPrimary'
             startIcon={<img src='/images/logos/google.png' alt='Google' width={22} />}
             sx={{ '& .MuiButton-startIcon': { marginInlineEnd: 3 } }}
-
+            disabled={isLoggingIn}
             // onClick={() => signIn('google')}
           >
             Sign in with Google
