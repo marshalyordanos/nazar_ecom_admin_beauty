@@ -20,3 +20,11 @@ export function useDashboardSummary() {
 	})
 }
 
+
+export function useCustomerDashboardCards() {
+	return useQuery<any, Error>({
+		queryKey: dashboardKeys.all,
+		queryFn: async () => (await api.get('/dashboard/customers/cards')).data,
+		staleTime: 1000 * 1
+	})
+}

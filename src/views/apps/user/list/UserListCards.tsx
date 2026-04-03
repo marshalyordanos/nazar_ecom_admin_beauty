@@ -9,7 +9,7 @@ import type { UserDataType } from '@components/card-statistics/HorizontalWithSub
 import HorizontalWithSubtitle from '@components/card-statistics/HorizontalWithSubtitle'
 import Skeleton from '@mui/material/Skeleton'
 import Typography from '@mui/material/Typography'
-import { useDashboardSummary } from '@/api/admin/dashboard'
+import { useCustomerDashboardCards, useDashboardSummary } from '@/api/admin/dashboard'
 
 // Vars
 const LoadingCard = () => (
@@ -21,46 +21,47 @@ const LoadingCard = () => (
 )
 
 const UserListCards = () => {
-  const { data, isLoading, isError } = useDashboardSummary()
-  const users = data?.data?.users
+  const { data, isLoading, isError } = useCustomerDashboardCards()
+  console.log(data, 'data cards')
+  const users = data
 
   const cards: UserDataType[] = users
     ? [
         {
-          title: 'Users',
-          stats: String(users.total),
-          avatarIcon: 'ri-group-line',
+          title: 'Customers',
+          stats: String(data?.total_users?.value),
+          avatarIcon: 'ri-user-line',
           avatarColor: 'primary',
-          trend: users.percentChange >= 0 ? 'positive' : 'negative',
-          trendNumber: `${Math.abs(users.percentChange).toFixed(1)}%`,
-          subtitle: 'Total Users'
+          trend: data?.total_users?.trend === 'positive' ? 'positive' : 'negative',
+          trendNumber: data?.total_users?.trendNumber,
+          subtitle: 'Total Customers'
         },
         {
           title: 'Active',
-          stats: String(users.active),
-          avatarIcon: 'ri-user-follow-line',
+          stats: String(data?.active_users?.value),
+          avatarIcon: 'ri-user-line',
           avatarColor: 'success',
-          trend: users.percentChange >= 0 ? 'positive' : 'negative',
-          trendNumber: `${Math.abs(users.percentChange).toFixed(1)}%`,
-          subtitle: 'Current period'
+          trend: data?.active_users?.trend === 'positive' ? 'positive' : 'negative',
+          trendNumber: data?.active_users?.trendNumber,
+          subtitle: 'Active Customers'
         },
         {
-          title: 'Suspended',
-          stats: String(users.suspended),
-          avatarIcon: 'ri-user-forbid-line',
-          avatarColor: 'error',
-          trend: users.percentChange >= 0 ? 'negative' : 'positive',
-          trendNumber: `${Math.abs(users.percentChange).toFixed(1)}%`,
-          subtitle: 'Current period'
+          title: 'New Users',
+          stats: String(data?.new_users?.value),
+          avatarIcon: 'ri-user-add-line',
+          avatarColor: 'warning',
+          trend: data?.new_users?.trend === 'positive' ? 'positive' : 'negative',
+          trendNumber: data?.new_users?.trendNumber,
+          subtitle: 'New Customers This Month'
         },
         {
-          title: 'Verified Emails',
-          stats: String(users.verifiedEmails),
-          avatarIcon: 'ri-mail-check-line',
-          avatarColor: 'info',
-          trend: users.percentChange >= 0 ? 'positive' : 'negative',
-          trendNumber: `${Math.abs(users.percentChange).toFixed(1)}%`,
-          subtitle: 'Current period'
+          title: 'Customer Orders',
+          stats: String(data?.customers_with_orders?.value),
+          avatarIcon: 'ri-shopping-bag-3-line',
+          avatarColor: 'success',
+          trend: data?.customers_with_orders?.trend === 'positive' ? 'positive' : 'negative',
+          trendNumber: data?.customers_with_orders?.trendNumber,
+          subtitle: 'Customers With Orders'
         }
       ]
     : []

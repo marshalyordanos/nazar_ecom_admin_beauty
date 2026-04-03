@@ -62,6 +62,7 @@ import { useAdminUsers, useUpdateUserRole, type UserAdmin } from '@/api/admin/us
 import type { ApiListResponse } from '@/api/admin/types'
 import TableFilters from './TableFilters'
 import { Divider } from '@mui/material'
+import AddUserDrawer from './AddUserDrawer'
 
 declare module '@tanstack/table-core' {
   interface FilterFns {
@@ -151,6 +152,20 @@ const getAvatar = (params: { avatarUrl: string | null; fullName: string }) => {
   return <CustomAvatar>{getInitials(fullName)}</CustomAvatar>
 }
 
+type UserRowWithAction = {
+  id: string
+  serverId: string
+  fullName: string
+  email: string
+  phone: string
+  avatar: string
+  status: string
+  role: string
+  createdAt?: string
+  updatedAt?: string
+  action?: string
+}
+
 const RolesTable = () => {
   const [rowSelection, setRowSelection] = useState({})
   const [data, setData] = useState<UserRow[]>([])
@@ -161,6 +176,8 @@ const RolesTable = () => {
   const [assignOpen, setAssignOpen] = useState(false)
   const [assignUserId, setAssignUserId] = useState<string | undefined>(undefined)
   const [assignUserRole, setAssignUserRole] = useState<string | null | undefined>(undefined)
+  const [addUserOpen, setAddUserOpen] = useState(false)
+  const [editUserData, setEditUserData] = useState<UserRowWithAction | null>(null)
 
   const { lang: locale } = useParams()
   const { mutateAsync: updateUserRole } = useUpdateUserRole()
@@ -233,6 +250,11 @@ const RolesTable = () => {
 
   const handleGlobalFilterChange = useCallback((value: string | number) => {
     setGlobalFilter(String(value))
+  }, [])
+
+  const handleEditUser = useCallback((user: UserRowWithAction) => {
+    setEditUserData(user)
+    setAddUserOpen(true)
   }, [])
 
   const columns = useMemo<ColumnDef<UserRow, any>[]>(
@@ -423,6 +445,16 @@ const RolesTable = () => {
             onChange={handleGlobalFilterChange}
             placeholder='Search User'
           />
+           <Button
+              variant='contained'
+              onClick={() => {
+                setEditUserData(null);
+                setAddUserOpen(true);
+              }}
+              className='max-sm:is-full'
+            >
+              Add New User
+            </Button>
         </div>
       </CardContent>
       <div className='overflow-x-auto'>
@@ -505,6 +537,11 @@ const RolesTable = () => {
         onSuccess={() => {
           // no-op: query invalidation happens in mutation hook
         }}
+      />
+        <AddUserDrawer
+        open={addUserOpen}
+        handleClose={() => setAddUserOpen(false)}
+        userData={editUserData ? [editUserData] : []}
       />
     </Card>
   )

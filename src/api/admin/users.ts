@@ -52,6 +52,19 @@ export function useRegisterUsers() {
 	})
 }
 
+export function addUser() {
+	const qc = useQueryClient()
+	return useMutation({
+		mutationFn: async (payload: Record<string, unknown>) => (await api.post('/users', payload)).data,
+		onSuccess: () => {
+			toast.success('User added successfully')
+			qc.invalidateQueries({ queryKey: userAdminKeys.all })
+			qc.invalidateQueries({ queryKey: dashboardKeys.all })
+		},
+		onError: error => toast.error(getApiErrorMessage(error, 'Failed to add user'))
+	})
+}
+
 export function useUpdateUserProfile() {
 	const qc = useQueryClient()
 	return useMutation({
