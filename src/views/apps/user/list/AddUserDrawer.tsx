@@ -1,102 +1,116 @@
 // React Imports
-import { useState } from 'react'
+import { useEffect } from 'react'
 
 // MUI Imports
 import Button from '@mui/material/Button'
 import Drawer from '@mui/material/Drawer'
-import FormControl from '@mui/material/FormControl'
 import IconButton from '@mui/material/IconButton'
-import InputLabel from '@mui/material/InputLabel'
-import MenuItem from '@mui/material/MenuItem'
-import Select from '@mui/material/Select'
 import TextField from '@mui/material/TextField'
-import FormHelperText from '@mui/material/FormHelperText'
 import Typography from '@mui/material/Typography'
 import Divider from '@mui/material/Divider'
 
 // Third-party Imports
 import { useForm, Controller } from 'react-hook-form'
 
-// Types Imports
-import type { UsersType } from '@/types/apps/userTypes'
+// API
+import { useRegisterUsers, useUpdateUserProfile } from '@/api/admin/users'
 
 type Props = {
   open: boolean
   handleClose: () => void
-  userData?: UsersType[]
-  setData: (data: UsersType[]) => void
+  userData: any[]
 }
 
 type FormValidateType = {
-  fullName: string
-  username: string
+  firstName: string
+  lastName: string
   email: string
-  role: string
-  plan: string
-  status: string
+  phone: string
+  password?: string
 }
 
-type FormNonValidateType = {
-  company: string
-  country: string
-  contact: string
-}
-
-// Vars
-const initialData = {
-  company: '',
-  country: '',
-  contact: ''
+const initialData: FormValidateType = {
+  firstName: '',
+  lastName: '',
+  email: '',
+  phone: '',
+  password: ''
 }
 
 const AddUserDrawer = (props: Props) => {
   // Props
-  const { open, handleClose, userData, setData } = props
+  const { open, handleClose, userData } = props
 
-  // States
-  const [formData, setFormData] = useState<FormNonValidateType>(initialData)
+  // Check if editing
+  const isEdit = userData && userData.length > 0 && !!userData[0]?.id
+  const editUser = isEdit ? userData[0] : null
 
-  // Hooks
+  // Form hook, note: password only required for add
   const {
     control,
     reset: resetForm,
     handleSubmit,
     formState: { errors }
   } = useForm<FormValidateType>({
-    defaultValues: {
-      fullName: '',
-      username: '',
-      email: '',
-      role: '',
-      plan: '',
-      status: ''
-    }
+    defaultValues: initialData
   })
 
-  const onSubmit = (data: FormValidateType) => {
-    const newUser: UsersType = {
-      id: (userData?.length && userData?.length + 1) || 1,
-      avatar: `/images/avatars/${Math.floor(Math.random() * 8) + 1}.png`,
-      fullName: data.fullName,
-      username: data.username,
-      email: data.email,
-      role: data.role,
-      currentPlan: data.plan,
-      status: data.status,
-      company: formData.company,
-      country: formData.country,
-      contact: formData.contact
-    }
+  // Register and update hooks
+  const registerUser = useRegisterUsers()
+  const updateUser = useUpdateUserProfile()
 
-    setData([...(userData ?? []), newUser])
-    handleClose()
-    setFormData(initialData)
-    resetForm({ fullName: '', username: '', email: '', role: '', plan: '', status: '' })
+  // Populate form when in edit mode or when switching between add and edit
+  useEffect(() => {
+    if (isEdit && editUser) {
+      console.log(editUser,"editUser")
+      const firstName = editUser.fullName?.split(' ')[0] || ''
+      const lastName = editUser.fullName?.split(' ')[1] || ''
+      resetForm({
+        firstName: firstName || '',
+        lastName: lastName || '',
+        email: editUser.email || '',
+        phone: editUser.phone || '',
+        password: '' // not shown, but set for initialData type compat
+      })
+    } else {
+      resetForm(initialData)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isEdit, editUser, open]) // open triggers reset when the drawer is reopened
+
+  // Add or Edit submit
+  const onSubmit = (form: FormValidateType) => {
+    if (isEdit && editUser) {
+      updateUser.mutate(
+        {
+          id: editUser.id,
+          data: {
+            firstName: form.firstName,
+            lastName: form.lastName,
+            email: form.email,
+            phone: form.phone
+          }
+        },
+        {
+          onSuccess: () => {
+            handleClose()
+            resetForm(initialData)
+          }
+        }
+      )
+    } else {
+      registerUser.mutate(form, {
+        onSuccess: () => {
+          handleClose()
+          resetForm(initialData)
+        }
+      })
+    }
   }
 
   const handleReset = () => {
     handleClose()
-    setFormData(initialData)
+    resetForm(initialData)
   }
 
   return (
@@ -109,150 +123,111 @@ const AddUserDrawer = (props: Props) => {
       sx={{ '& .MuiDrawer-paper': { width: { xs: 300, sm: 400 } } }}
     >
       <div className='flex items-center justify-between pli-5 plb-4'>
-        <Typography variant='h5'>Add New User</Typography>
+        <Typography variant='h5'>{isEdit ? 'Edit User' : 'Add New User'}</Typography>
         <IconButton size='small' onClick={handleReset}>
           <i className='ri-close-line text-2xl' />
         </IconButton>
       </div>
       <Divider />
       <div className='p-5'>
-        <form onSubmit={handleSubmit(data => onSubmit(data))} className='flex flex-col gap-5'>
+        <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-5'>
           <Controller
-            name='fullName'
+            name='firstName'
             control={control}
-            rules={{ required: true }}
+            rules={{ required: 'First Name is required' }}
             render={({ field }) => (
               <TextField
                 {...field}
                 fullWidth
-                label='Full Name'
-                placeholder='John Doe'
-                {...(errors.fullName && { error: true, helperText: 'This field is required.' })}
+                label='First Name'
+                placeholder='marshal'
+                error={Boolean(errors.firstName)}
+                helperText={errors.firstName?.message}
               />
             )}
           />
           <Controller
-            name='username'
+            name='lastName'
             control={control}
-            rules={{ required: true }}
+            rules={{ required: 'Last Name is required' }}
             render={({ field }) => (
               <TextField
                 {...field}
                 fullWidth
-                label='Username'
-                placeholder='johndoe'
-                {...(errors.username && { error: true, helperText: 'This field is required.' })}
+                label='Last Name'
+                placeholder='yordanos'
+                error={Boolean(errors.lastName)}
+                helperText={errors.lastName?.message}
               />
             )}
           />
           <Controller
             name='email'
             control={control}
-            rules={{ required: true }}
+            rules={{
+              required: 'Email is required',
+              pattern: { value: /\S+@\S+\.\S+/, message: 'Invalid email address' }
+            }}
             render={({ field }) => (
               <TextField
                 {...field}
                 fullWidth
                 type='email'
                 label='Email'
-                placeholder='johndoe@gmail.com'
-                {...(errors.email && { error: true, helperText: 'This field is required.' })}
+                placeholder='marsh@gmail.com'
+                error={Boolean(errors.email)}
+                helperText={errors.email?.message}
               />
             )}
           />
-          <FormControl fullWidth>
-            <InputLabel id='country' error={Boolean(errors.role)}>
-              Select Role
-            </InputLabel>
-            <Controller
-              name='role'
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Select label='Select Role' {...field} error={Boolean(errors.role)}>
-                  <MenuItem value='admin'>Admin</MenuItem>
-                  <MenuItem value='author'>Author</MenuItem>
-                  <MenuItem value='editor'>Editor</MenuItem>
-                  <MenuItem value='maintainer'>Maintainer</MenuItem>
-                  <MenuItem value='subscriber'>Subscriber</MenuItem>
-                </Select>
-              )}
-            />
-            {errors.role && <FormHelperText error>This field is required.</FormHelperText>}
-          </FormControl>
-          <FormControl fullWidth>
-            <InputLabel id='country' error={Boolean(errors.plan)}>
-              Select Plan
-            </InputLabel>
-            <Controller
-              name='plan'
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Select label='Select Plan' {...field} error={Boolean(errors.plan)}>
-                  <MenuItem value='basic'>Basic</MenuItem>
-                  <MenuItem value='company'>Company</MenuItem>
-                  <MenuItem value='enterprise'>Enterprise</MenuItem>
-                  <MenuItem value='team'>Team</MenuItem>
-                </Select>
-              )}
-            />
-            {errors.plan && <FormHelperText error>This field is required.</FormHelperText>}
-          </FormControl>
-          <FormControl fullWidth>
-            <InputLabel id='country' error={Boolean(errors.status)}>
-              Select Status
-            </InputLabel>
-            <Controller
-              name='status'
-              control={control}
-              rules={{ required: true }}
-              render={({ field }) => (
-                <Select label='Select Status' {...field} error={Boolean(errors.status)}>
-                  <MenuItem value='pending'>Pending</MenuItem>
-                  <MenuItem value='active'>Active</MenuItem>
-                  <MenuItem value='inactive'>Inactive</MenuItem>
-                </Select>
-              )}
-            />
-            {errors.status && <FormHelperText error>This field is required.</FormHelperText>}
-          </FormControl>
-          <TextField
-            label='Company'
-            fullWidth
-            placeholder='Company PVT LTD'
-            value={formData.company}
-            onChange={e => setFormData({ ...formData, company: e.target.value })}
+          <Controller
+            name='phone'
+            control={control}
+            rules={{ required: 'Phone is required' }}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                fullWidth
+                label='Phone'
+                type='tel'
+                placeholder='0987654322'
+                error={Boolean(errors.phone)}
+                helperText={errors.phone?.message}
+              />
+            )}
           />
-          <FormControl fullWidth>
-            <InputLabel id='country'>Select Country</InputLabel>
-            <Select
-              fullWidth
-              id='country'
-              value={formData.country}
-              onChange={e => setFormData({ ...formData, country: e.target.value })}
-              label='Select Country'
-              labelId='country'
-            >
-              <MenuItem value='India'>India</MenuItem>
-              <MenuItem value='USA'>USA</MenuItem>
-              <MenuItem value='Australia'>Australia</MenuItem>
-              <MenuItem value='Germany'>Germany</MenuItem>
-            </Select>
-          </FormControl>
-          <TextField
-            label='Contact'
-            type='number'
-            fullWidth
-            placeholder='(397) 294-5153'
-            value={formData.contact}
-            onChange={e => setFormData({ ...formData, contact: e.target.value })}
-          />
+          {/* Password field is hidden in edit mode */}
+          {!isEdit && (
+            <Controller
+              name='password'
+              control={control}
+              rules={{ required: 'Password is required' }}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  fullWidth
+                  label='Password'
+                  type='password'
+                  placeholder='marshal1111'
+                  error={Boolean(errors.password)}
+                  helperText={errors.password?.message}
+                />
+              )}
+            />
+          )}
           <div className='flex items-center gap-4'>
-            <Button variant='contained' type='submit'>
-              Submit
+            <Button
+              variant='contained'
+              type='submit'
+              disabled={
+                isEdit
+                  ? updateUser.isPending
+                  : registerUser.isPending
+              }
+            >
+              {isEdit ? 'Update' : 'Submit'}
             </Button>
-            <Button variant='outlined' color='error' type='reset' onClick={() => handleReset()}>
+            <Button variant='outlined' color='error' type='reset' onClick={handleReset}>
               Cancel
             </Button>
           </div>

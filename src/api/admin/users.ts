@@ -39,11 +39,70 @@ export function useAdminUsers(params: QueryParams) {
 	})
 }
 
+export function useRegisterUsers() {
+	const qc = useQueryClient()
+	return useMutation({
+		mutationFn: async (payload: Record<string, unknown>) => (await api.post('/auth/register', payload)).data,
+		onSuccess: () => {
+			toast.success('User registered successfully')
+			qc.invalidateQueries({ queryKey: userAdminKeys.all })
+			qc.invalidateQueries({ queryKey: dashboardKeys.all })
+		},
+		onError: error => toast.error(getApiErrorMessage(error, 'Failed to register user'))
+	})
+}
+
+export function useUpdateUserProfile() {
+	const qc = useQueryClient()
+	return useMutation({
+		mutationFn: async ({
+			id,
+			data
+		}: {
+			id: string
+			data: { firstName?: string; lastName?: string; email?: string; phone?: string }
+		}) => (await api.patch(`/users/${id}`, data)).data,
+		onSuccess: () => {
+			toast.success('User profile updated successfully')
+			qc.invalidateQueries({ queryKey: userAdminKeys.all })
+			qc.invalidateQueries({ queryKey: dashboardKeys.all })
+		},
+		onError: error => toast.error(getApiErrorMessage(error, 'Failed to update user profile'))
+	})
+}
+
+export function useActivateUser() {
+	const qc = useQueryClient()
+	return useMutation({
+		mutationFn: async (id: string) => (await api.patch(`/users/${id}`, { status: 'ACTIVE' })).data,
+		onSuccess: () => {
+			toast.success('User activated successfully')
+			qc.invalidateQueries({ queryKey: userAdminKeys.all })
+			qc.invalidateQueries({ queryKey: dashboardKeys.all })
+		},
+		onError: error => toast.error(getApiErrorMessage(error, 'Failed to activate user'))
+	})
+}
+export function useDeactivateUser() {
+	const qc = useQueryClient()
+	return useMutation({
+		mutationFn: async (id: string) => (await api.delete(`/users/${id}`)).data,
+		onSuccess: () => {
+			toast.success('User deactivated successfully')
+			qc.invalidateQueries({ queryKey: userAdminKeys.all })
+			qc.invalidateQueries({ queryKey: dashboardKeys.all })
+		},
+		onError: error => toast.error(getApiErrorMessage(error, 'Failed to deactivate user'))
+	})
+}
+
+
+
 export function useUpdateUserRole() {
 	const qc = useQueryClient()
 	return useMutation({
-		mutationFn: async ({ id, role }: { id: string; role: string | null }) =>
-			(await api.patch(`/users/${id}`, { role })).data,
+		mutationFn: async ({ id, userId }: { id: string; userId: string }) =>
+			(await api.post(`/roles/${id}/assign`, { userId })).data,
 		onSuccess: () => {
 			toast.success('User role updated successfully')
 			qc.invalidateQueries({ queryKey: userAdminKeys.all })

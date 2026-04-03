@@ -5,4 +5,5 @@ export interface QueryParams {
     page?: number;
     pageSize?: number;
     track?: string;
+    onlyUsers?: boolean;
   }

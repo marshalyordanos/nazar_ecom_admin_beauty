@@ -45,18 +45,18 @@ const TableFilters = ({
   const onFilterChangeRef = useRef(onFilterChange)
   onFilterChangeRef.current = onFilterChange
 
-  useEffect(() => {
-    if (onFilterChangeRef.current) {
-      onFilterChangeRef.current({ role, plan, status })
-    }
-    // Only role/plan/status drive parent fetches; tableData/setData are legacy props and must NOT be
-    // in deps — parent often passes `[]` and inline no-ops which change every render and cause update loops.
-  }, [ status])
+  // useEffect(() => {
+  //   if (onFilterChangeRef.current) {
+  //     onFilterChangeRef.current({ role, plan, status })
+  //   }
+  //   // Only role/plan/status drive parent fetches; tableData/setData are legacy props and must NOT be
+  //   // in deps — parent often passes `[]` and inline no-ops which change every render and cause update loops.
+  // }, [role, plan, status])
 
   return (
     <CardContent>
       <Grid container spacing={6}>
-        {/* <Grid size={{ xs: 12, sm: 4 }}>
+        <Grid size={{ xs: 12, sm: 4 }}>
           <FormControl fullWidth sx={{ minWidth: 200 }}>
             <InputLabel id='role-select'>Select Role</InputLabel>
             <Select
@@ -77,7 +77,7 @@ const TableFilters = ({
               ))}
             </Select>
           </FormControl>
-        </Grid> */}
+        </Grid>
 
         <Grid size={{ xs: 12, sm: 4 }}>
           <FormControl fullWidth sx={{ minWidth: 200 }}>

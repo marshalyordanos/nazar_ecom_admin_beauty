@@ -8,6 +8,9 @@ export function buildQuery(params: QueryParams & { extra?: Record<string, string
 
     searchParams.push(`search=${searchStrings.join(',')}`)
   }
+  if (params.onlyUsers) {
+    searchParams.push(`onlyUsers=true`)
+  }
 
   if (params.filter) {
     const filterStrings = Object.entries(params.filter)

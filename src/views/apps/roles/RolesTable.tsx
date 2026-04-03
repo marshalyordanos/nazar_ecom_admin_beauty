@@ -42,7 +42,7 @@ import type { RankingInfo } from '@tanstack/match-sorter-utils'
 
 // Type Imports
 import type { ThemeColor } from '@core/types'
-import type { UsersType } from '@/types/apps/userTypes'
+// import type { UsersType } from '@/types/apps/userTypes'
 import type { Locale } from '@configs/i18n'
 
 // Component Imports
@@ -60,6 +60,8 @@ import tableStyles from '@core/styles/table.module.css'
 // API Imports
 import { useAdminUsers, useUpdateUserRole, type UserAdmin } from '@/api/admin/users'
 import type { ApiListResponse } from '@/api/admin/types'
+import TableFilters from './TableFilters'
+import { Divider } from '@mui/material'
 
 declare module '@tanstack/table-core' {
   interface FilterFns {
@@ -70,7 +72,14 @@ declare module '@tanstack/table-core' {
   }
 }
 
-type UsersTypeWithAction = UsersType & {
+type UserRow = {
+  id: string | number
+  fullName: string
+  email: string
+  phone: string
+  status: string
+  roles: string[]
+  avatarUrl: string | null
   action?: string
 }
 
@@ -113,40 +122,39 @@ const DebouncedInput = ({
     }, debounce)
     return () => clearTimeout(timeout)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value])
+  }, [value, onChange, debounce])
 
   return <TextField {...props} value={value} onChange={e => setValue(e.target.value)} size='small' />
 }
 
+// You can expand this map as you add new roles
 const userRoleObj: UserRoleType = {
   admin: { icon: 'ri-vip-crown-line', color: 'error' },
-  author: { icon: 'ri-computer-line', color: 'warning' },
-  editor: { icon: 'ri-edit-box-line', color: 'info' },
-  maintainer: { icon: 'ri-pie-chart-2-line', color: 'success' },
-  subscriber: { icon: 'ri-user-3-line', color: 'primary' }
+  user: { icon: 'ri-user-3-line', color: 'primary' }
+  // add more as needed
 }
 
 const userStatusObj: UserStatusType = {
-  active: 'success',
-  pending: 'warning',
-  inactive: 'secondary'
+  ACTIVE: 'success',
+  PENDING: 'warning',
+  INACTIVE: 'secondary',
+  SUSPENDED: 'error'
 }
 
-const columnHelper = createColumnHelper<UsersTypeWithAction>()
+const columnHelper = createColumnHelper<UserRow>()
 
-const getAvatar = (params: Pick<UsersType, 'avatar' | 'fullName'>) => {
-  const { avatar, fullName } = params
-  if (avatar) {
-    return <CustomAvatar src={avatar} size={34} />
+const getAvatar = (params: { avatarUrl: string | null; fullName: string }) => {
+  const { avatarUrl, fullName } = params
+  if (avatarUrl) {
+    return <CustomAvatar src={avatarUrl} size={34} />
   }
-  return <CustomAvatar>{getInitials(fullName as string)}</CustomAvatar>
+  return <CustomAvatar>{getInitials(fullName)}</CustomAvatar>
 }
 
-const RolesTable = ({ tableData }: { tableData?: UsersType[] }) => {
-  const [role, setRole] = useState<UsersType['role']>('')
+const RolesTable = () => {
   const [rowSelection, setRowSelection] = useState({})
-  const [data, setData] = useState(tableData || [])
-  const [filteredData, setFilteredData] = useState(data)
+  const [data, setData] = useState<UserRow[]>([])
+  const [filteredData, setFilteredData] = useState<UserRow[]>([])
   const [globalFilter, setGlobalFilter] = useState('')
   const [page, setPage] = useState(0)
   const [pageSize, setPageSize] = useState(10)
@@ -156,6 +164,8 @@ const RolesTable = ({ tableData }: { tableData?: UsersType[] }) => {
 
   const { lang: locale } = useParams()
   const { mutateAsync: updateUserRole } = useUpdateUserRole()
+  // Add status to filter state initializer
+  const [listFilters, setListFilters] = useState({ role: '', status: '' })
 
   // Server Data
   const usersQuery = useAdminUsers({
@@ -168,50 +178,64 @@ const RolesTable = ({ tableData }: { tableData?: UsersType[] }) => {
           username: globalFilter as string
         }
       : undefined,
-    filter: role ? { role } : undefined,
+    // Add status to the filter object if present
+    filter: {
+      ...(listFilters.role ? { roleId: listFilters.role } : {}),
+      ...(listFilters.status ? { status: listFilters.status } : {})
+    },
     sort: { createdAt: 'desc' }
   })
   const usersResp = usersQuery.data as ApiListResponse<UserAdmin> | undefined
   const serverData = usersResp?.data ?? []
 
-  const mapUserToRow = useCallback((u: UserAdmin, idx: number): UsersType => {
-    const fullName =
-      `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim() || (u.username as string) || u.email || 'User'
-    const username = (u.username as string) || (u.email ? u.email.split('@')[0] : 'user')
-    const numericId = page * pageSize + idx + 1
-    return {
-      id: numericId,
-      role: (u.role as string) || 'subscriber',
-      email: u.email,
-      status: (u.status as string) || 'active',
-      avatar: (u.avatar as string) || '',
-      company: '',
-      country: '',
-      contact: '',
-      fullName,
-      username,
-      currentPlan: (u.currentPlan as string) || 'standard',
-      avatarColor: undefined
-    }
-  }, [page, pageSize])
+  // Transform API user into a shape usable in the table
+  const mapUserToRow = useCallback(
+    (u: UserAdmin, idx: number): UserRow => {
+      const fullName =
+        `${u.firstName ?? ''} ${u.lastName ?? ''}`.trim() || u.email || 'User'
+      return {
+        id: u.id ?? idx,
+        fullName,
+        email: u.email ?? '',
+        phone: u.phone ?? '',
+        status: u.status ?? '',
+        roles: Array.isArray(u.roles) && u.roles.length > 0 ? u.roles.map(r => r.name) : [],
+        avatarUrl: u.avatarUrl ?? null
+      }
+    },
+    []
+  )
 
+  // FIX: Only setData and setFilteredData when serverData actually changes (useEffect dependencies are correct).
   useEffect(() => {
     const mapped = serverData.map(mapUserToRow)
     setData(mapped)
     setFilteredData(mapped)
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [serverData, page, pageSize, mapUserToRow])
+    // no infinite loop, dependencies only change when serverData changes (not on every render)
+  }, [serverData, mapUserToRow])
 
-  // Only filter by role here. Filtering by search comes from the backend.
+  // FIX: Only filter when listFilters or the data changes (dependencies are correct)
   useEffect(() => {
     let filtered = data
-    if (role) {
-      filtered = data?.filter(user => user.role === role)
+    if (listFilters.role) {
+      filtered = filtered.filter(user => user.roles.includes(listFilters.role))
+    }
+    if (listFilters.status) {
+      filtered = filtered.filter(user => user.status === listFilters.status)
     }
     setFilteredData(filtered)
-  }, [role, data])
+  }, [listFilters.role, listFilters.status, data])
 
-  const columns = useMemo<ColumnDef<UsersTypeWithAction, any>[]>(
+  const handleFilterChange = useCallback((f: { role: string; plan: string; status: string }) => {
+    setListFilters({ role: f.role, status: f.status })
+    setPage(0)
+  }, [])
+
+  const handleGlobalFilterChange = useCallback((value: string | number) => {
+    setGlobalFilter(String(value))
+  }, [])
+
+  const columns = useMemo<ColumnDef<UserRow, any>[]>(
     () => [
       {
         id: 'select',
@@ -235,12 +259,12 @@ const RolesTable = ({ tableData }: { tableData?: UsersType[] }) => {
         header: 'User',
         cell: ({ row }) => (
           <div className='flex items-center gap-3'>
-            {getAvatar({ avatar: row.original.avatar, fullName: row.original.fullName })}
+            {getAvatar({ avatarUrl: row.original.avatarUrl, fullName: row.original.fullName })}
             <div className='flex flex-col'>
               <Typography color='text.primary' className='font-medium'>
-                {row.original.fullName}
+                {row.original.fullName || '-'}
               </Typography>
-              <Typography variant='body2'>{row.original.username}</Typography>
+              <Typography variant='body2'>{row.original.email}</Typography>
             </div>
           </div>
         )
@@ -249,27 +273,34 @@ const RolesTable = ({ tableData }: { tableData?: UsersType[] }) => {
         header: 'Email',
         cell: ({ row }) => <Typography>{row.original.email}</Typography>
       }),
-      columnHelper.accessor('role', {
-        header: 'Role',
-        cell: ({ row }) => (
-          <div className='flex items-center gap-2'>
-            <Icon
-              className={userRoleObj[row.original.role]?.icon || 'ri-user-3-line'}
-              sx={{ color: `var(--mui-palette-${userRoleObj[row.original.role]?.color || 'primary'}-main)`, fontSize: '1.375rem' }}
-            />
-            <Typography color='text.primary' className='capitalize'>
-              {row.original.role}
-            </Typography>
-          </div>
-        )
+      columnHelper.accessor('phone', {
+        header: 'Phone',
+        cell: ({ row }) => <Typography>{row.original.phone}</Typography>
       }),
-      columnHelper.accessor('currentPlan', {
-        header: 'Plan',
-        cell: ({ row }) => (
-          <Typography color='text.primary' className='capitalize'>
-            {row.original.currentPlan}
-          </Typography>
-        )
+      columnHelper.accessor('roles', {
+        header: 'Roles',
+        cell: ({ row }) =>
+          row.original.roles && row.original.roles.length > 0 ? (
+            <div className="flex flex-wrap gap-1">
+              {row.original.roles.map((role: string, idx: number) => (
+                <Chip
+                  key={role + idx}
+                  variant='tonal'
+                  label={role}
+                  size='small'
+                  // color={userRoleObj[role]?.color || 'primary'}
+                  color='primary'
+                  className='capitalize'
+                  icon={
+                    <Icon className={userRoleObj[role]?.icon || 'ri-user-3-line'} />
+                  }
+                  sx={{ pl: 1 }}
+                />
+              ))}
+            </div>
+          ) : (
+            <Typography>-</Typography>
+          )
       }),
       columnHelper.accessor('status', {
         header: 'Status',
@@ -289,7 +320,10 @@ const RolesTable = ({ tableData }: { tableData?: UsersType[] }) => {
         header: 'Actions',
         cell: ({ row }) => (
           <div className='flex items-center gap-0.5'>
-            <IconButton size='small' onClick={() => setData(curr => curr?.filter(product => product.id !== row.original.id))}>
+            <IconButton
+              size='small'
+              onClick={() => setData(curr => curr.filter(user => user.id !== row.original.id))}
+            >
               <i className='ri-delete-bin-7-line text-textSecondary' />
             </IconButton>
             <IconButton size='small'>
@@ -300,9 +334,10 @@ const RolesTable = ({ tableData }: { tableData?: UsersType[] }) => {
             <IconButton
               size='small'
               onClick={() => {
-                const src = serverData?.[row.index]
-                setAssignUserId(src?.id)
-                setAssignUserRole((src?.role as string) || null)
+                const apiUser = serverData?.find(u => u.id === row.original.id)
+                setAssignUserId(apiUser?.id)
+                const userRoles = Array.isArray(apiUser?.roles) && apiUser?.roles.length > 0 ? apiUser.roles.map((r: any) => r.name) : []
+                setAssignUserRole(userRoles.length > 0 ? userRoles[0] : null)
                 setAssignOpen(true)
               }}
             >
@@ -322,11 +357,11 @@ const RolesTable = ({ tableData }: { tableData?: UsersType[] }) => {
                   menuItemProps: {
                     className: 'flex items-center',
                     onClick: async () => {
-                      const newRole = window.prompt('Enter new role for user', row.original.role)
-                      if (newRole !== null && newRole !== row.original.role) {
-                        const src = serverData?.[row.index]
-                        if (src?.id) {
-                          await updateUserRole({ id: src.id, role: newRole })
+                      const newRole = window.prompt('Enter new role for user', row.original.roles[0] || '')
+                      if (newRole !== null && !row.original.roles.includes(newRole)) {
+                        const apiUser = serverData?.find(u => u.id === row.original.id)
+                        if (apiUser?.id) {
+                          await updateUserRole({ id: apiUser.id, role: newRole })
                         }
                       }
                     }
@@ -343,7 +378,7 @@ const RolesTable = ({ tableData }: { tableData?: UsersType[] }) => {
   )
 
   const table = useReactTable({
-    data: filteredData as UsersType[],
+    data: filteredData,
     columns,
     filterFns: {
       fuzzy: fuzzyFilter
@@ -372,6 +407,12 @@ const RolesTable = ({ tableData }: { tableData?: UsersType[] }) => {
 
   return (
     <Card>
+      <TableFilters
+        setData={()=>{}}
+        tableData={[]}
+        onFilterChange={handleFilterChange}
+      />
+      <Divider />
       <CardContent className='flex justify-between flex-col items-start sm:flex-row sm:items-center max-sm:gap-4'>
         <Button
           variant='outlined'
@@ -385,27 +426,9 @@ const RolesTable = ({ tableData }: { tableData?: UsersType[] }) => {
           <DebouncedInput
             value={globalFilter ?? ''}
             className='max-sm:is-full min-is-[220px]'
-            onChange={value => setGlobalFilter(String(value))}
+            onChange={handleGlobalFilterChange}
             placeholder='Search User'
           />
-          <FormControl size='small' className='max-sm:is-full'>
-            <InputLabel id='roles-app-role-select-label'>Select Role</InputLabel>
-            <Select
-              value={role}
-              onChange={e => setRole(e.target.value)}
-              label='Select Role'
-              id='roles-app-role-select'
-              labelId='roles-app-role-select-label'
-              className='min-is-[150px]'
-            >
-              <MenuItem value=''>Select Role</MenuItem>
-              <MenuItem value='admin'>Admin</MenuItem>
-              <MenuItem value='author'>Author</MenuItem>
-              <MenuItem value='editor'>Editor</MenuItem>
-              <MenuItem value='maintainer'>Maintainer</MenuItem>
-              <MenuItem value='subscriber'>Subscriber</MenuItem>
-            </Select>
-          </FormControl>
         </div>
       </CardContent>
       <div className='overflow-x-auto'>

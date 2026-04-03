@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useEffect, useState, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 
 // Next Imports
 import Link from 'next/link'
@@ -19,6 +19,10 @@ import Checkbox from '@mui/material/Checkbox'
 import IconButton from '@mui/material/IconButton'
 import { styled } from '@mui/material/styles'
 import TablePagination from '@mui/material/TablePagination'
+import Dialog from '@mui/material/Dialog'
+import DialogTitle from '@mui/material/DialogTitle'
+import DialogContent from '@mui/material/DialogContent'
+import DialogActions from '@mui/material/DialogActions'
 import type { TextFieldProps } from '@mui/material/TextField'
 
 // Third-party Imports
@@ -56,8 +60,14 @@ import { getLocalizedUrl } from '@/utils/i18n'
 // Style Imports
 import tableStyles from '@core/styles/table.module.css'
 
-import { useAdminUsers } from '@/api/admin/users'
+import { useActivateUser, useAdminUsers, useDeactivateUser } from '@/api/admin/users'
 import type { UserAdmin } from '@/api/admin/users'
+import type { UsersType } from '@/types/apps/userTypes'
+
+/** Stable empty ref so TableFilters useEffect does not re-run every parent render */
+const EMPTY_TABLE_DATA: UsersType[] = []
+
+const noopSetTableData = (_data: UsersType[]) => {}
 
 declare module '@tanstack/table-core' {
   interface FilterFns {
@@ -211,6 +221,18 @@ const UserListTable = () => {
   const [data, setData] = useState<UserRowWithAction[]>([])
   const [filteredData, setFilteredData] = useState<UserRowWithAction[]>([])
 
+  // Additional state for holding the current user being edited
+  const [editUserData, setEditUserData] = useState<UserRowWithAction | null>(null)
+
+  const [statusConfirm, setStatusConfirm] = useState<{
+    open: boolean
+    action: 'activate' | 'deactivate' | null
+    user: UserRowWithAction | null
+  }>({ open: false, action: null, user: null })
+
+  const activateUserMut = useActivateUser()
+  const deactivateUserMut = useDeactivateUser()
+
   useEffect(() => {
     const t = setTimeout(() => setDebouncedSearch(globalFilter.trim()), 400)
     return () => clearTimeout(t)
@@ -218,18 +240,21 @@ const UserListTable = () => {
 
   const listParams = useMemo(() => {
     const filter: Record<string, string> = {}
-    if (listFilters.status === 'active') filter.status = 'ACTIVE'
-    else if (listFilters.status === 'inactive') filter.status = 'INACTIVE'
-    else if (listFilters.status === 'pending') filter.status = 'INACTIVE'
-    else if (listFilters.status === 'suspended') filter.status = 'SUSPENDED'
+    if (listFilters.status === 'ACTIVE') filter.status = 'ACTIVE'
+    else if (listFilters.status === 'INACTIVE') filter.status = 'INACTIVE'
+    else if (listFilters.status === 'PENDING') filter.status = 'PENDING'
+    else if (listFilters.status === 'SUSPENDED') filter.status = 'SUSPENDED'
+
 
     return {
+      onlyUsers: true,
       page: page + 1,
       pageSize,
       ...(debouncedSearch ? { search: { all: debouncedSearch } } : {}),
       ...(Object.keys(filter).length ? { filter } : {})
     }
-  }, [page, pageSize, debouncedSearch, listFilters.status])
+  }, [page, pageSize, debouncedSearch, listFilters])
+  console.log('listParams', listParams)
 
   const { data: listRes, isLoading, isFetching, isError } = useAdminUsers(listParams)
 
@@ -244,10 +269,25 @@ const UserListTable = () => {
     setPage(0)
   }, [debouncedSearch])
 
+  const handleFilterChange = useCallback((f: { role: string; plan: string; status: string }) => {
+    console.log('f', f)
+    setListFilters(f)
+    setPage(0)
+  }, [])
+
+  const openStatusConfirm = useCallback((action: 'activate' | 'deactivate', user: UserRowWithAction) => {
+    setStatusConfirm({ open: true, action, user })
+  }, [])
+
   // Hooks
   const { lang: locale } = useParams()
 
   const totalRows = listRes?.pagination?.total ?? 0
+
+  const handleEditUser = useCallback((user: UserRowWithAction) => {
+    setEditUserData(user)
+    setAddUserOpen(true)
+  }, [])
 
   const columns = useMemo<ColumnDef<UserRowWithAction, any>[]>(
     () => [
@@ -361,6 +401,12 @@ const UserListTable = () => {
                 <i className='ri-eye-line text-textSecondary' />
               </Link>
             </IconButton>
+            <IconButton
+              size='small'
+              onClick={() => handleEditUser(row.original)}
+            >
+              <i className='ri-edit-box-line text-textSecondary' />
+            </IconButton>
             <OptionMenu
               iconClassName='text-textSecondary'
               options={[
@@ -369,8 +415,26 @@ const UserListTable = () => {
                   icon: 'ri-download-line'
                 },
                 {
-                  text: 'Edit',
-                  icon: 'ri-edit-box-line'
+                  text: 'Activate user',
+                  icon: 'ri-checkbox-circle-line',
+                  menuItemProps: {
+                    disabled:
+                      row.original.status === 'active' ||
+                      activateUserMut.isPending ||
+                      deactivateUserMut.isPending,
+                    onClick: () => openStatusConfirm('activate', row.original)
+                  }
+                },
+                {
+                  text: 'Deactivate user',
+                  icon: 'ri-user-unfollow-line',
+                  menuItemProps: {
+                    disabled:
+                      row.original.status !== 'active' ||
+                      activateUserMut.isPending ||
+                      deactivateUserMut.isPending,
+                    onClick: () => openStatusConfirm('deactivate', row.original)
+                  }
                 }
               ]}
             />
@@ -380,7 +444,7 @@ const UserListTable = () => {
       })
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [data, filteredData]
+    [data, filteredData, locale, handleEditUser, openStatusConfirm, activateUserMut.isPending, deactivateUserMut.isPending]
   )
 
   const table = useReactTable({
@@ -419,17 +483,30 @@ const UserListTable = () => {
     }
   }
 
+  const handleConfirmStatusChange = async () => {
+    const id = statusConfirm.user?.serverId
+    const action = statusConfirm.action
+    if (!id || !action) return
+    try {
+      if (action === 'activate') {
+        await activateUserMut.mutateAsync(id)
+      } else {
+        await deactivateUserMut.mutateAsync(id)
+      }
+      setStatusConfirm({ open: false, action: null, user: null })
+    } catch {
+      // Toasts are handled in mutation hooks
+    }
+  }
+
   return (
     <>
       <Card>
         <CardHeader title='Filters' className='pbe-4' />
         <TableFilters
-          setData={()=>{}}
-          tableData={[]}
-          onFilterChange={f => {
-            setListFilters(f)
-            setPage(0)
-          }}
+          setData={noopSetTableData}
+          tableData={EMPTY_TABLE_DATA}
+          onFilterChange={handleFilterChange}
         />
         <Divider />
         <div className='flex justify-between gap-4 p-5 flex-col items-start sm:flex-row sm:items-center'>
@@ -451,7 +528,14 @@ const UserListTable = () => {
               placeholder='Search User'
               className='max-sm:is-full'
             />
-            <Button variant='contained' onClick={() => setAddUserOpen(!addUserOpen)} className='max-sm:is-full'>
+            <Button
+              variant='contained'
+              onClick={() => {
+                setEditUserData(null);
+                setAddUserOpen(true);
+              }}
+              className='max-sm:is-full'
+            >
               Add New User
             </Button>
           </div>
@@ -543,10 +627,49 @@ const UserListTable = () => {
       </Card>
       <AddUserDrawer
         open={addUserOpen}
-        handleClose={() => setAddUserOpen(!addUserOpen)}
-        userData={[]}
-        setData={()=>{}}
+        handleClose={() => setAddUserOpen(false)}
+        userData={editUserData ? [editUserData] : []}
       />
+
+      <Dialog
+        open={statusConfirm.open}
+        onClose={() => setStatusConfirm({ open: false, action: null, user: null })}
+        maxWidth='xs'
+        fullWidth
+      >
+        <DialogTitle>
+          {statusConfirm.action === 'activate' ? 'Activate user' : 'Deactivate user'}
+        </DialogTitle>
+        <DialogContent>
+          <Typography>
+            {statusConfirm.action === 'activate'
+              ? 'Are you sure you want to activate this user? They will be able to sign in again.'
+              : 'Are you sure you want to deactivate this user? They will no longer be able to sign in.'}
+          </Typography>
+          {statusConfirm.user && (
+            <Typography className='mt-2 font-medium' color='text.primary'>
+              {statusConfirm.user.fullName} ({statusConfirm.user.email})
+            </Typography>
+          )}
+        </DialogContent>
+        <DialogActions className='gap-2 pbs-0'>
+          <Button
+            variant='outlined'
+            color='secondary'
+            onClick={() => setStatusConfirm({ open: false, action: null, user: null })}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant='contained'
+            color={statusConfirm.action === 'deactivate' ? 'error' : 'success'}
+            disabled={activateUserMut.isPending || deactivateUserMut.isPending}
+            onClick={() => void handleConfirmStatusChange()}
+          >
+            {activateUserMut.isPending || deactivateUserMut.isPending ? 'Please wait…' : 'Confirm'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   )
 }

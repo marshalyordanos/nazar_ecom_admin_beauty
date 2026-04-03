@@ -18,6 +18,8 @@ import Typography from '@mui/material/Typography'
 // API Imports
 import { useAdminRoles } from '@/api/admin/roles'
 import { useUpdateUserRole } from '@/api/admin/users'
+import { getApiErrorMessage } from '@/libs/toastUtils'
+import { toast } from 'react-toastify'
 
 type AssignRoleDialogProps = {
 	open: boolean
@@ -43,15 +45,19 @@ const AssignRoleDialog = ({ open, setOpen, userId, currentRole, onSuccess }: Ass
 	}
 
 	const handleConfirm = async () => {
+		console.log('role', role)
+		console.log('userId', userId)
 		if (!userId || !role) return
 		try {
 			setSubmitting(true)
-			await updateUserRole({ id: userId, role })
+			await updateUserRole({ id: role, userId })
 			onSuccess?.()
-			setOpen(false)
+			setOpen(false)		
+			// toast.success('Role assigned to user successfully');
 		} catch (e) {
 			// eslint-disable-next-line no-console
 			console.error(e)
+			// toast.error(getApiErrorMessage(e, 'Failed to assign role to user'));
 			// Keep dialog open for retry
 		} finally {
 			setSubmitting(false)
@@ -77,7 +83,7 @@ const AssignRoleDialog = ({ open, setOpen, userId, currentRole, onSuccess }: Ass
 						onChange={e => setRole(e.target.value)}
 					>
 						{roles.map(r => (
-							<MenuItem key={r.id} value={r.name}>
+							<MenuItem key={r.id} value={r.id}>
 								{r.name}
 							</MenuItem>
 						))}
