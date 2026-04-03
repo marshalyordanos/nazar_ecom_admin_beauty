@@ -357,13 +357,7 @@ const RolesTable = () => {
                   menuItemProps: {
                     className: 'flex items-center',
                     onClick: async () => {
-                      const newRole = window.prompt('Enter new role for user', row.original.roles[0] || '')
-                      if (newRole !== null && !row.original.roles.includes(newRole)) {
-                        const apiUser = serverData?.find(u => u.id === row.original.id)
-                        if (apiUser?.id) {
-                          await updateUserRole({ id: apiUser.id, role: newRole })
-                        }
-                      }
+                     
                     }
                   }
                 }

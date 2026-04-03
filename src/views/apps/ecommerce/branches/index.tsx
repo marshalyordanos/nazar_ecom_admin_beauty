@@ -15,7 +15,7 @@ const BranchesList = ({ userData }: { userData?: UsersType[] }) => {
         <BranchesCards />
       </Grid>
       <Grid size={{ xs: 12 }}>
-        <BranchesTable  tableData={userData} />
+        <BranchesTable />
       </Grid>
     </Grid>
   )
