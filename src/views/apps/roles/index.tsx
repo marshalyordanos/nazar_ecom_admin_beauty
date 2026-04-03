@@ -31,7 +31,7 @@ const Roles = ({ userData }: { userData?: UsersType[] }) => {
         <Typography>Find all of your company&#39;s administrator accounts and their associate roles.</Typography>
       </Grid>
       <Grid size={{ xs: 12 }}>
-        <RolesTable tableData={userData} />
+        <RolesTable  />
       </Grid>
     </Grid>
   )
