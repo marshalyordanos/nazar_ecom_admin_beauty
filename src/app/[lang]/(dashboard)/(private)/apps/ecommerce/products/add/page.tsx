@@ -58,9 +58,9 @@ const eCommerceProductsAdd = () => {
       variantStatus: 'ACTIVE',
       image: null,
 
-      locationId: '',
-      type: '',
-      quantity: '',
+      // locationId: '',
+      // type: '',
+      // quantity: '',
 
       // option values
       optionValueIds: []
@@ -78,9 +78,9 @@ const eCommerceProductsAdd = () => {
         costPrice: variant?.costPrice ? String(variant?.costPrice):  '',
         weight: variant?.weight ? String(variant?.weight):  '',
         variantStatus: variant?.status ,
-        locationId: variant?.inventories?.[0]?.locationId ?? '',
-        // type: variant?.inventories?.[0]?.movements?.[0]?.type ?? '',
-        quantity: variant?.inventories?.[0]?.quantity ? String(variant?.inventories?.[0]?.quantity):  '',
+        // locationId: variant?.inventories?.[0]?.locationId ?? '',
+        // // type: variant?.inventories?.[0]?.movements?.[0]?.type ?? '',
+        // quantity: variant?.inventories?.[0]?.quantity ? String(variant?.inventories?.[0]?.quantity):  '',
         // image: variant?.image ?? '',
         optionValueIds: variant?.variantOptionValues?.map((optionValue: any) => optionValue.optionValueId) ?? [],
 
@@ -239,20 +239,20 @@ const eCommerceProductsAdd = () => {
          { !onlyVariation && <Grid size={{ xs: 12 }}>
             <ProductInformation />
           </Grid>}
-         {(onlyVariation||!isUpdate)&& <p className='text-lg font-bold'>Variants</p>}
-         {(onlyVariation||!isUpdate)&& <Grid size={{ xs: 12 }}>
+         {(onlyVariation)&& <p className='text-lg font-bold'>Variants</p>}
+         {(onlyVariation)&& <Grid size={{ xs: 12 }}>
             <ProductImage url={variant?.image??''} />
           </Grid>}
-         { (onlyVariation||!isUpdate)&& <Grid size={{ xs: 12 }}>
+         { (onlyVariation)&& <Grid size={{ xs: 12 }}>
             <ProductPricing variantStatus={variant?.status ?? 'DRAFT'} />
           </Grid>}
-          {(onlyVariation||!isUpdate)&& <Grid size={{ xs: 12 }}>
+          {(onlyVariation)&& <Grid size={{ xs: 12 }}>
             <ProductVariants optionValue= {variant?.variantOptionValues}  isUpdate={isUpdate === 'true' ? true : false} />
           </Grid>}
         
-          {!isUpdate&& <Grid size={{ xs: 12 }}>
+          {/* {!isUpdate&& <Grid size={{ xs: 12 }}>
             <ProductInventory2 />
-          </Grid>}
+          </Grid>} */}
         </Grid>
       </Grid>
     { !onlyVariation && <Grid size={{ xs: 12, md: 4 }}>
