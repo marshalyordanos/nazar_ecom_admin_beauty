@@ -14,8 +14,8 @@ const verticalMenuData = (dictionary: Awaited<ReturnType<typeof getDictionary>>)
     children: [
       // This is how you will normally render menu item
       {
-        label: dictionary['navigation'].crm,
-        href: '/dashboards/crm'
+        label: dictionary['navigation'].overview,
+        href: '/dashboards/overview'
       },
       {
         label: dictionary['navigation'].analytics,
@@ -126,6 +126,10 @@ const verticalMenuData = (dictionary: Awaited<ReturnType<typeof getDictionary>>)
                 activeUrl: '/apps/ecommerce/orders/details'
               }
             ]
+          },
+          {
+            label: dictionary['navigation'].salesFromShop,
+            href: '/apps/ecommerce/sales-from-shop'
           },
           {
             label: dictionary['navigation'].customers,

@@ -56,7 +56,7 @@ const schema = object({
   password: pipe(
     string(),
     nonEmpty('This field is required'),
-    minLength(5, 'Password must be at least 5 characters long')
+    minLength(3, 'Password must be at least 3 characters long')
   )
 })
 

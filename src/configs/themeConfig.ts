@@ -55,7 +55,7 @@ export type Config = {
 
 const themeConfig: Config = {
   templateName: 'Materialize',
-  homePageUrl: '/dashboards/crm',
+  homePageUrl: '/dashboards/overview',
   settingsCookieName: 'materialize-mui-next-demo-1',
   mode: 'system', // 'system', 'light', 'dark'
   skin: 'default', // 'default', 'bordered'

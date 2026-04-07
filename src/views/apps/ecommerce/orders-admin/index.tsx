@@ -10,6 +10,9 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
+import FormControl from '@mui/material/FormControl'
+import InputLabel from '@mui/material/InputLabel'
+import Select from '@mui/material/Select'
 import Chip from '@mui/material/Chip'
 import TablePagination from '@mui/material/TablePagination'
 import IconButton from '@mui/material/IconButton'
@@ -235,10 +238,23 @@ function OrderActions({
 }
 
 // This makes the table similar in style to ProductListTable
+const ORDER_STATUSES = [
+  'PENDING',
+  'PAID',
+  'PROCESSING',
+  'SHIPPED',
+  'COMPLETED',
+  'CANCELLED',
+  'REFUNDED'
+] as const
+
 const OrdersAdminManagement = () => {
   const [page, setPage] = useState(0)
   const [pageSize, setPageSize] = useState(10)
   const [search, setSearch] = useState('')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
 
   const { data: summary, isLoading: sumLoading, isError: sumError } = useDashboardSummary()
   const ord = summary?.data?.orders
@@ -248,14 +264,19 @@ const OrdersAdminManagement = () => {
     '{\n  "shopId": "",\n  "userId": "",\n  "subtotal": 0,\n  "grandTotal": 0,\n  "currency": "USD",\n  "items": [],\n  "address": {\n    "name": "",\n    "phone": "",\n    "addressLine1": "",\n    "city": "",\n    "country": ""\n  }\n}'
   )
 
-  const params = useMemo(
-    () => ({
+  const params = useMemo(() => {
+    const filter: Record<string, string> = {}
+    if (dateFrom) filter.createdAt_gte = new Date(`${dateFrom}T00:00:00.000Z`).toISOString()
+    if (dateTo) filter.createdAt_lte = new Date(`${dateTo}T23:59:59.999Z`).toISOString()
+    if (statusFilter) filter.status = statusFilter
+
+    return {
       page: page + 1,
       pageSize,
-      ...(search.trim() ? { search: { all: search.trim() } } : {})
-    }),
-    [page, pageSize, search]
-  )
+      ...(search.trim() ? { search: { all: search.trim() } } : {}),
+      ...(Object.keys(filter).length ? { filter } : {})
+    }
+  }, [page, pageSize, search, dateFrom, dateTo, statusFilter])
   const { data, isLoading, isFetching } = useAdminOrders(params)
   const completeMut = useCompleteOrder()
   const cancelMut = useCancleOrder()
@@ -356,7 +377,50 @@ const OrdersAdminManagement = () => {
       <Typography variant="h4" className="mb-6 font-medium">Order Management</Typography>
       <Card>
         <CardContent>
-          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between mb-4">
+          <div className="flex flex-col gap-3 mb-4">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3 items-start sm:items-end">
+              <TextField
+                size="small"
+                type="date"
+                label="From"
+                InputLabelProps={{ shrink: true }}
+                value={dateFrom}
+                onChange={e => {
+                  setDateFrom(e.target.value)
+                  setPage(0)
+                }}
+              />
+              <TextField
+                size="small"
+                type="date"
+                label="To"
+                InputLabelProps={{ shrink: true }}
+                value={dateTo}
+                onChange={e => {
+                  setDateTo(e.target.value)
+                  setPage(0)
+                }}
+              />
+              <FormControl size="small" sx={{ minWidth: 160 }}>
+                <InputLabel id="ord-status-filter">Status</InputLabel>
+                <Select
+                  labelId="ord-status-filter"
+                  label="Status"
+                  value={statusFilter}
+                  onChange={e => {
+                    setStatusFilter(e.target.value)
+                    setPage(0)
+                  }}
+                >
+                  <MenuItem value="">All</MenuItem>
+                  {ORDER_STATUSES.map(s => (
+                    <MenuItem key={s} value={s}>
+                      {s}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </div>
             <TextField
               size="small"
               placeholder="Search order number, user, product, status etc"
@@ -365,11 +429,8 @@ const OrdersAdminManagement = () => {
                 setSearch(e.target.value)
                 setPage(0)
               }}
-              className="max-sm:w-full"
+              className="max-sm:w-full sm:max-w-md"
             />
-            {/* <Button variant="contained" onClick={() => setOpenCreate(true)}>
-              Create Admin Order
-            </Button> */}
           </div>
           <div className="overflow-x-auto">
             <table className={tableStyles.table}>

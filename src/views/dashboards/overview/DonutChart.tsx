@@ -15,12 +15,22 @@ import type { ApexOptions } from 'apexcharts'
 // Styled Component Imports
 const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexCharts'))
 
-// Vars
-const series = [35, 30, 23]
-
-const DonutChart = () => {
+const DonutChart = ({ orders, overviewData }: { orders: any, overviewData: any }) => {
   // Hooks
   const theme = useTheme()
+
+  // Prepare donut chart data from overviewData.ordersByStatus
+  // Fallback to 0 if any value is missing
+  const ordersByStatus = overviewData?.ordersByStatus || {}
+  const pending = Number(ordersByStatus.PENDING) || 0
+  const completed = Number(ordersByStatus.COMPLETED) || 0
+  const refunded = Number(ordersByStatus.REFUNDED) || 0
+  const total = pending + completed + refunded
+  // Fallback for donut series, never empty array to avoid ApexCharts error
+  const series = total > 0 ? [pending, completed, refunded] : [0, 0, 0]
+
+  // Labels map to statuses (can update for display if needed)
+  const labels = ['Pending', 'Completed', 'Refunded']
 
   const options: ApexOptions = {
     legend: { show: false },
@@ -33,10 +43,21 @@ const DonutChart = () => {
         bottom: 13
       }
     },
-    colors: ['var(--mui-palette-primary-main)', 'var(--mui-palette-success-main)', 'var(--mui-palette-secondary-main)'],
-    labels: [`${new Date().getFullYear()}`, `${new Date().getFullYear() - 1}`, `${new Date().getFullYear() - 2}`],
+    colors: [
+      'var(--mui-palette-warning-main)', // Pending - yellow/orange
+      'var(--mui-palette-success-main)', // Completed - green
+      'var(--mui-palette-error-main)',   // Refunded - red
+    ],
+    labels: labels,
     tooltip: {
-      y: { formatter: (val: number) => `${val}%` }
+      y: {
+        formatter: (val: number) => {
+          // Value is absolute, show also percentage if possible
+          if (!total) return `${val}`
+          const percent = ((val / total) * 100).toFixed(1)
+          return `${val} (${percent}%)`
+        }
+      }
     },
     dataLabels: {
       enabled: false
@@ -62,13 +83,17 @@ const DonutChart = () => {
               fontWeight: 600,
               fontSize: '1rem',
               color: 'var(--mui-palette-text-secondary)',
-              formatter: val => (typeof val === 'string' ? `${val}%` : '12%')
+              // Show total orders in the center
+              formatter: () =>
+                typeof overviewData?.totalOrders === 'number'
+                  ? `${overviewData.totalOrders} `
+                  : '0'
             },
             value: {
               offsetY: 6,
               fontWeight: 600,
               fontSize: '0.9375rem',
-              formatter: val => `${val}%`,
+              formatter: (val: any) => `${val}`,
               color: 'var(--mui-palette-text-primary)'
             }
           }
@@ -107,14 +132,31 @@ const DonutChart = () => {
     ]
   }
 
+  // Calculate growth, fallback to 0 if missing
+  const growth =
+    typeof orders?.growth === 'number'
+      ? orders.growth
+      : 0
+
+  // Color for positive/negative growth
+  const growthColor = growth > 0 ? 'success.main' : (growth < 0 ? 'error.main' : 'text.secondary')
+  // Format growth with percent sign, always show sign for clarity
+  const formattedGrowth =
+    growth > 0 ? `+${growth}%`
+    : growth < 0 ? `${growth}%`
+    : '0%'
+
+  // Show thisMonth orders in headline
+  const thisMonthOrders = typeof orders?.thisMonth === 'number' ? orders.thisMonth : 0
+
   return (
     <Card className='bs-full'>
       <CardContent className='pbe-0'>
         <div className='flex flex-wrap items-center gap-1'>
-          <Typography variant='h5'>$27.9k</Typography>
-          <Typography color='success.main'>+16%</Typography>
+          <Typography variant='h5'>{thisMonthOrders}</Typography>
+          <Typography color={growthColor}>{formattedGrowth}</Typography>
         </div>
-        <Typography variant='subtitle1'>Total Growth</Typography>
+        <Typography variant='subtitle1'>This Month Orders</Typography>
         <AppReactApexCharts type='donut' height={127} width='100%' options={options} series={series} />
       </CardContent>
     </Card>

@@ -26,7 +26,7 @@ const defaultSuggestions: DefaultSuggestionsType[] = [
     items: [
       {
         label: 'CRM',
-        href: '/dashboards/crm',
+        href: '/dashboards/overview',
         icon: 'ri-pie-chart-2-line'
       },
       {

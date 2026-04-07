@@ -14,24 +14,36 @@ import type { ApexOptions } from 'apexcharts'
 
 // Components Imports
 import OptionMenu from '@core/components/option-menu'
+import { useDashboardPaymentSummary } from '@/api/admin/dashboard'
 
 // Styled Component Imports
 const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexCharts'))
 
-const OrganicSessions = () => {
-  // Hooks
+const OrganicSessions = ({ paymentSummary }: { paymentSummary: any }) => {
+
   const theme = useTheme()
+
+  // Map paymentSummary to data for the donut chart
+  // We'll display Paid, Refunded, Pending, Failed in a fixed order
+  // Fallback to 0 if missing
+  const paid = typeof paymentSummary?.paid === "number" ? paymentSummary.paid : 0
+  const refunded = typeof paymentSummary?.refunded === "number" ? paymentSummary.refunded : 0
+  const pending = typeof paymentSummary?.pending === "number" ? paymentSummary.pending : 0
+  const failed = typeof paymentSummary?.failed === "number" ? paymentSummary.failed : 0
+
+  // Aggregate series and labels for payment types
+  const series = [paid, refunded, pending, failed] // order: Paid, Refunded, Pending, Failed
+  const labels = ["Paid", "Refunded", "Pending", "Failed"]
 
   const options: ApexOptions = {
     chart: {
       sparkline: { enabled: true }
     },
     colors: [
-      'var(--mui-palette-warning-main)',
-      'rgba(var(--mui-palette-warning-mainChannel) / 0.8)',
-      'rgba(var(--mui-palette-warning-mainChannel) / 0.6)',
-      'rgba(var(--mui-palette-warning-mainChannel) / 0.4)',
-      'rgba(var(--mui-palette-warning-mainChannel) / 0.2)'
+      'var(--mui-palette-warning-main)', // Paid
+      'rgba(var(--mui-palette-warning-mainChannel) / 0.8)', // Refunded
+      'rgba(var(--mui-palette-warning-mainChannel) / 0.6)', // Pending
+      'rgba(var(--mui-palette-warning-mainChannel) / 0.4)' // Failed
     ],
     grid: {
       padding: {
@@ -60,7 +72,7 @@ const OrganicSessions = () => {
     tooltip: { enabled: false },
     dataLabels: { enabled: false },
     stroke: { width: 4, lineCap: 'round', colors: ['var(--mui-palette-background-paper)'] },
-    labels: ['USA', 'India', 'Canada', 'Japan', 'France'],
+    labels: labels,
     states: {
       hover: {
         filter: { type: 'none' }
@@ -87,7 +99,7 @@ const OrganicSessions = () => {
               offsetY: -15,
               fontWeight: 500,
               fontSize: '1.75rem',
-              formatter: value => `${value}k`,
+              formatter: value => `${value} Br.`,
               color: 'var(--mui-palette-text-primary)'
             },
             total: {
@@ -95,7 +107,7 @@ const OrganicSessions = () => {
               label: '2022',
               fontSize: '1rem',
               color: 'var(--mui-palette-text-secondary)',
-              formatter: value => `${value.globals.seriesTotals.reduce((total: number, num: number) => total + num)}k`
+              formatter: value => `${value.globals.seriesTotals.reduce((total: number, num: number) => total + num)} Br.`
             }
           }
         }
@@ -106,11 +118,11 @@ const OrganicSessions = () => {
   return (
     <Card>
       <CardHeader
-        title='Organic Sessions'
+        title='Payment Summary'
         action={<OptionMenu options={['Last 28 Days', 'Last Month', 'Last Year']} />}
       />
       <CardContent>
-        <AppReactApexCharts type='donut' height={373} width='100%' options={options} series={[13, 18, 18, 24, 16]} />
+        <AppReactApexCharts type='donut' height={373} width='100%' options={options} series={series} />
       </CardContent>
     </Card>
   )

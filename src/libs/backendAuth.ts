@@ -1,12 +1,22 @@
 'use client'
 
+export type PermissionRow = {
+  resource: string
+  create: boolean
+  read: boolean
+  update: boolean
+  delete: boolean
+}
+
 export type AuthUser = {
   id?: string
   email?: string
   firstName?: string
   lastName?: string
+  phone?: string | null
   roles?: string[]
   isSuperAdmin?: boolean
+  permissions?: PermissionRow[]
 }
 
 const ACCESS_TOKEN_COOKIE = 'accessToken'
@@ -91,6 +101,7 @@ export function getStoredAuthUser(): AuthUser | null {
 export function setStoredAuthUser(user: AuthUser) {
   if (typeof window === 'undefined') return
   window.localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user))
+  window.dispatchEvent(new Event('auth-user-updated'))
 }
 
 export function clearStoredAuthUser() {

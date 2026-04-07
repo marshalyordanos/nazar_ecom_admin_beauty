@@ -1,7 +1,7 @@
 {
   "navigation": {
     "dashboards": "Dashboards",
-    "crm": "CRM",
+    "overview": "Overview",
     "analytics": "Analytics",
     "eCommerce": "eCommerce",
     "academy": "Academy",
@@ -26,6 +26,7 @@
     "category": "Category",
     "variantOptions": "Variant options",
     "orders": "Orders",
+    "salesFromShop": "Shop sales",
     "details": "Details",
     "customers": "Customers",
     "manageReviews": "Manage Reviews",

@@ -10,9 +10,9 @@ const horizontalMenuData = (dictionary: Awaited<ReturnType<typeof getDictionary>
     children: [
       // This is how you will normally render menu item
       {
-        label: dictionary['navigation'].crm,
+        label: dictionary['navigation'].overview,
         icon: 'ri-pie-chart-2-line',
-        href: '/dashboards/crm'
+        href: '/dashboards/overview'
       },
       {
         label: dictionary['navigation'].analytics,
@@ -83,6 +83,10 @@ const horizontalMenuData = (dictionary: Awaited<ReturnType<typeof getDictionary>
                 activeUrl: '/apps/ecommerce/orders/details'
               }
             ]
+          },
+          {
+            label: dictionary['navigation'].salesFromShop,
+            href: '/apps/ecommerce/sales-from-shop'
           },
           {
             label: dictionary['navigation'].customers,

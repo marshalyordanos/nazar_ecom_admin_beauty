@@ -1,7 +1,7 @@
 {
   "navigation": {
     "dashboards": "لوحات القيادة",
-    "crm": "إدارة علاقات العملاء",
+    "overview": "نظرة عامة",
     "analytics": "تحليلات",
     "eCommerce": "التجارة الإلكترونية",
     "academy": "أكاديمية",
@@ -26,6 +26,7 @@
     "category": "فئة",
     "variantOptions": "خيارات المتغير",
     "orders": "أوامر",
+    "salesFromShop": "مبيعات المتجر",
     "details": "تفاصيل",
     "customers": "العملاء",
     "manageReviews": "إدارة المراجعات",

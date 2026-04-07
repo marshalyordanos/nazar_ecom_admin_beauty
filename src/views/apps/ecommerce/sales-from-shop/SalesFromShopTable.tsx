@@ -1,0 +1,322 @@
+'use client'
+
+import { useEffect, useState } from 'react'
+
+import Button from '@mui/material/Button'
+import Card from '@mui/material/Card'
+import Dialog from '@mui/material/Dialog'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import DialogTitle from '@mui/material/DialogTitle'
+import FormControl from '@mui/material/FormControl'
+import IconButton from '@mui/material/IconButton'
+import InputLabel from '@mui/material/InputLabel'
+import MenuItem from '@mui/material/MenuItem'
+import Select from '@mui/material/Select'
+import Table from '@mui/material/Table'
+import TableBody from '@mui/material/TableBody'
+import TableCell from '@mui/material/TableCell'
+import TableContainer from '@mui/material/TableContainer'
+import TableHead from '@mui/material/TableHead'
+import TablePagination from '@mui/material/TablePagination'
+import TableRow from '@mui/material/TableRow'
+import TextField from '@mui/material/TextField'
+import Typography from '@mui/material/Typography'
+import type { TextFieldProps } from '@mui/material/TextField'
+
+import type { SaleFromShopRow } from '@/api/sales/useSaleFromShop'
+import type { Shop } from '@/types/shop'
+
+import tableStyles from '@core/styles/table.module.css'
+
+const DebouncedInput = ({
+  value: initialValue,
+  onChange,
+  debounce = 400,
+  ...props
+}: {
+  value: string
+  onChange: (value: string) => void
+  debounce?: number
+} & Omit<TextFieldProps, 'onChange'>) => {
+  const [value, setValue] = useState(initialValue)
+
+  useEffect(() => {
+    setValue(initialValue)
+  }, [initialValue])
+
+  useEffect(() => {
+    const t = setTimeout(() => onChange(value), debounce)
+
+    return () => clearTimeout(t)
+    // Intentionally omit onChange from deps — parent should pass a stable callback (useCallback).
+  }, [value, debounce, onChange])
+
+  return <TextField {...props} value={value} onChange={e => setValue(e.target.value)} size='small' />
+}
+
+type Props = {
+  rows: SaleFromShopRow[]
+  total: number
+  page: number
+  pageSize: number
+  onPageChange: (page: number) => void
+  onPageSizeChange: (size: number) => void
+  search: string
+  onSearchChange: (v: string) => void
+  shops: Shop[]
+  shopFilter: string
+  locationFilter: string
+  onShopFilter: (id: string) => void
+  onLocationFilter: (id: string) => void
+  isLoading: boolean
+  listError?: boolean
+  currency?: string
+  onEdit: (row: SaleFromShopRow, payload: { quantity?: number; price?: number }) => void
+  onDelete: (id: string) => void
+  isMutating?: boolean
+}
+
+const SalesFromShopTable = ({
+  rows,
+  total,
+  page,
+  pageSize,
+  onPageChange,
+  onPageSizeChange,
+  search,
+  onSearchChange,
+  shops,
+  shopFilter,
+  locationFilter,
+  onShopFilter,
+  onLocationFilter,
+  isLoading,
+  listError,
+  currency = 'USD',
+  onEdit,
+  onDelete,
+  isMutating
+}: Props) => {
+  const [editRow, setEditRow] = useState<SaleFromShopRow | null>(null)
+  const [editQty, setEditQty] = useState('')
+  const [editPrice, setEditPrice] = useState('')
+  const [deleteId, setDeleteId] = useState<string | null>(null)
+
+  const locations = shops.find(s => s.id === shopFilter)?.locations ?? []
+
+  useEffect(() => {
+    if (editRow) {
+      setEditQty(String(editRow.quantity))
+      setEditPrice(String(editRow.price))
+    }
+  }, [editRow])
+
+  const fmtMoney = (n: number) =>
+    new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(n)
+
+  const handleSaveEdit = () => {
+    if (!editRow) return
+    const q = parseInt(editQty, 10)
+    const p = parseFloat(editPrice)
+    const payload: { quantity?: number; price?: number } = {}
+    if (editQty !== '' && Number.isFinite(q) && q !== editRow.quantity) payload.quantity = q
+    if (editPrice !== '' && Number.isFinite(p) && p !== editRow.price) payload.price = p
+    if (Object.keys(payload).length === 0) {
+      setEditRow(null)
+
+      return
+    }
+    onEdit(editRow, payload)
+    setEditRow(null)
+  }
+
+  return (
+    <>
+      <Card>
+        <div className='flex flex-col gap-4 p-5'>
+          <Typography variant='h5'>Shop sales</Typography>
+          <div className='flex flex-wrap items-center gap-4 max-sm:flex-col max-sm:is-full'>
+            <DebouncedInput
+              value={search}
+              onChange={onSearchChange}
+              placeholder='Search product, SKU, shop, location…'
+              className='max-sm:is-full sm:is-[280px]'
+            />
+            <FormControl size='small' className='min-is-[180px] max-sm:is-full'>
+              <InputLabel id='sfs-shop'>Shop</InputLabel>
+              <Select
+                labelId='sfs-shop'
+                label='Shop'
+                value={shopFilter}
+                onChange={e => onShopFilter(e.target.value)}
+              >
+                <MenuItem value=''>All shops</MenuItem>
+                {shops.map(s => (
+                  <MenuItem key={s.id} value={s.id}>
+                    {s.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            <FormControl size='small' className='min-is-[180px] max-sm:is-full' disabled={!shopFilter}>
+              <InputLabel id='sfs-loc'>Location</InputLabel>
+              <Select
+                labelId='sfs-loc'
+                label='Location'
+                value={locationFilter}
+                onChange={e => onLocationFilter(e.target.value)}
+              >
+                <MenuItem value=''>All locations</MenuItem>
+                {locations.map(l => (
+                  <MenuItem key={l.id} value={l.id}>
+                    {l.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </div>
+        </div>
+        <TableContainer>
+          <Table className={tableStyles.table}>
+            <TableHead>
+              <TableRow>
+                <TableCell>Date</TableCell>
+                <TableCell>Shop</TableCell>
+                <TableCell>Location</TableCell>
+                <TableCell>Product</TableCell>
+                <TableCell>SKU</TableCell>
+                <TableCell align='right'>Qty</TableCell>
+                <TableCell align='right'>Price</TableCell>
+                <TableCell align='right'>Total</TableCell>
+                <TableCell align='right'>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {listError ? (
+                <TableRow>
+                  <TableCell colSpan={9}>
+                    <Typography color='error'>Could not load sales. Try again.</Typography>
+                  </TableCell>
+                </TableRow>
+              ) : isLoading ? (
+                <TableRow>
+                  <TableCell colSpan={9}>
+                    <Typography color='text.secondary'>Loading…</Typography>
+                  </TableCell>
+                </TableRow>
+              ) : rows.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={9}>
+                    <Typography color='text.secondary'>No sales found</Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                rows.map(row => (
+                  <TableRow key={row.id}>
+                    <TableCell>
+                      {new Date(row.createdAt).toLocaleString(undefined, {
+                        dateStyle: 'short',
+                        timeStyle: 'short'
+                      })}
+                    </TableCell>
+                    <TableCell>{row.location.shop.name}</TableCell>
+                    <TableCell>{row.location.name}</TableCell>
+                    <TableCell>{row.variant.product.name}</TableCell>
+                    <TableCell>{row.variant.sku}</TableCell>
+                    <TableCell align='right'>{row.quantity}</TableCell>
+                    <TableCell align='right'>{fmtMoney(row.price)}</TableCell>
+                    <TableCell align='right'>{fmtMoney(row.total)}</TableCell>
+                    <TableCell align='right'>
+                      <IconButton
+                        size='small'
+                        onClick={() => setEditRow(row)}
+                        disabled={isMutating}
+                        aria-label='Edit'
+                      >
+                        <i className='ri-edit-line text-textSecondary' />
+                      </IconButton>
+                      <IconButton
+                        size='small'
+                        onClick={() => setDeleteId(row.id)}
+                        disabled={isMutating}
+                        aria-label='Delete'
+                      >
+                        <i className='ri-delete-bin-7-line text-error' />
+                      </IconButton>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
+        </TableContainer>
+        <TablePagination
+          component='div'
+          count={total}
+          page={page - 1}
+          onPageChange={(_, p) => onPageChange(p + 1)}
+          rowsPerPage={pageSize}
+          onRowsPerPageChange={e => onPageSizeChange(parseInt(e.target.value, 10))}
+          rowsPerPageOptions={[5, 10, 25, 50]}
+        />
+      </Card>
+
+      <Dialog open={!!editRow} onClose={() => setEditRow(null)} maxWidth='xs' fullWidth>
+        <DialogTitle>Edit sale line</DialogTitle>
+        <DialogContent className='flex flex-col gap-4 pt-2'>
+          <TextField
+            label='Quantity'
+            type='number'
+            inputProps={{ min: 1 }}
+            value={editQty}
+            onChange={e => setEditQty(e.target.value)}
+            fullWidth
+          />
+          <TextField
+            label='Unit price'
+            type='number'
+            inputProps={{ min: 0, step: '0.01' }}
+            value={editPrice}
+            onChange={e => setEditPrice(e.target.value)}
+            fullWidth
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button variant='outlined' onClick={() => setEditRow(null)}>
+            Cancel
+          </Button>
+          <Button variant='contained' onClick={handleSaveEdit}>
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={!!deleteId} onClose={() => setDeleteId(null)}>
+        <DialogTitle>Delete this sale?</DialogTitle>
+        <DialogContent>
+          <Typography variant='body2' color='text.secondary'>
+            Stock will be returned to the location inventory. This cannot be undone.
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button variant='outlined' onClick={() => setDeleteId(null)}>
+            Cancel
+          </Button>
+          <Button
+            color='error'
+            variant='contained'
+            onClick={() => {
+              if (deleteId) onDelete(deleteId)
+              setDeleteId(null)
+            }}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
+  )
+}
+
+export default SalesFromShopTable

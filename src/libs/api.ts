@@ -4,7 +4,9 @@ import {
   clearAuthCookies,
   getAccessTokenFromCookies,
   getRefreshTokenFromCookies,
-  persistAuthTokens
+  persistAuthTokens,
+  setStoredAuthUser,
+  type AuthUser
 } from '@/libs/backendAuth'
 
 const baseURL = process.env.NEXT_PUBLIC_API_URL
@@ -76,6 +78,15 @@ api.interceptors.request.use(config => {
   return config
 })
 
+function requestUrl(config: InternalAxiosRequestConfig): string {
+  const path = String(config.url || '')
+  const b = String(config.baseURL || baseURL || '')
+  if (path.startsWith('http')) return path
+  const base = b.replace(/\/$/, '')
+  const p = path.startsWith('/') ? path : `/${path}`
+  return `${base}${p}`
+}
+
 api.interceptors.response.use(
   res => res,
   async (error: AxiosError) => {
@@ -89,9 +100,14 @@ api.interceptors.response.use(
       return Promise.reject(error)
     }
 
-    const url = String(original.url || '')
+    const resolved = requestUrl(original)
+    if (resolved.includes('/auth/refresh') || resolved.includes('/auth/login')) {
+      return Promise.reject(error)
+    }
 
-    if (url.includes('/auth/refresh') || url.includes('/auth/login')) {
+    if (typeof window !== 'undefined' && !getRefreshTokenFromCookies()) {
+      clearAuthCookies()
+      window.location.assign(getLoginPath())
       return Promise.reject(error)
     }
 

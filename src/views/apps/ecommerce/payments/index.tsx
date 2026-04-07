@@ -4,6 +4,10 @@ import { useMemo, useState } from 'react'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
+import FormControl from '@mui/material/FormControl'
+import InputLabel from '@mui/material/InputLabel'
+import MenuItem from '@mui/material/MenuItem'
+import Select from '@mui/material/Select'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
@@ -14,7 +18,6 @@ import Chip from '@mui/material/Chip'
 import TablePagination from '@mui/material/TablePagination'
 import IconButton from '@mui/material/IconButton'
 import Menu from '@mui/material/Menu'
-import MenuItem from '@mui/material/MenuItem'
 import tableStyles from '@core/styles/table.module.css'
 import { useAdminPayments, useCapturePayment, useRefundPayment } from '@/api/admin/payments'
 import { useDashboardSummary } from '@/api/admin/dashboard'
@@ -188,22 +191,32 @@ function PaymentActions({
   )
 }
 
+const PAYMENT_STATUSES = ['PENDING', 'PAID', 'FAILED', 'REFUNDED'] as const
+
 const PaymentsManagement = () => {
   const [page, setPage] = useState(0)
   const [pageSize, setPageSize] = useState(10)
   const [search, setSearch] = useState('')
+  const [dateFrom, setDateFrom] = useState('')
+  const [dateTo, setDateTo] = useState('')
+  const [statusFilter, setStatusFilter] = useState('')
 
   const { data: summary, isLoading: sumLoading, isError: sumError } = useDashboardSummary()
   const pay = summary?.data?.payments
 
-  const params = useMemo(
-    () => ({
+  const params = useMemo(() => {
+    const filter: Record<string, string> = {}
+    if (dateFrom) filter.createdAt_gte = new Date(`${dateFrom}T00:00:00.000Z`).toISOString()
+    if (dateTo) filter.createdAt_lte = new Date(`${dateTo}T23:59:59.999Z`).toISOString()
+    if (statusFilter) filter.status = statusFilter
+
+    return {
       page: page + 1,
       pageSize,
-      ...(search.trim() ? { search: { all: search.trim() } } : {})
-    }),
-    [page, pageSize, search]
-  )
+      ...(search.trim() ? { search: { all: search.trim() } } : {}),
+      ...(Object.keys(filter).length ? { filter } : {})
+    }
+  }, [page, pageSize, search, dateFrom, dateTo, statusFilter])
 
   const { data, isLoading, isFetching } = useAdminPayments(params)
   const captureMut = useCapturePayment()
@@ -281,7 +294,50 @@ const PaymentsManagement = () => {
       <Typography variant="h4" className="mb-6 font-medium">Payment Management</Typography>
       <Card>
         <CardContent>
-          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center justify-between mb-4">
+          <div className="flex flex-col gap-3 mb-4">
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3 items-start sm:items-end">
+              <TextField
+                size="small"
+                type="date"
+                label="From"
+                InputLabelProps={{ shrink: true }}
+                value={dateFrom}
+                onChange={e => {
+                  setDateFrom(e.target.value)
+                  setPage(0)
+                }}
+              />
+              <TextField
+                size="small"
+                type="date"
+                label="To"
+                InputLabelProps={{ shrink: true }}
+                value={dateTo}
+                onChange={e => {
+                  setDateTo(e.target.value)
+                  setPage(0)
+                }}
+              />
+              <FormControl size="small" sx={{ minWidth: 160 }}>
+                <InputLabel id="pay-status-filter">Status</InputLabel>
+                <Select
+                  labelId="pay-status-filter"
+                  label="Status"
+                  value={statusFilter}
+                  onChange={e => {
+                    setStatusFilter(e.target.value)
+                    setPage(0)
+                  }}
+                >
+                  <MenuItem value="">All</MenuItem>
+                  {PAYMENT_STATUSES.map(s => (
+                    <MenuItem key={s} value={s}>
+                      {s}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </div>
             <TextField
               size="small"
               placeholder="Search payment, user, order, status etc"
@@ -290,7 +346,7 @@ const PaymentsManagement = () => {
                 setSearch(e.target.value)
                 setPage(0)
               }}
-              className="max-sm:w-full"
+              className="max-sm:w-full sm:max-w-md"
             />
           </div>
           <div className="overflow-x-auto">

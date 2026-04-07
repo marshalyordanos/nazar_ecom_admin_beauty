@@ -812,8 +812,8 @@ const data: SearchData[] = [
   // Dashboards (from VerticalMenu.tsx)
   {
     id: '1',
-    name: 'CRM',
-    url: '/dashboards/crm',
+    name: 'Overview',
+    url: '/dashboards/overview',
     icon: 'ri-pie-chart-2-line',
     section: 'Dashboards'
   },

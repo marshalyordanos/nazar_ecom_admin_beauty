@@ -1,5 +1,11 @@
+'use client'
+
 // Next Imports
+import { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
+
+import { getStoredAuthUser, type AuthUser } from '@/libs/backendAuth'
+import { can } from '@/libs/permissions'
 
 // MUI Imports
 import { useTheme } from '@mui/material/styles'
@@ -56,6 +62,20 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
   const { isBreakpointReached, transitionDuration } = verticalNavOptions
   const { lang: locale } = params
 
+  const [authUser, setAuthUser] = useState<AuthUser | null>(() =>
+    typeof window !== 'undefined' ? getStoredAuthUser() : null
+  )
+
+  useEffect(() => {
+    const on = () => setAuthUser(getStoredAuthUser())
+    window.addEventListener('auth-user-updated', on)
+    return () => window.removeEventListener('auth-user-updated', on)
+  }, [])
+
+  /** Super admins bypass RBAC in the API; mirror that in the sidebar so all items stay visible. */
+  const cr = (resource: string) =>
+    authUser?.isSuperAdmin === true || can(resource, 'read', authUser)
+
   const ScrollWrapper = isBreakpointReached ? 'div' : PerfectScrollbar
 
   return (
@@ -86,11 +106,11 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
           icon={<i className='ri-home-smile-line' />}
           suffix={<Chip label='5' size='small' color='error' />}
         >
-          <MenuItem href={`/${locale}/dashboards/crm`}>{dictionary['navigation'].crm}</MenuItem>
+          <MenuItem href={`/${locale}/dashboards/overview`}>{dictionary['navigation'].overview}</MenuItem>
           <MenuItem href={`/${locale}/dashboards/analytics`}>{dictionary['navigation'].analytics}</MenuItem>
           <MenuItem href={`/${locale}/dashboards/ecommerce`}>{dictionary['navigation'].eCommerce}</MenuItem>
-          <MenuItem href={`/${locale}/dashboards/academy`}>{dictionary['navigation'].academy}</MenuItem>
-          <MenuItem href={`/${locale}/dashboards/logistics`}>{dictionary['navigation'].logistics}</MenuItem>
+          {/* <MenuItem href={`/${locale}/dashboards/academy`}>{dictionary['navigation'].academy}</MenuItem>
+          <MenuItem href={`/${locale}/dashboards/logistics`}>{dictionary['navigation'].logistics}</MenuItem> */}
         </SubMenu>
         {/* <SubMenu label={dictionary['navigation'].frontPages} icon={<i className='ri-file-copy-line' />}>
           <MenuItem href='/front-pages/landing-page' target='_blank'>
@@ -115,46 +135,73 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
           {/* </SubMenu> */}
         {/* </MenuSection> */}
 
-        <MenuSection label='Catalog Management'>
-          <SubMenu icon={<i className='ri-shopping-bag-3-line' />} label={dictionary['navigation'].manage_products}>
-            <MenuItem href={`/${locale}/apps/ecommerce/products/list`}
-            exactMatch={false}
-              activeUrl={`/${locale}/apps/ecommerce/products/list`}
+        {(cr('products') || cr('categories') || cr('brands')) && (
+          <MenuSection label='Catalog Management'>
+            {cr('products') && (
+              <SubMenu icon={<i className='ri-shopping-bag-3-line' />} label={dictionary['navigation'].manage_products}>
+                <MenuItem
+                  href={`/${locale}/apps/ecommerce/products/list`}
+                  exactMatch={false}
+                  activeUrl={`/${locale}/apps/ecommerce/products/list`}
+                >
+                  {dictionary['navigation'].products}
+                </MenuItem>
+                <MenuItem icon={<i className='ri-settings-line' />} href={`/${locale}/apps/ecommerce/products/options`}>
+                  {dictionary['navigation'].variantOptions}
+                </MenuItem>
+              </SubMenu>
+            )}
+            {cr('categories') && (
+              <MenuItem icon={<i className='ri-folder-line' />} href={`/${locale}/apps/ecommerce/categories`}>
+                {dictionary['navigation'].categories}
+              </MenuItem>
+            )}
+            {cr('brands') && (
+              <MenuItem icon={<i className='ri-shopping-bag-3-line' />} href={`/${locale}/apps/ecommerce/brands`}>
+                Brands
+              </MenuItem>
+            )}
+          </MenuSection>
+        )}
 
-            >{dictionary['navigation'].products}</MenuItem>
-            {/* <MenuItem href={`/${locale}/apps/ecommerce/products/add`}>{dictionary['navigation'].add}</MenuItem> */}
-            {/* <MenuItem href={`/${locale}/apps/ecommerce/products/1`} exactMatch={false} activeUrl='/apps/ecommerce/products/:detail'>{dictionary['navigation'].detail}</MenuItem> */}
-            {/* <MenuItem
-                href={`/${locale}/apps/ecommerce/products/list`}
+        {(cr('shops') || cr('inventory')) && (
+          <MenuSection label='Branch & Operations'>
+            {cr('shops') && (
+              <MenuItem icon={<i className='ri-building-line' />} href={`/${locale}/apps/ecommerce/branches`}>
+                {dictionary['navigation'].branches}
+              </MenuItem>
+            )}
+            {cr('inventory') && (
+              <MenuItem
+                icon={<i className='ri-file-text-line' />}
+                href={`/${locale}/apps/ecommerce/inventory`}
                 exactMatch={false}
-                activeUrl='/apps/ecommerce/products'
+                activeUrl={`/${locale}/apps/ecommerce/inventory`}
               >
-                {dictionary['navigation'].detail}
-              </MenuItem> */}
-            {/* <MenuItem icon={<i className='ri-folder-line' />} href={`/${locale}/apps/ecommerce/products/category`}>
-              {dictionary['navigation'].category}
-            </MenuItem> */}
-            <MenuItem icon={<i className='ri-settings-line' />} href={`/${locale}/apps/ecommerce/products/options`}>
-              {dictionary['navigation'].variantOptions}
-            </MenuItem>
-          </SubMenu>
-          <MenuItem icon={<i className='ri-folder-line' />} href={`/${locale}/apps/ecommerce/categories`}>{dictionary['navigation'].categories}</MenuItem>
-          <MenuItem icon={<i className='ri-shopping-bag-3-line' />} href={`/${locale}/apps/ecommerce/brands`}>Brands</MenuItem>
-        </MenuSection>
+                Inventory
+              </MenuItem>
+            )}
+          </MenuSection>
+        )}
 
-        <MenuSection label='Branch & Operations'>
-          <MenuItem icon={<i className='ri-building-line' />} href={`/${locale}/apps/ecommerce/branches`}>{dictionary['navigation'].branches}</MenuItem>
-          <MenuItem icon={<i className='ri-file-text-line' />} href={`/${locale}/apps/ecommerce/inventory`} 
-            exactMatch={false}
-            activeUrl={`/${locale}/apps/ecommerce/inventory`}
-
-          >Inventory</MenuItem>
-        </MenuSection>
-
-        <MenuSection label='Sales & Transactions'>
-          <MenuItem icon={<i className='ri-shopping-cart-line' />} href={`/${locale}/apps/ecommerce/orders-admin`}>Orders </MenuItem>
-          <MenuItem icon={<i className='ri-money-dollar-circle-line' />} href={`/${locale}/apps/ecommerce/payments`}>Payments</MenuItem>
-          <SubMenu label={dictionary['navigation'].invoice} icon={<i className='ri-bill-line' />}>
+        {(cr('orders') || cr('payments') || cr('shop_sales')) && (
+          <MenuSection label='Sales & Transactions'>
+            {cr('orders') && (
+              <MenuItem icon={<i className='ri-shopping-cart-line' />} href={`/${locale}/apps/ecommerce/orders-admin`}>
+                Orders{' '}
+              </MenuItem>
+            )}
+            {cr('payments') && (
+              <MenuItem icon={<i className='ri-money-dollar-circle-line' />} href={`/${locale}/apps/ecommerce/payments`}>
+                Payments
+              </MenuItem>
+            )}
+            {cr('shop_sales') && (
+              <MenuItem icon={<i className='ri-shopping-cart-line' />} href={`/${locale}/apps/ecommerce/sales-from-shop`}>
+                Sales From Shop
+              </MenuItem>
+            )}
+          {/* <SubMenu label={dictionary['navigation'].invoice} icon={<i className='ri-bill-line' />}>
             <MenuItem href={`/${locale}/apps/invoice/list`}>{dictionary['navigation'].list}</MenuItem>
             <MenuItem
               href={`/${locale}/apps/invoice/preview/4987`}
@@ -167,29 +214,42 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
               {dictionary['navigation'].edit}
             </MenuItem>
             <MenuItem href={`/${locale}/apps/invoice/add`}>{dictionary['navigation'].add}</MenuItem>
-          </SubMenu>
+          </SubMenu> */}
         </MenuSection>
+        )}
 
-        <MenuSection label='Customer Interaction'>
-          <MenuItem icon={<i className='ri-star-line' />} href={`/${locale}/apps/ecommerce/manage-reviews`}>
-            {dictionary['navigation'].manageReviews}
-          </MenuItem>
+        {cr('reviews') && (
+          <MenuSection label='Customer Interaction'>
+            <MenuItem icon={<i className='ri-star-line' />} href={`/${locale}/apps/ecommerce/manage-reviews`}>
+              {dictionary['navigation'].manageReviews}
+            </MenuItem>
           {/* <MenuItem href={`/${locale}/apps/chat`} icon={<i className='ri-wechat-line' />}>
             {dictionary['navigation'].chat}
           </MenuItem> */}
-        </MenuSection>
+          </MenuSection>
+        )}
 
-        <MenuSection label='User Management'>
-          <SubMenu label={dictionary['navigation'].user} icon={<i className='ri-user-line' />}>
-            <MenuItem href={`/${locale}/apps/user/list`}>{dictionary['navigation'].list}</MenuItem>
-            <MenuItem href={`/${locale}/apps/user/view`}>{dictionary['navigation'].view}</MenuItem>
-          </SubMenu>
+        {(cr('users') || cr('roles') || cr('permissions')) && (
+          <MenuSection label='User Management'>
+            {cr('users') && (
+              <SubMenu label={dictionary['navigation'].user} icon={<i className='ri-user-line' />}>
+                <MenuItem href={`/${locale}/apps/user/list`}>{dictionary['navigation'].list}</MenuItem>
+                <MenuItem href={`/${locale}/apps/user/view`}>{dictionary['navigation'].view}</MenuItem>
+              </SubMenu>
+            )}
 
-          <SubMenu label={dictionary['navigation'].rolesPermissions} icon={<i className='ri-lock-2-line' />}>
-            <MenuItem href={`/${locale}/apps/roles`}>{dictionary['navigation'].roles}</MenuItem>
-            <MenuItem href={`/${locale}/apps/permissions`}>{dictionary['navigation'].permissions}</MenuItem>
-          </SubMenu>
-        </MenuSection>
+            {(cr('roles') || cr('permissions')) && (
+              <SubMenu label={dictionary['navigation'].rolesPermissions} icon={<i className='ri-lock-2-line' />}>
+                {cr('roles') && (
+                  <MenuItem href={`/${locale}/apps/roles`}>{dictionary['navigation'].roles}</MenuItem>
+                )}
+                {cr('permissions') && (
+                  <MenuItem href={`/${locale}/apps/permissions`}>{dictionary['navigation'].permissions}</MenuItem>
+                )}
+              </SubMenu>
+            )}
+          </MenuSection>
+        )}
 
 {/* commeted out for now */}
 

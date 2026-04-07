@@ -9,6 +9,10 @@ import { useParams } from 'next/navigation'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Button from '@mui/material/Button'
+import Dialog from '@mui/material/Dialog'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import DialogTitle from '@mui/material/DialogTitle'
 import TextField from '@mui/material/TextField'
 import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
@@ -58,7 +62,8 @@ import { getLocalizedUrl } from '@/utils/i18n'
 import tableStyles from '@core/styles/table.module.css'
 
 // API Imports
-import { useAdminUsers, useUpdateUserRole, type UserAdmin } from '@/api/admin/users'
+import { useAdminUsers, useUpdateUserLocation, useUpdateUserRole, type UserAdmin } from '@/api/admin/users'
+import { useShops } from '@/api/shops/useShops'
 import type { ApiListResponse } from '@/api/admin/types'
 import TableFilters from './TableFilters'
 import { Divider } from '@mui/material'
@@ -81,6 +86,7 @@ type UserRow = {
   status: string
   roles: string[]
   avatarUrl: string | null
+  locationName: string | null
   action?: string
 }
 
@@ -181,21 +187,20 @@ const RolesTable = () => {
 
   const { lang: locale } = useParams()
   const { mutateAsync: updateUserRole } = useUpdateUserRole()
-  // Add status to filter state initializer
+  const updateUserLocation = useUpdateUserLocation()
+  const { data: shopsRes } = useShops({ page: 1, pageSize: 50 })
+  const shops = shopsRes?.data ?? []
+
   const [listFilters, setListFilters] = useState({ role: '', status: '' })
+  const [locOpen, setLocOpen] = useState(false)
+  const [locUserId, setLocUserId] = useState<string | null>(null)
+  const [locPick, setLocPick] = useState('')
 
   // Server Data
   const usersQuery = useAdminUsers({
     page: page + 1,
     pageSize,
-    search: globalFilter
-      ? {
-          name: globalFilter as string,
-          email: globalFilter as string,
-          username: globalFilter as string
-        }
-      : undefined,
-    // Add status to the filter object if present
+    search: globalFilter.trim() ? { all: globalFilter.trim() } : undefined,
     filter: {
       ...(listFilters.role ? { roleId: listFilters.role } : {}),
       ...(listFilters.status ? { status: listFilters.status } : {})
@@ -217,7 +222,8 @@ const RolesTable = () => {
         phone: u.phone ?? '',
         status: u.status ?? '',
         roles: Array.isArray(u.roles) && u.roles.length > 0 ? u.roles.map(r => r.name) : [],
-        avatarUrl: u.avatarUrl ?? null
+        avatarUrl: u.avatarUrl ?? null,
+        locationName: u.location?.name ?? null
       }
     },
     []
@@ -228,20 +234,7 @@ const RolesTable = () => {
     const mapped = serverData.map(mapUserToRow)
     setData(mapped)
     setFilteredData(mapped)
-    // no infinite loop, dependencies only change when serverData changes (not on every render)
   }, [serverData, mapUserToRow])
-
-  // FIX: Only filter when listFilters or the data changes (dependencies are correct)
-  useEffect(() => {
-    let filtered = data
-    if (listFilters.role) {
-      filtered = filtered.filter(user => user.roles.includes(listFilters.role))
-    }
-    if (listFilters.status) {
-      filtered = filtered.filter(user => user.status === listFilters.status)
-    }
-    setFilteredData(filtered)
-  }, [listFilters.role, listFilters.status, data])
 
   const handleFilterChange = useCallback((f: { role: string; plan: string; status: string }) => {
     setListFilters({ role: f.role, status: f.status })
@@ -250,7 +243,18 @@ const RolesTable = () => {
 
   const handleGlobalFilterChange = useCallback((value: string | number) => {
     setGlobalFilter(String(value))
+    setPage(0)
   }, [])
+
+  const openLocationDialog = useCallback(
+    (userId: string) => {
+      const u = serverData.find(x => x.id === userId)
+      setLocUserId(userId)
+      setLocPick(u?.locationId ?? '')
+      setLocOpen(true)
+    },
+    [serverData]
+  )
 
   const handleEditUser = useCallback((user: UserRowWithAction) => {
     setEditUserData(user)
@@ -298,6 +302,12 @@ const RolesTable = () => {
       columnHelper.accessor('phone', {
         header: 'Phone',
         cell: ({ row }) => <Typography>{row.original.phone}</Typography>
+      }),
+      columnHelper.accessor('locationName', {
+        header: 'Location',
+        cell: ({ row }) => (
+          <Typography variant='body2'>{row.original.locationName || '—'}</Typography>
+        )
       }),
       columnHelper.accessor('roles', {
         header: 'Roles',
@@ -355,6 +365,13 @@ const RolesTable = () => {
             </IconButton>
             <IconButton
               size='small'
+              title='Assign location'
+              onClick={() => openLocationDialog(String(row.original.id))}
+            >
+              <i className='ri-map-pin-line text-textSecondary' />
+            </IconButton>
+            <IconButton
+              size='small'
               onClick={() => {
                 const apiUser = serverData?.find(u => u.id === row.original.id)
                 setAssignUserId(apiUser?.id)
@@ -390,7 +407,7 @@ const RolesTable = () => {
         enableSorting: false
       })
     ],
-    [data, serverData, locale, updateUserRole]
+    [serverData, locale, openLocationDialog]
   )
 
   const table = useReactTable({
@@ -543,6 +560,51 @@ const RolesTable = () => {
         handleClose={() => setAddUserOpen(false)}
         userData={editUserData ? [editUserData] : []}
       />
+
+      <Dialog open={locOpen} onClose={() => setLocOpen(false)} maxWidth='sm' fullWidth>
+        <DialogTitle>Assign shop location</DialogTitle>
+        <DialogContent className='flex flex-col gap-4 pt-2'>
+          <FormControl fullWidth size='small'>
+            <InputLabel id='user-loc-label'>Location</InputLabel>
+            <Select
+              labelId='user-loc-label'
+              label='Location'
+              value={locPick}
+              onChange={e => setLocPick(e.target.value)}
+            >
+              <MenuItem value=''>
+                <em>None</em>
+              </MenuItem>
+              {shops.flatMap(shop =>
+                (shop.locations ?? []).map(loc => (
+                  <MenuItem key={loc.id} value={loc.id}>
+                    {shop.name} — {loc.name}
+                  </MenuItem>
+                ))
+              )}
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button variant='outlined' onClick={() => setLocOpen(false)}>
+            Cancel
+          </Button>
+          <Button
+            variant='contained'
+            disabled={!locUserId || updateUserLocation.isPending}
+            onClick={async () => {
+              if (!locUserId) return
+              await updateUserLocation.mutateAsync({
+                id: locUserId,
+                locationId: locPick || null
+              })
+              setLocOpen(false)
+            }}
+          >
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Card>
   )
 }

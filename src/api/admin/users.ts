@@ -19,7 +19,9 @@ export type UserAdmin = {
 	status?: string | null
 	role?: string | null
 	currentPlan?: string | null
-	roles?: { name: string }[]
+	roles?: { id: string; name: string }[]
+	locationId?: string | null
+	location?: { id: string; name: string; shopId: string } | null
 	createdAt?: string
 	updatedAt?: string
 }
@@ -122,6 +124,20 @@ export function useUpdateUserRole() {
 			qc.invalidateQueries({ queryKey: dashboardKeys.all })
 		},
 		onError: error => toast.error(getApiErrorMessage(error, 'Failed to update user role'))
+	})
+}
+
+export function useUpdateUserLocation() {
+	const qc = useQueryClient()
+	return useMutation({
+		mutationFn: async ({ id, locationId }: { id: string; locationId: string | null }) =>
+			(await api.patch(`/users/${id}`, { locationId })).data,
+		onSuccess: () => {
+			toast.success('Location updated successfully')
+			qc.invalidateQueries({ queryKey: userAdminKeys.all })
+			qc.invalidateQueries({ queryKey: dashboardKeys.all })
+		},
+		onError: error => toast.error(getApiErrorMessage(error, 'Failed to update location'))
 	})
 }
 

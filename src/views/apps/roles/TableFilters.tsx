@@ -63,7 +63,11 @@ const TableFilters = ({
               fullWidth
               id='select-role'
               value={role}
-              onChange={e => setRole(e.target.value)}
+              onChange={e => {
+                const v = e.target.value
+                setRole(v)
+                onFilterChange?.({ role: v, plan: plan ?? '', status: status ?? '' })
+              }}
               label='Select Role'
               labelId='role-select'
               inputProps={{ placeholder: 'Select Role' }}
@@ -87,7 +91,11 @@ const TableFilters = ({
               id='select-status'
               label='Select Status'
               value={status}
-              onChange={e => setStatus(e.target.value)}
+              onChange={e => {
+                const v = e.target.value
+                setStatus(v as UsersType['status'])
+                onFilterChange?.({ role: role ?? '', plan: plan ?? '', status: v })
+              }}
               labelId='status-select'
               inputProps={{ placeholder: 'Select Status' }}
               sx={{ minWidth: 200 }}

@@ -1,7 +1,7 @@
 {
   "navigation": {
     "dashboards": "Tableaux de bord",
-    "crm": "GRC",
+    "overview": "Vue d'ensemble",
     "analytics": "Analytique",
     "eCommerce": "commerce électronique",
     "academy": "Académie",
@@ -26,6 +26,7 @@
     "category": "Catégorie",
     "variantOptions": "Options de variante",
     "orders": "Ordres",
+    "salesFromShop": "Ventes magasin",
     "details": "Détails",
     "customers": "Clientes",
     "manageReviews": "Gérer les avis",
