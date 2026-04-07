@@ -6,7 +6,6 @@ import { useState, useMemo } from 'react'
 // MUI Imports
 import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
-import Chip from '@mui/material/Chip'
 import Skeleton from '@mui/material/Skeleton'
 import { styled } from '@mui/material/styles'
 
@@ -28,20 +27,11 @@ import {
 import type { ColumnDef, FilterFn } from '@tanstack/react-table'
 import type { RankingInfo } from '@tanstack/match-sorter-utils'
 
-// Type Imports
-import type { ThemeColor } from '@core/types'
-
-// Component Imports
-import CustomAvatar from '@core/components/mui/Avatar'
-
-// Util Imports
-import { getInitials } from '@/utils/getInitials'
-
 // Style Imports
 import tableStyles from '@core/styles/table.module.css'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/redux-store'
-import { useDashboardRecentOrders } from '@/api/admin/dashboard'
+import { useDashboardLowInventory } from '@/api/admin/dashboard'
 
 declare module '@tanstack/table-core' {
   interface FilterFns {
@@ -50,14 +40,6 @@ declare module '@tanstack/table-core' {
   interface FilterMeta {
     itemRank: RankingInfo
   }
-}
-
-// Map order status to color
-const userStatusObj: { [key: string]: ThemeColor } = {
-  PENDING: 'warning',
-  PAID: 'info',
-  COMPLETED: 'success',
-  CANCELLED: 'error'
 }
 
 // Styled Components
@@ -71,47 +53,33 @@ const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
 
 const columnHelper = createColumnHelper<any>()
 
-const UserListTable = () => {
+const LowInventory = () => {
   const shop: any = useSelector((state: RootState) => state.shopReducer.shops)
-  const { data: recentOrders, isLoading } = useDashboardRecentOrders(shop?.[0]?.id)
+  const { data: lowInventory, isLoading } = useDashboardLowInventory(shop?.[0]?.id)
   const [rowSelection, setRowSelection] = useState({})
   const [globalFilter, setGlobalFilter] = useState('')
 
-  // Transform recentOrders into user table data
-  const data = useMemo(() => {
-    if (!Array.isArray(recentOrders)) return []
-    return recentOrders.map((order, idx) => {
-      const user = order.user || {}
-      const fullName = (user.firstName && user.lastName)
-        ? `${user.firstName} ${user.lastName}`
-        : user.firstName || user.lastName || ''
-      return {
-        id: order.id || idx,
-        fullName,
-        email: user.email || '',
-        status: order.status || '',
-        orderNumber: order.orderNumber || '',
-        createdAt: order.createdAt || '',
-        grandTotal: order.grandTotal || 0,
-        currency: order.currency || '',
-        // You could add more fields as needed
-      }
-    })
-  }, [recentOrders])
-
-  // Always show 10 rows - either actual data or skeletons
+  // Transform lowInventory into table data with required columns and skeleton for loading
   const rowCount = 9
+  const data = useMemo(() => {
+    if (!Array.isArray(lowInventory)) return []
+    return lowInventory.map((item, idx) => ({
+      id: item.id || idx,
+      productName: item.variant?.product?.name || '',
+      variantOption: item.variant?.sku || '', // fallback to sku (can adjust to show option value if available)
+      quantity: typeof item.quantity === 'number' ? item.quantity : 0,
+      reservedQuantity: typeof item.reservedQuantity === 'number' ? item.reservedQuantity : 0
+    }))
+  }, [lowInventory])
+
   const dataWithSkeletons = useMemo(() => {
     if (isLoading) {
       return Array.from({ length: rowCount }, (_, idx) => ({
         id: `skeleton-${idx}`,
-        fullName: null,
-        email: null,
-        status: null,
-        orderNumber: null,
-        createdAt: null,
-        grandTotal: null,
-        currency: null
+        productName: null,
+        variantOption: null,
+        quantity: null,
+        reservedQuantity: null
       }))
     }
     if (data.length < rowCount) {
@@ -119,102 +87,61 @@ const UserListTable = () => {
         ...data,
         ...Array.from({ length: rowCount - data.length }, (_, idx) => ({
           id: `skeleton-${idx + data.length}`,
-          fullName: null,
-          email: null,
-          status: null,
-          orderNumber: null,
-          createdAt: null,
-          grandTotal: null,
-          currency: null
+          productName: null,
+          variantOption: null,
+          quantity: null,
+          reservedQuantity: null
         }))
       ]
     }
     return data.slice(0, rowCount)
   }, [isLoading, data])
 
-  // Columns
+  // Columns: product name, product variant (sku), quantity, reservedQuantity
   const columns = useMemo<ColumnDef<any, any>[]>(
     () => [
-      columnHelper.accessor('fullName', {
-        header: 'Customer',
+      columnHelper.accessor('productName', {
+        header: 'Product Name',
         cell: ({ row }) =>
-          row.original.fullName === null ? (
-            <div className='flex items-center gap-3'>
-              <Skeleton variant='circular' width={34} height={34} />
-              <div className='flex flex-col'>
-                <Skeleton variant='text' width={80} height={24} />
-              </div>
-            </div>
-          ) : (
-            <div className='flex items-center gap-3'>
-              <CustomAvatar skin='light' size={34}>
-                {getInitials(row.original.fullName || '')}
-              </CustomAvatar>
-              <div className='flex flex-col'>
-                <Typography color='text.primary' className='font-medium'>
-                  {row.original.fullName}
-                </Typography>
-              </div>
-            </div>
-          )
-      }),
-      columnHelper.accessor('email', {
-        header: 'Email',
-        cell: ({ row }) =>
-          row.original.email === null ? (
-            <Skeleton variant='text' width={100} />
-          ) : (
-            <Typography>{row.original.email}</Typography>
-          )
-      }),
-      columnHelper.accessor('orderNumber', {
-        header: 'Order #',
-        cell: ({ row }) =>
-          row.original.orderNumber === null ? (
-            <Skeleton variant='text' width={60} />
-          ) : (
-            <Typography>{row.original.orderNumber}</Typography>
-          )
-      }),
-      columnHelper.accessor('grandTotal', {
-        header: 'Total',
-        cell: ({ row }) =>
-          row.original.grandTotal === null ? (
-            <Skeleton variant='text' width={60} />
-          ) : (
-            <Typography>
-              {row.original.grandTotal.toLocaleString()} {row.original.currency}
-            </Typography>
-          )
-      }),
-      columnHelper.accessor('createdAt', {
-        header: 'Date',
-        cell: ({ row }) =>
-          row.original.createdAt === null ? (
+          row.original.productName === null ? (
             <Skeleton variant='text' width={120} />
           ) : (
-            <Typography>
-              {row.original.createdAt
-                ? new Date(row.original.createdAt).toLocaleString()
-                : ''}
+            <Typography color='text.primary' className='font-medium'>
+              {row.original.productName}
             </Typography>
           )
       }),
-      columnHelper.accessor('status', {
-        header: 'Status',
+      columnHelper.accessor('variantOption', {
+        header: 'Variant (SKU)',
         cell: ({ row }) =>
-          row.original.status === null ? (
-            <Skeleton variant='rounded' width={60} height={28} />
+          row.original.variantOption === null ? (
+            <Skeleton variant='text' width={80} />
           ) : (
-            <div className='flex items-center gap-3'>
-              <Chip
-                variant='tonal'
-                className='capitalize'
-                label={row.original.status}
-                color={userStatusObj[row.original.status]}
-                size='small'
-              />
-            </div>
+            <Typography>
+              {row.original.variantOption}
+            </Typography>
+          )
+      }),
+      columnHelper.accessor('quantity', {
+        header: 'Quantity',
+        cell: ({ row }) =>
+          row.original.quantity === null ? (
+            <Skeleton variant='text' width={40} />
+          ) : (
+            <Typography>
+              {row.original.quantity}
+            </Typography>
+          )
+      }),
+      columnHelper.accessor('reservedQuantity', {
+        header: 'Reserved',
+        cell: ({ row }) =>
+          row.original.reservedQuantity === null ? (
+            <Skeleton variant='text' width={40} />
+          ) : (
+            <Typography>
+              {row.original.reservedQuantity}
+            </Typography>
           )
       })
     ],
@@ -249,7 +176,6 @@ const UserListTable = () => {
     getFacetedMinMaxValues: getFacetedMinMaxValues()
   })
 
-  // Use this to exclude hidden skeleton rows on search/filter, but always show 10 skeletons when loading or less than 10 data
   const filteredRows = Array.isArray(table?.getFilteredRowModel?.().rows)
     ? table.getFilteredRowModel().rows
     : []
@@ -294,16 +220,13 @@ const UserListTable = () => {
                   </td>
                 </tr>
               ) : (
-                filteredRows.slice(0, rowCount).map(row => {
-                  // If row.original.fullName === null it's a skeleton row
-                  return (
-                    <tr key={row.id} className={classnames({ selected: row.getIsSelected() })}>
-                      {row.getVisibleCells().map(cell => (
-                        <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
-                      ))}
-                    </tr>
-                  )
-                })
+                filteredRows.slice(0, rowCount).map(row => (
+                  <tr key={row.id} className={classnames({ selected: row.getIsSelected() })}>
+                    {row.getVisibleCells().map(cell => (
+                      <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+                    ))}
+                  </tr>
+                ))
               )}
             </tbody>
           </table>
@@ -313,4 +236,4 @@ const UserListTable = () => {
   )
 }
 
-export default UserListTable
+export default LowInventory

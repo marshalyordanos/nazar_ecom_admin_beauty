@@ -1,208 +1,172 @@
-'use client'
-
-// Next Imports
-import dynamic from 'next/dynamic'
-
 // MUI Imports
 import Card from '@mui/material/Card'
-import Button from '@mui/material/Button'
 import CardHeader from '@mui/material/CardHeader'
-import Typography from '@mui/material/Typography'
 import CardContent from '@mui/material/CardContent'
-import { useTheme } from '@mui/material/styles'
-
-// Third Party Imports
-import type { ApexOptions } from 'apexcharts'
+import Typography from '@mui/material/Typography'
+import Chip from '@mui/material/Chip'
+import Skeleton from '@mui/material/Skeleton'
 
 // Components Imports
 import OptionMenu from '@core/components/option-menu'
+import { RootState } from '@/redux-store'
+import { useSelector } from 'react-redux'
+import { useDashboardBrands } from '@/api/admin/dashboard'
+import { useState, useMemo } from 'react'
 
-// Styled Component Imports
-const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexCharts'))
+// Helper function to format number as currency with comma separators
+const formatCurrency = (value: number) => {
+  return value.toLocaleString(undefined, {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2
+  })
+}
 
-const series = [
-  {
-    name: 'Sales',
-    type: 'column',
-    data: [85, 68, 56, 65, 65, 50, 39]
-  },
-  {
-    type: 'line',
-    name: 'Sales',
-    data: [63, 38, 31, 45, 46, 27, 18]
+// Helper to compute total revenue and (optional) revenue change
+const getSummary = (brands: any[]) => {
+  const totalRevenue = brands?.reduce((sum, item) => sum + (item.revenue || 0), 0) || 0
+  // For demo, static +12% and up arrow; real implementation could compare periods if data available
+  return {
+    totalRevenue,
+    revenueChangePct: 12,
+    isPositive: true
   }
+}
+
+const options = [
+  { label: 'Last 7 Days', value: 7 },
+  { label: 'Last Month', value: 30 },
+  { label: 'Last Year', value: 365 }
 ]
 
-const WeeklyOverview = () => {
-  // Hooks
-  const theme = useTheme()
+const SKELETON_ROW_COUNT = 4
 
-  const options: ApexOptions = {
-    chart: {
-      parentHeightOffset: 0,
-      toolbar: { show: false }
-    },
-    plotOptions: {
-      bar: {
-        borderRadius: 7,
-        columnWidth: '35%',
-        colors: {
-          ranges: [
-            {
-              to: 50,
-              from: 40,
-              color: 'var(--mui-palette-primary-main)'
-            }
-          ]
-        }
-      }
-    },
-    markers: {
-      size: 3.5,
-      strokeWidth: 2,
-      fillOpacity: 1,
-      strokeOpacity: 1,
-      colors: 'var(--mui-palette-background-paper)',
-      strokeColors: 'var(--mui-palette-primary-main)'
-    },
-    stroke: {
-      width: [0, 2],
-      colors: ['var(--mui-palette-customColors-trackBg)', 'var(--mui-palette-primary-main)']
-    },
-    legend: { show: false },
-    dataLabels: { enabled: false },
-    colors: ['var(--mui-palette-customColors-trackBg)'],
-    grid: {
-      strokeDashArray: 7,
-      borderColor: 'var(--mui-palette-divider)',
-      padding: {
-        left: -2,
-        right: 8
-      }
-    },
-    states: {
-      hover: {
-        filter: { type: 'none' }
-      },
-      active: {
-        filter: { type: 'none' }
-      }
-    },
-    xaxis: {
-      categories: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'],
-      tickPlacement: 'on',
-      labels: { show: false },
-      axisTicks: { show: false },
-      axisBorder: { show: false }
-    },
-    yaxis: {
-      min: 0,
-      max: 90,
-      show: true,
-      tickAmount: 3,
-      labels: {
-        offsetX: -10,
-        formatter: value => `${value > 999 ? `${(value / 1000).toFixed(0)}` : value}k`,
-        style: {
-          fontSize: '0.8125rem',
-          colors: 'var(--mui-palette-text-disabled)'
-        }
-      }
-    },
-    responsive: [
-      {
-        breakpoint: theme.breakpoints.values.xl,
-        options: {
-          plotOptions: {
-            bar: { columnWidth: '35%' }
-          }
-        }
-      },
-      {
-        breakpoint: 1445,
-        options: {
-          plotOptions: {
-            bar: { columnWidth: '40%', borderRadius: 7 }
-          }
-        }
-      },
-      {
-        breakpoint: 1368,
-        options: {
-          plotOptions: {
-            bar: { borderRadius: 6 }
-          }
-        }
-      },
-      {
-        breakpoint: 1201,
-        options: {
-          plotOptions: {
-            bar: { columnWidth: '42%', borderRadius: 7 }
-          }
-        }
-      },
-      {
-        breakpoint: 1080,
-        options: {
-          plotOptions: {
-            bar: { borderRadius: 6 }
-          }
-        }
-      },
-      {
-        breakpoint: theme.breakpoints.values.md,
-        options: {
-          chart: {
-            height: 210
-          },
-          plotOptions: {
-            bar: { columnWidth: '32%', borderRadius: 7 }
-          }
-        }
-      },
-      {
-        breakpoint: 750,
-        options: {
-          plotOptions: {
-            bar: { columnWidth: '38%', borderRadius: 6 }
-          }
-        }
-      },
-      {
-        breakpoint: theme.breakpoints.values.sm,
-        options: {
-          plotOptions: {
-            bar: { columnWidth: '25%', borderRadius: 7 }
-          }
-        }
-      },
-      {
-        breakpoint: 450,
-        options: {
-          plotOptions: {
-            bar: { columnWidth: '35%' }
-          }
-        }
-      }
+const TopBrands = () => {
+  const shop: any = useSelector((state: RootState) => state.shopReducer.shops)
+  const [selectedDays, setSelectedDays] = useState<number>(7)
+
+  // refetches when shop or days change. Default 7 days.
+  const { data: topBrandsRaw, isLoading } = useDashboardBrands(shop?.[0]?.id, selectedDays)
+  const topBrands = Array.isArray(topBrandsRaw) ? topBrandsRaw : []
+  const { totalRevenue, revenueChangePct, isPositive } = getSummary(topBrands)
+
+  const rowCount = SKELETON_ROW_COUNT
+  // Compute array for skeleton rows if less than rowCount, or skeletons if loading.
+  const brandsToDisplay = useMemo(() => {
+    if (isLoading) {
+      // Show all skeleton rows
+      return Array.from({ length: rowCount }, (_, i) => null)
+    }
+    // Pad with null for skeletons at end if less than rowCount
+    const padCount = rowCount - topBrands.length
+    return [
+      ...topBrands,
+      ...Array.from({ length: padCount > 0 ? padCount : 0 }, () => null)
     ]
+  }, [isLoading, topBrands])
+
+  // OptionMenu expects an `onChange` handler; assume custom OptionMenu supports value/label
+  const handleChange = (selected: string) => {
+    // Find corresponding days from label; fallback to 7 if not found.
+    const found = options.find(opt => opt.label === selected)
+    setSelectedDays(found?.value || 7)
   }
 
   return (
     <Card>
-      <CardHeader title='Weekly Overview' action={<OptionMenu options={['Refresh', 'Update', 'Share']} />} />
+      <CardHeader
+        title='Top Brands'
+        action={
+          <OptionMenu
+            options={[
+              { text: 'Last 7 Days',
+                menuItemProps: {
+                  onClick: () => handleChange('Last 7 Days')
+                }
+               },
+              { text: 'Last Month',menuItemProps:{
+                onClick: () => handleChange('Last Month')
+              } },
+              { text: 'Last Year',menuItemProps:{
+                onClick: () => handleChange('Last Year')
+              } }
+            ]}
+          />
+        }
+      />
       <CardContent className='flex flex-col gap-6'>
-        <AppReactApexCharts type='line' height={186} width='100%' series={series} options={options} />
-        <div className='flex items-center gap-4'>
-          <Typography variant='h4'>62%</Typography>
-          <Typography>Your sales performance is 45% 😎 better compared to last month</Typography>
+        <div>
+          <div className='flex items-center'>
+            <Typography variant='h4'>
+              {isLoading
+                ? <Skeleton variant='text' width={80} height={36} />
+                : `$${formatCurrency(totalRevenue)}`}
+            </Typography>
+            {isLoading ? (
+              <Skeleton variant='circular' width={32} height={32} sx={{ ml: 1, mr: 1 }} />
+            ) : (
+              <i
+                className={`${
+                  isPositive
+                    ? 'ri-arrow-up-s-line text-success'
+                    : 'ri-arrow-down-s-line text-error'
+                } text-2xl`}
+              />
+            )}
+            <Typography color={isPositive ? 'success.main' : 'error.main'}>
+              {isLoading ? <Skeleton variant='text' width={30} /> : `${revenueChangePct}%`}
+            </Typography>
+          </div>
+          <Typography>Total Top Brand Revenue</Typography>
         </div>
-        <Button variant='contained' color='primary'>
-          Details
-        </Button>
+        <div className='flex flex-col gap-4 max-[1396px]:gap-6'>
+          {brandsToDisplay.map((item: any, index: number) =>
+            item ? (
+              <div key={item.brandId || index} className='flex items-center gap-3'>
+                <div className='flex items-center justify-center w-[34px] h-[34px] bg-default rounded'>
+                  <i className='ri-shopping-bag-3-line text-lg text-primary' />
+                </div>
+                <div className='flex flex-wrap justify-between items-center gap-x-2 gap-y-1 is-full'>
+                  <div className='flex flex-col gap-0.5'>
+                    <Typography className='font-medium' color='text.primary'>
+                      {item.brandName}
+                    </Typography>
+                    <Typography>
+                      Orders: {item.orderCount}
+                    </Typography>
+                  </div>
+                  <div className='flex items-center gap-2'>
+                    <Typography color='text.primary' className='font-medium'>
+                      ${formatCurrency(item.revenue)}
+                    </Typography>
+                    <Chip
+                      label={item.revenue > 0 ? `+${item.orderCount}` : `-${item.orderCount}`}
+                      color={item.revenue > 0 ? 'success' : 'error'}
+                      variant='tonal'
+                      size='small'
+                    />
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div key={`skeleton-row-${index}`} className='flex items-center gap-3'>
+                <Skeleton variant='circular' width={34} height={34} />
+                <div className='flex flex-wrap justify-between items-center gap-x-2 gap-y-1 is-full w-full'>
+                  <div className='flex flex-col gap-0.5'>
+                    <Skeleton variant='text' width={120} height={24} />
+                    <Skeleton variant='text' width={60} height={18} />
+                  </div>
+                  <div className='flex items-center gap-2'>
+                    <Skeleton variant='text' width={60} height={21} />
+                    <Skeleton variant='rounded' width={44} height={26} />
+                  </div>
+                </div>
+              </div>
+            )
+          )}
+        </div>
       </CardContent>
     </Card>
   )
 }
 
-export default WeeklyOverview
+export default TopBrands

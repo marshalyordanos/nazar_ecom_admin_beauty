@@ -105,6 +105,10 @@ export const dashboardKeys = {
   // System/Health
   healthSummary: ['dashboard-health-summary'] as const,
   syncStatus: ['dashboard-sync-status'] as const,
+  topProducts: ['dashboard-top-products'] as const,
+  recentOrders: ['dashboard-recent-orders'] as const,
+  lowInventory:['dashboard-low-inventory'] as const,
+  recentActivities:['dashboard-recent-activities'] as const,
 }
 
 // All hooks below are refactored to accept an optional shopId parameter and pass it as query string
@@ -123,7 +127,7 @@ export function useDashboardOverview(shopId?: string) {
 }
 
 export function useDashboardSummary(shopId?: string) {
-  return useQuery<{ data: DashboardSummary }, Error>({
+  return useQuery<any, Error>({
     queryKey: [...dashboardKeys.summary, shopId],
     queryFn: async () => (await api.get(`/dashboard/summary${getQuery(shopId)}`)).data,
     staleTime: 1000 * 10
@@ -290,11 +294,12 @@ export function useDashboardCategories(shopId?: string) {
   })
 }
 
-export function useDashboardBrands(shopId?: string) {
+export function useDashboardBrands(shopId?: string,days: number=90) {
   return useQuery<any, Error>({
-    queryKey: [...dashboardKeys.brands, shopId],
-    queryFn: async () => (await api.get(`/dashboard/products/brands${getQuery(shopId)}`)).data,
-    staleTime: 1000 * 10
+    queryKey: [...dashboardKeys.brands, shopId,days],
+    queryFn: async () => (await api.get(`/dashboard/products/brands${getQuery(shopId)}&days=${days}`)).data,
+    staleTime: 1000 * 10,
+    enabled: !!shopId && !!days
   })
 }
 
@@ -606,4 +611,35 @@ export function useCustomerDashboardCards(shopId?: string) {
 		queryFn: async () => (await api.get(`/dashboard/customers/cards${getQuery(shopId)}`)).data,
 		staleTime: 1000 * 1
 	})
+}
+
+export function useDashboardTopProducts(shopId?: string,limit: number=5) {
+  return useQuery<any, Error>({
+    queryKey: [...dashboardKeys.topProducts, shopId],
+    queryFn: async () => (await api.get(`/dashboard/top-products${getQuery(shopId)}&limit=${limit}`)).data,
+    staleTime: 1000 * 10
+  })
+}
+
+export function useDashboardRecentOrders(shopId?: string,limit: number=5) {
+  return useQuery<any, Error>({
+    queryKey: [...dashboardKeys.recentOrders, shopId],
+    queryFn: async () => (await api.get(`/dashboard/recent-orders${getQuery(shopId)}&limit=${limit}`)).data,
+    staleTime: 1000 * 10
+  })
+}
+
+export function useDashboardLowInventory(shopId?: string) {
+  return useQuery<any, Error>({
+    queryKey: [...dashboardKeys.lowInventory, shopId],
+    queryFn: async () => (await api.get(`/dashboard/low-inventory${getQuery(shopId)}`)).data,
+    staleTime: 1000 * 10
+  })
+}
+export function useDashboardRecentActivities(shopId?: string) {
+  return useQuery<any, Error>({
+    queryKey: [...dashboardKeys.recentActivities, shopId],
+    queryFn: async () => (await api.get(`/dashboard/recent-activities${getQuery(shopId)}`)).data,
+    staleTime: 1000 * 10
+  })
 }

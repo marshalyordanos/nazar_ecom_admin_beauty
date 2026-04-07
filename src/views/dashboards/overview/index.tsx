@@ -10,7 +10,6 @@ import StackedBarChart from '@views/dashboards/overview/StackedBarChart'
 import DonutChart from '@views/dashboards/overview/DonutChart'
 import OrganicSessions from '@views/dashboards/overview/OrganicSessions'
 import ProjectTimeline from '@views/dashboards/overview/ProjectTimeline'
-import WeeklyOverview from '@views/dashboards/overview/WeeklyOverview'
 import SocialNetworkVisits from '@views/dashboards/overview/SocialNetworkVisits'
 import MonthlyBudget from '@views/dashboards/overview/MonthlyBudget'
 import MeetingSchedule from '@views/dashboards/overview/MeetingSchedule'
@@ -23,8 +22,13 @@ import UserTable from '@views/dashboards/overview/UserTable'
 import { getUserData } from '@/app/server/actions'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/redux-store'
-import { useDashboardOverview, useDashboardPaymentSummary, useDashboardSummaryWithDetails } from '@/api/admin/dashboard'
+import { useDashboardBrands, useDashboardOverview, useDashboardPaymentSummary, useDashboardShopKpi, useDashboardSummaryWithDetails, useDashboardTopProducts } from '@/api/admin/dashboard'
 import { useEffect, useState } from 'react'
+import HorizontalWithSubtitle from '@/components/card-statistics/HorizontalWithSubtitle'
+import TopBrands from '@views/dashboards/overview/WeeklyOverview'
+import ApexLineChart from '@views/dashboards/overview/MeetingSchedule'
+import LowInventory from './LowInventory'
+import { Typography } from '@mui/material'
 
 // NOTE: Removed import of getServerMode from @core/utils/serverHelpers to avoid server-only code in client component
 
@@ -52,13 +56,73 @@ const OverviewDashboard = () => {
     fetchData()
   }, [])
 
+  /**
+   * shopKPI={
+    "totalTransactions": 1,
+    "revenue": 2599.98,
+    "users": 2,
+    "orders": 8,
+    "products": 9,
+    "alerts": 0,
+    "customers": 3
+}
+   */
+  const { data: shopKPI } = useDashboardShopKpi(shop[0]?.id)
+
   const { data: summaryWithDetails } = useDashboardSummaryWithDetails(shop?.[0]?.id)
   const {data:overviewData} = useDashboardOverview(shop?.[0]?.id)
   const {data:paymentSummary} = useDashboardPaymentSummary(shop?.[0]?.id)
+  const {data:topProducts} = useDashboardTopProducts(shop?.[0]?.id,4)
+  console.log("summaryWithDetails",summaryWithDetails)
+  const cards:any = shopKPI
+  ? [
+      {
+        title: 'Customers',
+        stats: String(shopKPI?.customers),
+        avatarIcon: 'ri-user-line',
+        avatarColor: 'primary',
+        // trend: shopKPI?.customers > 0 ? 'positive' : 'negative',
+        // trendNumber: shopKPI?.customers,
+        subtitle: 'Total Customers'
+      },
+      {
+        title: 'Revenue',
+        stats: String(shopKPI?.revenue)+' br.',
+        avatarIcon: 'ri-money-cny-circle-line',
+        avatarColor: 'success',
+        // trend: shopKPI?.revenue > 0 ? 'positive' : 'negative',
+        // trendNumber: shopKPI?.revenue,
+        subtitle: 'Total Revenue'
+      },
+      {
+        title: 'Total Transactions',
+        stats: String(shopKPI?.totalTransactions) ,
+        avatarIcon: 'ri-money-cny-circle-line',
+        avatarColor: 'warning',
+        // trend: shopKPI?.totalTransactions > 0 ? 'positive' : 'negative',
+        // trendNumber: shopKPI?.totalTransactions,
+        subtitle: 'Total Transactions'
+      },
+      {
+        title: 'Orders',
+        stats: String(shopKPI?.orders),
+        avatarIcon: 'ri-shopping-cart-line',
+        avatarColor: 'success',
+        // trend: shopKPI?.orders > 0 ? 'positive' : 'negative',
+        // trendNumber: shopKPI?.orders,
+        subtitle: 'Total Orders'
+      }
+    ]
+  : []
   return (
     <Grid container spacing={6}>
+       {cards.map((item:any, i:number) => (
+        <Grid key={i} size={{ xs: 12, sm: 6, md: 3 }}>
+          <HorizontalWithSubtitle {...item} />
+        </Grid>
+      ))}
       <Grid size={{ xs: 12, md: 4 }}>
-        <Award />
+        <Award shopKPI={shopKPI} />
       </Grid>
       <Grid size={{ xs: 12, md: 2, sm: 3 }}>
         <CardStatVertical
@@ -109,29 +173,37 @@ const OverviewDashboard = () => {
         <ProjectTimeline />
       </Grid>
       <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-        <WeeklyOverview />
+        <TopBrands />
       </Grid>
       <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-        <SocialNetworkVisits />
+        <SocialNetworkVisits topProducts={topProducts} />
       </Grid>
       <Grid size={{ xs: 12, sm: 6, md: 4 }}>
         <MonthlyBudget />
       </Grid>
-      <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-        <MeetingSchedule />
+      <Grid size={{ xs: 12, sm: 12, md: 12}}>
+        <ApexLineChart />
       </Grid>
-      <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+      {/* <Grid size={{ xs: 12, sm: 6, md: 4 }}>
         <ExternalLinks />
-      </Grid>
-      <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-        {/* Remove serverMode prop to PaymentHistory, or pass null/undefined if needed */}
+      </Grid> */}
+      {/* <Grid size={{ xs: 12, sm: 6, md: 4 }}>
         <PaymentHistory serverMode={[] as any} />
-      </Grid>
-      <Grid size={{ xs: 12, md: 4 }}>
+      </Grid> */}
+      {/* <Grid size={{ xs: 12, md: 4 }}>
         <SalesInCountries />
+      </Grid> */}
+      <Grid size={{ xs: 12, md: 5 }}>
+        <Typography variant='h5' >Low Inventory</Typography>
+        <Typography className='mb-2' variant='subtitle1' >This is inverntery that are low in stock</Typography>
+
+        <LowInventory  />
       </Grid>
-      <Grid size={{ xs: 12, md: 8 }}>
-        {/* <UserTable tableData={userData} /> */}
+      <Grid size={{ xs: 12, md: 7 }}>
+      <Typography variant='h5' >Recent Order</Typography>
+      <Typography className='mb-2' variant='subtitle1' >This is recent orders </Typography>
+
+        <UserTable  />
       </Grid>
     </Grid>
   )

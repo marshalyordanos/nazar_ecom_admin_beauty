@@ -14,10 +14,8 @@ import { RootState } from '@/redux-store'
 import { useSelector } from 'react-redux'
 import React, { useEffect, useState } from 'react'
 
-const Award = () => {
-  const shop: any = useSelector((state: RootState) => state.shopReducer.shops)
+const Award = ({ shopKPI }: { shopKPI: any }) => {
   const theme = useTheme()
-  const { data: shopKPI } = useDashboardShopKpi(shop[0]?.id)
   
   // State: 0 for revenue, 1 for transaction
   const [showMode, setShowMode] = useState<0|1>(0)

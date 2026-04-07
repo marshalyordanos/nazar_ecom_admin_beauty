@@ -386,6 +386,7 @@ const BranchesTable = () => {
                 {
                   text: 'Download',
                   icon: 'ri-download-line'
+                  
                   // No action for download
                 },
                 {

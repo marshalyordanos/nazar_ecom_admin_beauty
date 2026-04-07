@@ -1,3 +1,4 @@
+'use client'
 // MUI Imports
 import Grid from '@mui/material/Grid'
 
@@ -17,6 +18,10 @@ import VisitsByDay from '@views/dashboards/ecommerce/VisitsByDay'
 
 // Data Imports
 import { getUserData } from '@/app/server/actions'
+import { useSelector } from 'react-redux'
+import { RootState } from '@/redux-store'
+import { useDashboardProductSummary, useDashboardRecentActivities, useDashboardSummary, useDashboardSummaryWithDetails } from '@/api/admin/dashboard'
+import { useEffect, useState } from 'react'
 
 /**
  * ! If you need data using an API call, uncomment the below API code, update the `process.env.API_URL` variable in the
@@ -35,66 +40,96 @@ import { getUserData } from '@/app/server/actions'
 
   return res.json()
 } */
-const DashboardECommerce = async () => {
-  // Vars
-  const data = await getUserData()
+
+const DashboardECommerce = () => {
+  const shop: any = useSelector((state: RootState) => state.shopReducer.shops)
+  const { data: productSummary, isLoading: isProductSummaryLoading } = useDashboardProductSummary(shop?.[0]?.id)
+//useDashboardSummary
+const {data: summary, isLoading: isSummaryLoading} = useDashboardSummary(shop?.[0]?.id)
+//useDashboardSummaryWithDetails
+const {data: summaryWithDetails, isLoading: isSummaryWithDetailsLoading} = useDashboardSummaryWithDetails(shop?.[0]?.id)
+
+const {data: recentActivities, isLoading: isRecentActivitiesLoading} = useDashboardRecentActivities(shop?.[0]?.id)
+
+console.log("summary:l", summary)
+  const [data, setData] = useState<any>(null)
+  const [dataLoading, setDataLoading] = useState(true)
+
+  useEffect(() => {
+    let mounted = true
+    const fetchData = async () => {
+      setDataLoading(true)
+      try {
+        const result = await getUserData()
+        if (mounted) setData(result)
+      } catch (e) {
+        if (mounted) setData(null)
+      }
+      if (mounted) setDataLoading(false)
+    }
+    fetchData()
+    return () => {
+      mounted = false
+    }
+  }, [])
 
   return (
     <Grid container spacing={6}>
       <Grid size={{ xs: 12, md: 6 }}>
-        <Sales />
+        <Sales isLoading={isProductSummaryLoading} productSummary={productSummary} />
       </Grid>
       <Grid size={{ xs: 12, sm: 6, md: 3 }}>
         <CardStatWithImage
-          stats='8.14k'
-          title='Ratings'
-          trendNumber='15.6%'
+          stats={productSummary?.totalSearchLogs ?? '-'}
+          title='All Time Product Searches'
+          // trendNumber='15.6%'
           chipColor='primary'
-          chipText={`Year of ${new Date().getFullYear()}`}
+          chipText='all time'
           src='/images/illustrations/characters/10.png'
         />
       </Grid>
       <Grid size={{ xs: 12, sm: 6, md: 3 }}>
         <CardStatWithImage
-          stats='12.2k'
-          title='Sessions'
+          stats={productSummary?.totalViewCount ?? '-'}
+          title='All Time Product Views'
           trend='negative'
-          trendNumber='25.5%'
+          // trendNumber='25.5%'
           chipColor='success'
-          chipText='Last Month'
+          chipText='all time'
           src='/images/illustrations/characters/11.png'
         />
       </Grid>
       <Grid size={{ xs: 12, md: 6 }}>
-        <WeeklySalesBg />
+        <WeeklySalesBg  />
       </Grid>
       <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-        <TotalVisits />
+        <TotalVisits totalVisit = {productSummary?.totalViewCount ?? 0} totalOrder={summary?.data.orders?.totalOrders ?? 0} />
       </Grid>
       <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-        <SalesMonth />
+        <SalesMonth thisMonthSale = {summaryWithDetails?.sales?.thisMonthSale ?? 0} />
       </Grid>
-      <Grid size={{ xs: 12, md: 6 }}>
-        <ActivityTimeline />
-      </Grid>
-      <Grid size={{ xs: 12, md: 6 }}>
+      
+      <Grid size={{ xs: 12, md: 12 }}>
         <TopReferralSources />
       </Grid>
-      <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+      <Grid size={{ xs: 12, md: 12 }}>
+        <ActivityTimeline isLoading={isRecentActivitiesLoading} recentActivities={recentActivities} />
+      </Grid>
+      {/* <Grid size={{ xs: 12, sm: 6, md: 3 }}>
         <OrdersImpressions />
-      </Grid>
-      <Grid size={{ xs: 12, md: 5 }} className='max-md:order-2'>
+      </Grid> */}
+      {/* <Grid size={{ xs: 12, md: 5 }} className='max-md:order-2'>
         <MarketingSales />
-      </Grid>
-      <Grid size={{ xs: 12, sm: 6, md: 4 }} className='max-md:order-1'>
+      </Grid> */}
+      {/* <Grid size={{ xs: 12, sm: 6, md: 4 }} className='max-md:order-1'>
         <LiveVisitors />
+      </Grid> */}
+      <Grid size={{ xs: 12, md: 12 }} className='max-md:order-3'>
+        {/* <UserTable tableData={data} loading={dataLoading} /> */}
       </Grid>
-      <Grid size={{ xs: 12, md: 8 }} className='max-md:order-3'>
-        <UserTable tableData={data} />
-      </Grid>
-      <Grid size={{ xs: 12, md: 4 }} className='max-md:order-3'>
+      {/* <Grid size={{ xs: 12, md: 4 }} className='max-md:order-3'>
         <VisitsByDay />
-      </Grid>
+      </Grid> */}
     </Grid>
   )
 }

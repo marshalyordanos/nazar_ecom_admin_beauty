@@ -23,12 +23,12 @@ const CardStatWithImage = (props: CardStatsCharacterProps) => {
               </Typography>
               <Chip size='small' variant='tonal' label={chipText} color={chipColor} />
             </div>
-            <div className='flex flex-wrap items-center gap-x-2'>
+            {<div className='flex flex-wrap items-center gap-x-2'>
               <Typography variant='h4'>{stats}</Typography>
-              <Typography color={trend === 'negative' ? 'error.main' : 'success.main'}>
+              {trendNumber && <Typography color={trend === 'negative' ? 'error.main' : 'success.main'}>
                 {`${trend === 'negative' ? '-' : '+'}${trendNumber}`}
-              </Typography>
-            </div>
+              </Typography>}
+            </div>}
           </Grid>
           <img src={src} alt={title} className='absolute block-end-0 inline-end-5 self-end bs-[130px] is-auto' />
         </Grid>

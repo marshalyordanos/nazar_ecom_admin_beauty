@@ -1,96 +1,157 @@
+'use client'
+
+// Next Imports
+import dynamic from 'next/dynamic'
+
 // MUI Imports
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
-import Chip from '@mui/material/Chip'
+import ToggleButton from '@mui/material/ToggleButton'
+import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
+import { useState, useMemo } from 'react'
 
-// Types Imports
-import type { ThemeColor } from '@core/types'
+// Third-party Imports
+import type { ApexOptions } from 'apexcharts'
+import { useSelector } from 'react-redux'
+import { RootState } from '@/redux-store'
+import { useDashboardSalesTrends } from '@/api/admin/dashboard'
 
-// Components Imports
-import OptionMenu from '@core/components/option-menu'
-import CustomAvatar from '@core/components/mui/Avatar'
+// Styled Component Imports
+const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexCharts'))
 
-type DataType = {
-  avatarSrc: string
-  title: string
-  subtitle: string
-  chipLabel: string
-  chipColor?: ThemeColor
-}
+const ApexLineChart = () => {
+  const shop: any = useSelector((state: RootState) => state.shopReducer.shops)
+  const [groupBy, setGroupBy] = useState<'day' | 'month'>('day')
 
-// Vars
-const data: DataType[] = [
-  {
-    avatarSrc: '/images/avatars/4.png',
-    title: 'Call with Woods',
-    subtitle: '21 Jul | 08:20-10:30',
-    chipLabel: 'Business',
-    chipColor: 'primary'
-  },
-  {
-    avatarSrc: '/images/avatars/5.png',
-    title: 'Conference call',
-    subtitle: '24 Jul | 11:30-12:00',
-    chipLabel: 'Meditation',
-    chipColor: 'success'
-  },
-  {
-    avatarSrc: '/images/avatars/3.png',
-    title: 'Meeting with Mark',
-    subtitle: '28 Jul | 05:00-6:45',
-    chipLabel: 'Dinner',
-    chipColor: 'warning'
-  },
-  {
-    avatarSrc: '/images/avatars/2.png',
-    title: 'Meeting with Oakland',
-    subtitle: '03 Aug | 07:00-8:30',
-    chipLabel: 'Meetup',
-    chipColor: 'secondary'
-  },
-  {
-    avatarSrc: '/images/avatars/8.png',
-    title: 'Meeting in Oakland',
-    subtitle: '14 Aug | 04:15-05:30',
-    chipLabel: 'Dinner',
-    chipColor: 'error'
-  },
-  {
-    avatarSrc: '/images/avatars/7.png',
-    title: 'Meeting with Carl',
-    subtitle: '05 Oct | 10:00-12:45',
-    chipLabel: 'Business',
-    chipColor: 'primary'
+  // Fetch sales trends data based on selected groupBy value (day or month)
+  const { data: salesTrends } = useDashboardSalesTrends(shop?.[0]?.id, groupBy)
+
+  // Vars
+  const divider = 'var(--mui-palette-divider)'
+  const disabledText = 'var(--mui-palette-text-disabled)'
+
+  // Map salesTrends data to chart series and categories
+  const { chartSeries, chartCategories } = useMemo(() => {
+    // Fallback if salesTrends is missing or invalid
+    const arr = Array.isArray(salesTrends?.series) ? salesTrends.series : []
+    if (arr.length === 0) {
+      return {
+        chartSeries: [
+          { data: [280, 200, 220, 180, 270, 250, 70, 90, 200, 150, 160, 100, 150, 100, 50] }
+        ],
+        chartCategories: [
+          '7/12','8/12','9/12','10/12','11/12','12/12','13/12','14/12','15/12',
+          '16/12','17/12','18/12','19/12','20/12','21/12'
+        ]
+      }
+    }
+
+    // When groupBy is 'day', format date as YYYY-MM-DD, show last 15 days, else groupBy 'month', show last 8 months
+    let points: any[] = arr
+    let categories: string[]
+
+    if (groupBy === 'day') {
+      points = arr.slice(-15)
+      categories = points.map((p: any) => {
+        const d = new Date(p.period)
+        return `${d.getDate()}/${d.getMonth() + 1}`
+      })
+    } else {
+      points = arr.slice(-8)
+      categories = points.map((p: any) => {
+        // p.period is "YYYY-MM"
+        const [year, month] = p.period.split('-')
+        return `${month}/${year}`
+      })
+    }
+    return {
+      chartSeries: [
+        {
+          data: points.map((p: any) => Number(p.revenue ?? 0))
+        }
+      ],
+      chartCategories: categories
+    }
+  }, [salesTrends, groupBy])
+
+  const options: ApexOptions = {
+    chart: {
+      parentHeightOffset: 0,
+      zoom: { enabled: false },
+      toolbar: { show: false }
+    },
+    colors: ['#ff9f43'],
+    stroke: { curve: 'straight' },
+    dataLabels: { enabled: false },
+    markers: {
+      strokeWidth: 7,
+      strokeOpacity: 1,
+      colors: ['#ff9f43'],
+      strokeColors: ['#fff']
+    },
+    grid: {
+      padding: { top: -10 },
+      borderColor: divider,
+      xaxis: {
+        lines: { show: true }
+      }
+    },
+    tooltip: {
+      custom(data: any) {
+        return `<div class='bar-chart'>
+          <span>${data.series[data.seriesIndex][data.dataPointIndex]}</span>
+        </div>`
+      }
+    },
+    yaxis: {
+      labels: {
+        style: { colors: disabledText, fontSize: '13px' }
+      }
+    },
+    xaxis: {
+      axisBorder: { show: false },
+      axisTicks: { color: divider },
+      crosshairs: {
+        stroke: { color: divider }
+      },
+      labels: {
+        style: { colors: disabledText, fontSize: '13px' }
+      },
+      categories: chartCategories
+    }
   }
-]
 
-const Transactions = () => {
   return (
     <Card>
-      <CardHeader title='Meeting Schedule' action={<OptionMenu options={['Refresh', 'Share', 'Reschedule']} />} />
-      <CardContent className='flex flex-col gap-6'>
-        {data.map((item, index) => (
-          <div key={index} className='flex items-center gap-4'>
-            <CustomAvatar variant='rounded' src={item.avatarSrc} size={38} />
-            <div className='flex justify-between items-center is-full flex-wrap gap-x-4 gap-y-2'>
-              <div className='flex flex-col gap-0.5'>
-                <Typography color='text.primary' className='font-medium'>
-                  {item.title}
-                </Typography>
-                <div className='flex items-center gap-2'>
-                  <i className='ri-calendar-line text-base text-textSecondary' />
-                  <Typography variant='body2'>{item.subtitle}</Typography>
-                </div>
-              </div>
-              <Chip label={item.chipLabel} color={item.chipColor} size='small' variant='tonal' />
-            </div>
-          </div>
-        ))}
+      <CardHeader
+        title='Sales Trends'
+        subheader='Sales trends by day or month'
+        sx={{
+          flexDirection: ['column', 'row'],
+          alignItems: ['flex-start', 'center'],
+          '& .MuiCardHeader-action': { mb: 0 },
+          '& .MuiCardHeader-content': { mb: [2, 0] }
+        }}
+        action={
+          <ToggleButtonGroup
+            exclusive
+            size="small"
+            value={groupBy}
+            onChange={(_, val) => { if (val) setGroupBy(val); }}
+            color="primary"
+            sx={{ ml: 2 }}
+          >
+            <ToggleButton value="day">Day</ToggleButton>
+            <ToggleButton value="month">Month</ToggleButton>
+          </ToggleButtonGroup>
+        }
+      />
+      <CardContent>
+        <AppReactApexCharts type='line' width='100%' height={400} options={options} series={chartSeries} />
       </CardContent>
     </Card>
   )
 }
 
-export default Transactions
+export default ApexLineChart

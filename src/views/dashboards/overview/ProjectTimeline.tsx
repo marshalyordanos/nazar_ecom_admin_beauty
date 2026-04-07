@@ -31,7 +31,7 @@ const ProjectTimeline = () => {
   const shop: any = useSelector((state: RootState) => state.shopReducer.shops)
 
   const [groupBy, setGroupBy] = useState<'day' | 'month'>('day')
-  const [chartType, setChartType] = useState<'line' | 'bar'>('line')
+  const [chartType, setChartType] = useState<'line' | 'bar'>('bar')
 
   const { data: salesTrends } = useDashboardSalesTrends(shop?.[0]?.id, groupBy)
 

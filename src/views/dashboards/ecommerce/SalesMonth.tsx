@@ -18,7 +18,7 @@ const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexChart
 // Vars
 const series = [{ data: [12, 12, 18, 18, 13, 13, 5, 5, 17, 17, 25, 25] }]
 
-const SalesMonth = () => {
+const SalesMonth = ({ thisMonthSale }: { thisMonthSale: number }) => {
   // Vars
   const primaryColor = 'var(--mui-palette-primary-main)'
 
@@ -65,7 +65,7 @@ const SalesMonth = () => {
       <CardContent className='flex flex-col gap-4 pbe-0'>
         <div>
           <Typography>Total Sales This Month</Typography>
-          <Typography variant='h5'>$28,450</Typography>
+          <Typography variant='h5'>{thisMonthSale} <span className='text-md text-gray-500'>Birr</span></Typography>
         </div>
         <AppReactApexCharts type='line' height={115} width='100%' options={options} series={series} />
       </CardContent>

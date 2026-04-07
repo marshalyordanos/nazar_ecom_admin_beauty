@@ -21,7 +21,7 @@ export type CardStatsVerticalProps = {
 export type CardStatsCharacterProps = {
   stats: string
   title: string
-  trendNumber: string
+  trendNumber?: string
   chipText: string
   src: string
   trend?: 'positive' | 'negative'

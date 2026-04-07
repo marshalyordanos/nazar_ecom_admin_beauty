@@ -14,44 +14,63 @@ import CustomAvatar from '@core/components/mui/Avatar'
 // Types
 type DataType = {
   icon: string
-  stats: string
+  stats: string | number
   title: string
   color: ThemeColor
 }
 
-// Vars
-const data: DataType[] = [
+type ProductSummaryType = {
+  totalProducts?: number
+  byStatus?: { [key: string]: number }
+  active?: number
+  draft?: number
+  archived?: number
+}
+
+const getData = (summary?: ProductSummaryType): DataType[] => [
   {
-    stats: '8,458',
+    stats: summary?.totalProducts ?? '-',
     color: 'primary',
-    title: 'Customers',
-    icon: 'ri-user-star-line'
+    title: 'Total Products',
+    icon: 'ri-user-star-line',
   },
   {
-    stats: '$28.5k',
+    stats: summary?.active ?? '-',
     color: 'warning',
     icon: 'ri-pie-chart-2-line',
-    title: 'Total Profit'
+    title: 'Active Products',
   },
   {
     color: 'info',
-    stats: '2,450k',
-    title: 'Transactions',
-    icon: 'ri-arrow-left-right-line'
-  }
+    stats: summary?.draft ?? '-',
+    title: 'Draft Products',
+    icon: 'ri-arrow-left-right-line',
+  },
+  // To show archived as an additional metric, uncomment below:
+  // {
+  //   color: 'secondary',
+  //   stats: summary?.archived ?? '-',
+  //   title: 'Archived Products',
+  //   icon: 'ri-archive-line',
+  // },
 ]
 
-const Sales = () => {
+const Sales = ({ isLoading, productSummary }: { isLoading: boolean, productSummary: any }) => {
+  const data = getData(productSummary)
   return (
     <Card className='bs-full'>
       <CardHeader
-        title='Sales Overview'
+        title='Product Overview'
         action={<OptionMenu options={['Refresh', 'Share', 'Update']} />}
         subheader={
           <div className='flex items-center gap-2'>
-            <span>Total 42.5k Sales</span>
+            <span>Total {productSummary?.totalProducts ?? 0} Products</span>
             <span className='flex items-center text-success font-medium'>
-              +18%
+              +{productSummary?.active !== undefined && productSummary?.totalProducts !== undefined
+                ? `${Math.round(
+                    (productSummary.active / (productSummary.totalProducts || 1)) * 100
+                  )}% Active`
+                : '—'}
               <i className='ri-arrow-up-s-line text-xl' />
             </span>
           </div>
