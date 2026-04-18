@@ -8,7 +8,6 @@ import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
 import Chip from '@mui/material/Chip'
 import Skeleton from '@mui/material/Skeleton'
-import { styled } from '@mui/material/styles'
 
 // Third-party Imports
 import classnames from 'classnames'
@@ -27,21 +26,21 @@ import {
 } from '@tanstack/react-table'
 import type { ColumnDef, FilterFn } from '@tanstack/react-table'
 import type { RankingInfo } from '@tanstack/match-sorter-utils'
+import { useSelector } from 'react-redux'
 
 // Type Imports
 import type { ThemeColor } from '@core/types'
+import type { RootState } from '@/redux-store'
 
 // Component Imports
 import CustomAvatar from '@core/components/mui/Avatar'
+import { useDashboardRecentOrders } from '@/api/admin/dashboard'
 
 // Util Imports
 import { getInitials } from '@/utils/getInitials'
 
 // Style Imports
 import tableStyles from '@core/styles/table.module.css'
-import { useSelector } from 'react-redux'
-import { RootState } from '@/redux-store'
-import { useDashboardRecentOrders } from '@/api/admin/dashboard'
 
 declare module '@tanstack/table-core' {
   interface FilterFns {
@@ -60,12 +59,11 @@ const userStatusObj: { [key: string]: ThemeColor } = {
   CANCELLED: 'error'
 }
 
-// Styled Components
-const Icon = styled('i')({})
-
 const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
   const itemRank = rankItem(row.getValue(columnId), value)
+
   addMeta({ itemRank })
+
   return itemRank.passed
 }
 
@@ -77,14 +75,16 @@ const UserListTable = () => {
   const [rowSelection, setRowSelection] = useState({})
   const [globalFilter, setGlobalFilter] = useState('')
 
-  // Transform recentOrders into user table data
   const data = useMemo(() => {
     if (!Array.isArray(recentOrders)) return []
+
     return recentOrders.map((order, idx) => {
       const user = order.user || {}
+
       const fullName = (user.firstName && user.lastName)
         ? `${user.firstName} ${user.lastName}`
         : user.firstName || user.lastName || ''
+
       return {
         id: order.id || idx,
         fullName,
@@ -94,14 +94,14 @@ const UserListTable = () => {
         createdAt: order.createdAt || '',
         grandTotal: order.grandTotal || 0,
         currency: order.currency || '',
-        // You could add more fields as needed
+        itemsCount: Array.isArray(order.items) ? order.items.length : 0
       }
     })
   }, [recentOrders])
 
-  // Always show 10 rows - either actual data or skeletons
   const rowCount = 9
-  const dataWithSkeletons = useMemo(() => {
+
+  const tableData = useMemo(() => {
     if (isLoading) {
       return Array.from({ length: rowCount }, (_, idx) => ({
         id: `skeleton-${idx}`,
@@ -111,28 +111,14 @@ const UserListTable = () => {
         orderNumber: null,
         createdAt: null,
         grandTotal: null,
-        currency: null
+        currency: null,
+        itemsCount: null
       }))
     }
-    if (data.length < rowCount) {
-      return [
-        ...data,
-        ...Array.from({ length: rowCount - data.length }, (_, idx) => ({
-          id: `skeleton-${idx + data.length}`,
-          fullName: null,
-          email: null,
-          status: null,
-          orderNumber: null,
-          createdAt: null,
-          grandTotal: null,
-          currency: null
-        }))
-      ]
-    }
-    return data.slice(0, rowCount)
-  }, [isLoading, data])
 
-  // Columns
+    return data.slice(0, rowCount)
+  }, [data, isLoading, rowCount])
+
   const columns = useMemo<ColumnDef<any, any>[]>(
     () => [
       columnHelper.accessor('fullName', {
@@ -140,9 +126,9 @@ const UserListTable = () => {
         cell: ({ row }) =>
           row.original.fullName === null ? (
             <div className='flex items-center gap-3'>
-              <Skeleton variant='circular' width={34} height={34} />
+              <Skeleton variant='circular' width={34} height={34} animation={false} />
               <div className='flex flex-col'>
-                <Skeleton variant='text' width={80} height={24} />
+                <Skeleton variant='text' width={80} height={24} animation={false} />
               </div>
             </div>
           ) : (
@@ -154,49 +140,50 @@ const UserListTable = () => {
                 <Typography color='text.primary' className='font-medium'>
                   {row.original.fullName}
                 </Typography>
+                <Typography variant='body2' color='text.secondary'>
+                  {row.original.email}
+                </Typography>
               </div>
             </div>
           )
       }),
-      columnHelper.accessor('email', {
-        header: 'Email',
-        cell: ({ row }) =>
-          row.original.email === null ? (
-            <Skeleton variant='text' width={100} />
-          ) : (
-            <Typography>{row.original.email}</Typography>
-          )
-      }),
       columnHelper.accessor('orderNumber', {
-        header: 'Order #',
+        header: 'Order',
         cell: ({ row }) =>
           row.original.orderNumber === null ? (
-            <Skeleton variant='text' width={60} />
+            <Skeleton variant='text' width={90} animation={false} />
           ) : (
-            <Typography>{row.original.orderNumber}</Typography>
+            <div className='flex flex-col gap-1'>
+              <Typography className='font-medium'>{row.original.orderNumber}</Typography>
+              <Typography variant='body2' color='text.secondary'>
+                {row.original.itemsCount} item{row.original.itemsCount === 1 ? '' : 's'}
+              </Typography>
+            </div>
+          )
+      }),
+      columnHelper.accessor('createdAt', {
+        header: 'Placed',
+        cell: ({ row }) =>
+          row.original.createdAt === null ? (
+            <Skeleton variant='text' width={120} animation={false} />
+          ) : (
+            <div className='flex flex-col gap-1'>
+              <Typography>{new Date(row.original.createdAt).toLocaleDateString()}</Typography>
+              <Typography variant='body2' color='text.secondary'>
+                {new Date(row.original.createdAt).toLocaleTimeString()}
+              </Typography>
+            </div>
           )
       }),
       columnHelper.accessor('grandTotal', {
         header: 'Total',
         cell: ({ row }) =>
           row.original.grandTotal === null ? (
-            <Skeleton variant='text' width={60} />
+            <Skeleton variant='text' width={60} animation={false} />
           ) : (
-            <Typography>
-              {row.original.grandTotal.toLocaleString()} {row.original.currency}
-            </Typography>
-          )
-      }),
-      columnHelper.accessor('createdAt', {
-        header: 'Date',
-        cell: ({ row }) =>
-          row.original.createdAt === null ? (
-            <Skeleton variant='text' width={120} />
-          ) : (
-            <Typography>
-              {row.original.createdAt
-                ? new Date(row.original.createdAt).toLocaleString()
-                : ''}
+            <Typography className='font-medium'>
+              {new Intl.NumberFormat('en', { maximumFractionDigits: 2 }).format(row.original.grandTotal)}{' '}
+              {row.original.currency}
             </Typography>
           )
       }),
@@ -204,7 +191,7 @@ const UserListTable = () => {
         header: 'Status',
         cell: ({ row }) =>
           row.original.status === null ? (
-            <Skeleton variant='rounded' width={60} height={28} />
+            <Skeleton variant='rounded' width={60} height={28} animation={false} />
           ) : (
             <div className='flex items-center gap-3'>
               <Chip
@@ -222,7 +209,7 @@ const UserListTable = () => {
   )
 
   const table = useReactTable({
-    data: dataWithSkeletons,
+    data: tableData,
     columns,
     filterFns: {
       fuzzy: fuzzyFilter
@@ -249,14 +236,13 @@ const UserListTable = () => {
     getFacetedMinMaxValues: getFacetedMinMaxValues()
   })
 
-  // Use this to exclude hidden skeleton rows on search/filter, but always show 10 skeletons when loading or less than 10 data
   const filteredRows = Array.isArray(table?.getFilteredRowModel?.().rows)
     ? table.getFilteredRowModel().rows
     : []
 
   return (
     <>
-      <Card>
+      <Card className='border border-[var(--mui-palette-divider)] shadow-none'>
         <div className='overflow-x-auto'>
           <table className={tableStyles.table}>
             <thead>
@@ -290,12 +276,11 @@ const UserListTable = () => {
               {filteredRows.length === 0 ? (
                 <tr>
                   <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>
-                    No data available
+                    No recent orders found
                   </td>
                 </tr>
               ) : (
                 filteredRows.slice(0, rowCount).map(row => {
-                  // If row.original.fullName === null it's a skeleton row
                   return (
                     <tr key={row.id} className={classnames({ selected: row.getIsSelected() })}>
                       {row.getVisibleCells().map(cell => (

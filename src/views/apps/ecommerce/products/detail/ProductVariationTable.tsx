@@ -19,6 +19,7 @@ import IconButton from '@mui/material/IconButton'
 import TablePagination from '@mui/material/TablePagination'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
+import CircularProgress from '@mui/material/CircularProgress'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
@@ -56,6 +57,7 @@ import { getLocalizedUrl } from '@/utils/i18n'
 // Style Imports
 import tableStyles from '@core/styles/table.module.css'
 import { useProduct } from '@/api/products/useProduct'
+import MutationBlockingOverlay from '@/components/loading/MutationBlockingOverlay'
 
 declare module '@tanstack/table-core' {
   interface FilterFns {
@@ -288,6 +290,7 @@ const ProductVariationDetailTable = () => {
           <div className='flex items-center'>
             <IconButton
               size='small'
+              disabled={deleting}
               onClick={() =>
                 router.push(
                   getLocalizedUrl(
@@ -304,6 +307,7 @@ const ProductVariationDetailTable = () => {
               size='small'
               color='error'
               title="Delete Variant"
+              disabled={deleting}
               onClick={() => {
                 setDeleteId(row.original.id)
                 setDeleteDialogOpen(true)
@@ -318,7 +322,7 @@ const ProductVariationDetailTable = () => {
       })
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [locale]
+    [locale, deleting]
   )
 
   const table = useReactTable({
@@ -351,7 +355,8 @@ const ProductVariationDetailTable = () => {
 
   return (
     <>
-      <Card>
+      <Card sx={{ position: 'relative', overflow: 'hidden' }}>
+        <MutationBlockingOverlay open={deleting} message='Deleting variant…' />
         <CardHeader title="Variant List" />
         <Divider />
         <div className='flex justify-between flex-col items-start sm:flex-row sm:items-center gap-y-4 p-5'>
@@ -367,6 +372,7 @@ const ProductVariationDetailTable = () => {
             href={getLocalizedUrl(`/apps/ecommerce/products/add?productId=${id}&only_variation=true`, locale as Locale)}
             startIcon={<i className='ri-add-line' />}
             className='max-sm:is-full is-auto'
+            disabled={deleting}
           >
             Add Variant
           </Button>
@@ -432,7 +438,12 @@ const ProductVariationDetailTable = () => {
           onRowsPerPageChange={handleChangeRowsPerPage}
         />
       </Card>
-      <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => !deleting && setDeleteDialogOpen(false)}
+        slotProps={{ paper: { sx: { position: 'relative', overflow: 'hidden' } } }}
+      >
+        <MutationBlockingOverlay open={deleting} message='Deleting variant…' />
         <DialogTitle>Delete Variant</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -443,7 +454,13 @@ const ProductVariationDetailTable = () => {
           <Button onClick={() => setDeleteDialogOpen(false)} disabled={deleting}>
             Cancel
           </Button>
-          <Button color="error" variant="contained" onClick={handleDeleteVariant} disabled={deleting}>
+          <Button
+            color="error"
+            variant="contained"
+            onClick={() => void handleDeleteVariant()}
+            disabled={deleting}
+            startIcon={deleting ? <CircularProgress color='inherit' size={18} /> : undefined}
+          >
             {deleting ? 'Deleting...' : 'Delete'}
           </Button>
         </DialogActions>

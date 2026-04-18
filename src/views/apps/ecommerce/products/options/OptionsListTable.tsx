@@ -58,6 +58,7 @@ declare module '@tanstack/table-core' {
 type OptionValue = {
   id: string
   value: string
+  colorValue?: string | null
   optionId: string
   createdAt: string
 }
@@ -181,11 +182,26 @@ const [optionId, setOptionId] = useState<string | null>(null)
                     style={{
                       background: '#F4F5F7',
                       color: '#555',
-                      borderRadius: 4,
-                      padding: '2px 8px',
-                      fontSize: 13
+                      borderRadius: 999,
+                      padding: '4px 10px',
+                      fontSize: 13,
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: 8
                     }}
                   >
+                    {val.colorValue ? (
+                      <span
+                        style={{
+                          width: 14,
+                          height: 14,
+                          borderRadius: '999px',
+                          backgroundColor: val.colorValue,
+                          border: '1px solid rgba(0,0,0,0.12)',
+                          display: 'inline-block'
+                        }}
+                      />
+                    ) : null}
                     {val.value}
                   </span>
                 ))

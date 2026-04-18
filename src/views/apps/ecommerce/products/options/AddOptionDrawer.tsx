@@ -30,12 +30,14 @@ type Props = {
 type OptionFormType = {
   name: string
   value: string
+  colorValue: string
 }
 
 // Util
 const defaultValues: OptionFormType = {
   name: '',
-  value: ''
+  value: '',
+  colorValue: '#000000'
 }
 
 const AddOptionDrawer = (props: Props) => {
@@ -64,12 +66,16 @@ const AddOptionDrawer = (props: Props) => {
     defaultValues
   })
 
+  const watchedName = watch('name')
+  const isColorOption = watchedName.trim().toLowerCase() === 'color'
+
   // Effect: Load option details and values when drawer is opened
   useEffect(() => {
     if (optionToEdit) {
       reset({
         name: optionToEdit.name,
-        value: ''
+        value: '',
+        colorValue: '#000000'
       })
       setServerValues(optionToEdit.values ?? [])
       setOptionSavedId(optionToEdit.id)
@@ -107,7 +113,8 @@ const AddOptionDrawer = (props: Props) => {
         // Option name edit will also update local
         reset({
           name: response.data.name,
-          value: ''
+          value: '',
+          colorValue: '#000000'
         })
       } else {
         // Create new
@@ -149,12 +156,24 @@ const AddOptionDrawer = (props: Props) => {
         return
       }
       // Add this value
-      const response = await api.post(`/products/options/${addToId}/values`, { value: trimmed })
+      const payload = isColorOption
+        ? { value: trimmed, colorValue: data.colorValue }
+        : { value: trimmed }
+      const response = await api.post(`/products/options/${addToId}/values`, payload)
       setServerValues(prev => [
         ...prev,
-        ...(Array.isArray(response.data) ? response.data : [{ id: response.data?.id || Math.random().toString(), value: trimmed }])
+        ...(Array.isArray(response.data)
+          ? response.data
+          : [
+              {
+                id: response.data?.id || Math.random().toString(),
+                value: trimmed,
+                colorValue: response.data?.colorValue ?? (isColorOption ? data.colorValue : null)
+              }
+            ])
       ])
       setValue('value', '')
+      setValue('colorValue', '#000000')
       setError(null)
       setData() // ask parent to refetch if needed
     } catch (err: any) {
@@ -278,8 +297,19 @@ const AddOptionDrawer = (props: Props) => {
               {serverValues.map(v => (
                 <span
                   key={v.id}
-                  className="inline-flex items-center px-2 py-1 bg-[#F4F5F7] rounded text-[13px] text-[#555]"
+                  className="inline-flex items-center gap-2 px-2 py-1 bg-[#F4F5F7] rounded text-[13px] text-[#555]"
                 >
+                  {v.colorValue ? (
+                    <span
+                      style={{
+                        width: 14,
+                        height: 14,
+                        borderRadius: '999px',
+                        backgroundColor: v.colorValue,
+                        border: '1px solid rgba(0,0,0,0.12)'
+                      }}
+                    />
+                  ) : null}
                   {v.value}
                   <IconButton
                     aria-label='Remove'
@@ -297,7 +327,7 @@ const AddOptionDrawer = (props: Props) => {
           {/* Add new value (no dependency on option name field validation for enabling this form) */}
           <form
             onSubmit={handleSubmit(onAddValue)}
-            className='flex gap-2 items-start'
+            className='flex gap-2 items-start flex-wrap'
             autoComplete='off'
           >
             <Controller
@@ -317,6 +347,38 @@ const AddOptionDrawer = (props: Props) => {
                 />
               )}
             />
+            {isColorOption ? (
+              <Controller
+                name='colorValue'
+                control={control}
+                render={({ field }) => (
+                  <div className='flex items-center gap-2 rounded border border-[var(--mui-palette-divider)] px-2 py-2'>
+                    <input
+                      type='color'
+                      value={field.value || '#000000'}
+                      onChange={e => field.onChange(e.target.value)}
+                      disabled={loading || (!optionSavedId && !optionToEdit)}
+                      style={{
+                        width: 36,
+                        height: 36,
+                        border: 'none',
+                        background: 'transparent',
+                        padding: 0,
+                        cursor: 'pointer'
+                      }}
+                    />
+                    <TextField
+                      size='small'
+                      label='Color value'
+                      value={field.value || '#000000'}
+                      onChange={e => field.onChange(e.target.value)}
+                      disabled={loading || (!optionSavedId && !optionToEdit)}
+                      sx={{ minWidth: 130 }}
+                    />
+                  </div>
+                )}
+              />
+            ) : null}
             <Button
               variant='contained'
               type='submit'

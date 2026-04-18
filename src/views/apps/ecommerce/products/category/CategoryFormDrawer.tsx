@@ -15,10 +15,12 @@ import Typography from '@mui/material/Typography'
 import Divider from '@mui/material/Divider'
 import InputAdornment from '@mui/material/InputAdornment'
 import Alert from '@mui/material/Alert'
+import Box from '@mui/material/Box'
 
 import { Controller, useForm } from 'react-hook-form'
 
 import { useCreateCategory, useUpdateCategory } from '@/api/categories/useCategories'
+import MutationBlockingOverlay from '@/components/loading/MutationBlockingOverlay'
 
 import { slugifyName } from './categoryFormUtils'
 
@@ -181,7 +183,11 @@ const CategoryFormDrawer = (props: CategoryFormDrawerProps) => {
         </IconButton>
       </div>
       <Divider />
-      <div className='p-5'>
+      <Box className='p-5' sx={{ position: 'relative', flex: 1, overflow: 'auto' }}>
+        <MutationBlockingOverlay
+          open={busy}
+          message={mode === 'add' ? 'Creating category…' : 'Updating category…'}
+        />
         {formError ? (
           <Alert severity='error' className='mbe-4' onClose={() => setFormError(null)}>
             {formError}
@@ -306,7 +312,7 @@ const CategoryFormDrawer = (props: CategoryFormDrawerProps) => {
             </Button>
           </div>
         </form>
-      </div>
+      </Box>
     </Drawer>
   )
 }

@@ -21,6 +21,7 @@ import ListItemText from '@mui/material/ListItemText'
 import Divider from '@mui/material/Divider'
 
 import CategoryFormDrawer from '@/views/apps/ecommerce/products/category/CategoryFormDrawer'
+import MutationBlockingOverlay from '@/components/loading/MutationBlockingOverlay'
 import {
   excludedParentIdsForEdit,
   flattenCategoryTreeForSelect
@@ -38,13 +39,15 @@ function TreeRow({
   depth,
   onAddChild,
   onEdit,
-  onDelete
+  onDelete,
+  actionsDisabled
 }: {
   node: CategoryTreeNode
   depth: number
   onAddChild: (parentId: string) => void
   onEdit: (n: CategoryTreeNode) => void
   onDelete: (n: CategoryTreeNode) => void
+  actionsDisabled?: boolean
 }) {
   return (
     <>
@@ -52,13 +55,24 @@ function TreeRow({
         sx={{ pl: theme => theme.spacing(2 + depth * 2), py: 1 }}
         secondaryAction={
           <Box sx={{ display: 'flex', gap: 0.5 }}>
-            <IconButton size='small' aria-label='Add subcategory' onClick={() => onAddChild(node.id)}>
+            <IconButton
+              size='small'
+              aria-label='Add subcategory'
+              disabled={actionsDisabled}
+              onClick={() => onAddChild(node.id)}
+            >
               <i className='ri-add-line' />
             </IconButton>
-            <IconButton size='small' aria-label='Edit' onClick={() => onEdit(node)}>
+            <IconButton size='small' aria-label='Edit' disabled={actionsDisabled} onClick={() => onEdit(node)}>
               <i className='ri-edit-line' />
             </IconButton>
-            <IconButton size='small' aria-label='Delete' color='error' onClick={() => onDelete(node)}>
+            <IconButton
+              size='small'
+              aria-label='Delete'
+              color='error'
+              disabled={actionsDisabled}
+              onClick={() => onDelete(node)}
+            >
               <i className='ri-delete-bin-line' />
             </IconButton>
           </Box>
@@ -82,6 +96,7 @@ function TreeRow({
           onAddChild={onAddChild}
           onEdit={onEdit}
           onDelete={onDelete}
+          actionsDisabled={actionsDisabled}
         />
       ))}
     </>
@@ -174,7 +189,8 @@ return flat
   }
 
   return (
-    <>
+    <Box sx={{ position: 'relative' }}>
+      <MutationBlockingOverlay open={deleteMut.isPending} message='Deleting category…' />
       <Box className='flex flex-wrap items-center justify-between gap-4 mbe-6'>
         <div>
           <Typography variant='h5' className='mbe-1'>
@@ -184,7 +200,12 @@ return flat
             Roots are shown as cards; nested categories are listed inside. Sales stats include all descendants.
           </Typography>
         </div>
-        <Button variant='contained' startIcon={<i className='ri-add-line' />} onClick={openAddRoot}>
+        <Button
+          variant='contained'
+          startIcon={<i className='ri-add-line' />}
+          onClick={openAddRoot}
+          disabled={deleteMut.isPending}
+        >
           Add root category
         </Button>
       </Box>
@@ -219,6 +240,7 @@ return flat
                       sx={{ bgcolor: 'background.paper' }}
                       onClick={() => openAddChild(root.id)}
                       aria-label='Add subcategory'
+                      disabled={deleteMut.isPending}
                     >
                       <i className='ri-add-line' />
                     </IconButton>
@@ -227,6 +249,7 @@ return flat
                       sx={{ bgcolor: 'background.paper' }}
                       onClick={() => openEdit(root)}
                       aria-label='Edit'
+                      disabled={deleteMut.isPending}
                     >
                       <i className='ri-edit-line' />
                     </IconButton>
@@ -236,6 +259,7 @@ return flat
                       color='error'
                       onClick={() => openDelete(root)}
                       aria-label='Delete'
+                      disabled={deleteMut.isPending}
                     >
                       <i className='ri-delete-bin-line' />
                     </IconButton>
@@ -270,6 +294,7 @@ return flat
                             onAddChild={openAddChild}
                             onEdit={openEdit}
                             onDelete={openDelete}
+                            actionsDisabled={deleteMut.isPending}
                           />
                         ))}
                       </List>
@@ -316,13 +341,15 @@ return flat
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteTarget(null)}>Cancel</Button>
+          <Button onClick={() => setDeleteTarget(null)} disabled={deleteMut.isPending}>
+            Cancel
+          </Button>
           <Button color='error' variant='contained' onClick={confirmDelete} disabled={deleteMut.isPending}>
             {deleteMut.isPending ? 'Deleting…' : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>
-    </>
+    </Box>
   )
 }
 

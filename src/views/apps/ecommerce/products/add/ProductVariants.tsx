@@ -140,7 +140,21 @@ const ProductVariants = ({ optionValue, isUpdate=false }: { optionValue: any, is
                           {selectedOption && Array.isArray(selectedOption.values) && selectedOption.values.length
                             ? selectedOption.values.map((val: OptionValue) => (
                                 <MenuItem key={val.id} value={val.id}>
-                                  {val.value}
+                                  <div className='flex items-center gap-2'>
+                                    {val.colorValue ? (
+                                      <span
+                                        style={{
+                                          width: 14,
+                                          height: 14,
+                                          borderRadius: '999px',
+                                          backgroundColor: val.colorValue,
+                                          border: '1px solid rgba(0,0,0,0.12)',
+                                          display: 'inline-block'
+                                        }}
+                                      />
+                                    ) : null}
+                                    <span>{val.value}</span>
+                                  </div>
                                 </MenuItem>
                               ))
                             : <MenuItem value="" disabled>No Values Available</MenuItem>

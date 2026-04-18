@@ -22,7 +22,9 @@ import tableStyles from '@core/styles/table.module.css'
 import { useAdminPayments, useCapturePayment, useRefundPayment } from '@/api/admin/payments'
 import { useDashboardSummary } from '@/api/admin/dashboard'
 import Grid from '@mui/material/Grid'
+import CircularProgress from '@mui/material/CircularProgress'
 import HorizontalWithSubtitle from '@components/card-statistics/HorizontalWithSubtitle'
+import MutationBlockingOverlay from '@/components/loading/MutationBlockingOverlay'
 
 // Payment status map for styled chips
 const paymentStatusObj = {
@@ -144,7 +146,8 @@ function PaymentActions({
           <Button
             variant="contained"
             color="success"
-            disabled={captureMut.isPending}
+            disabled={captureMut.isPending || loading}
+            startIcon={captureMut.isPending || loading ? <CircularProgress color='inherit' size={18} /> : undefined}
             onClick={async () => {
               setLoading(true)
               try {
@@ -154,7 +157,7 @@ function PaymentActions({
               setLoading(false)
             }}
           >
-            Confirm
+            {captureMut.isPending || loading ? 'Processing…' : 'Confirm'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -173,7 +176,8 @@ function PaymentActions({
           <Button
             variant="contained"
             color="warning"
-            disabled={refundMut.isPending}
+            disabled={refundMut.isPending || loading}
+            startIcon={refundMut.isPending || loading ? <CircularProgress color='inherit' size={18} /> : undefined}
             onClick={async () => {
               setLoading(true)
               try {
@@ -183,7 +187,7 @@ function PaymentActions({
               setLoading(false)
             }}
           >
-            Confirm
+            {refundMut.isPending || loading ? 'Processing…' : 'Confirm'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -292,7 +296,11 @@ const PaymentsManagement = () => {
         ) : null}
       </Grid>
       <Typography variant="h4" className="mb-6 font-medium">Payment Management</Typography>
-      <Card>
+      <Card sx={{ position: 'relative', overflow: 'hidden' }}>
+        <MutationBlockingOverlay
+          open={captureMut.isPending || refundMut.isPending}
+          message='Updating payment…'
+        />
         <CardContent>
           <div className="flex flex-col gap-3 mb-4">
             <div className="flex flex-col sm:flex-row flex-wrap gap-3 items-start sm:items-end">

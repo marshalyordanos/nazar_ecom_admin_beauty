@@ -22,7 +22,10 @@ import TablePagination from '@mui/material/TablePagination'
 import TableRow from '@mui/material/TableRow'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
+import CircularProgress from '@mui/material/CircularProgress'
 import type { TextFieldProps } from '@mui/material/TextField'
+
+import MutationBlockingOverlay from '@/components/loading/MutationBlockingOverlay'
 
 import type { SaleFromShopRow } from '@/api/sales/useSaleFromShop'
 import type { Shop } from '@/types/shop'
@@ -72,8 +75,8 @@ type Props = {
   isLoading: boolean
   listError?: boolean
   currency?: string
-  onEdit: (row: SaleFromShopRow, payload: { quantity?: number; price?: number }) => void
-  onDelete: (id: string) => void
+  onEdit: (row: SaleFromShopRow, payload: { quantity?: number; price?: number }) => void | Promise<void>
+  onDelete: (id: string) => void | Promise<void>
   isMutating?: boolean
 }
 
@@ -115,7 +118,7 @@ const SalesFromShopTable = ({
   const fmtMoney = (n: number) =>
     new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(n)
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editRow) return
     const q = parseInt(editQty, 10)
     const p = parseFloat(editPrice)
@@ -127,13 +130,18 @@ const SalesFromShopTable = ({
 
       return
     }
-    onEdit(editRow, payload)
-    setEditRow(null)
+    try {
+      await Promise.resolve(onEdit(editRow, payload))
+      setEditRow(null)
+    } catch {
+      // keep dialog open on failure
+    }
   }
 
   return (
     <>
-      <Card>
+      <Card sx={{ position: 'relative', overflow: 'hidden' }}>
+        <MutationBlockingOverlay open={Boolean(isMutating)} message='Updating sales…' />
         <div className='flex flex-col gap-4 p-5'>
           <Typography variant='h5'>Shop sales</Typography>
           <div className='flex flex-wrap items-center gap-4 max-sm:flex-col max-sm:is-full'>
@@ -262,7 +270,14 @@ const SalesFromShopTable = ({
         />
       </Card>
 
-      <Dialog open={!!editRow} onClose={() => setEditRow(null)} maxWidth='xs' fullWidth>
+      <Dialog
+        open={!!editRow}
+        onClose={() => !isMutating && setEditRow(null)}
+        maxWidth='xs'
+        fullWidth
+        slotProps={{ paper: { sx: { position: 'relative', overflow: 'hidden' } } }}
+      >
+        <MutationBlockingOverlay open={Boolean(isMutating)} message='Saving sale…' />
         <DialogTitle>Edit sale line</DialogTitle>
         <DialogContent className='flex flex-col gap-4 pt-2'>
           <TextField
@@ -272,6 +287,7 @@ const SalesFromShopTable = ({
             value={editQty}
             onChange={e => setEditQty(e.target.value)}
             fullWidth
+            disabled={isMutating}
           />
           <TextField
             label='Unit price'
@@ -280,19 +296,30 @@ const SalesFromShopTable = ({
             value={editPrice}
             onChange={e => setEditPrice(e.target.value)}
             fullWidth
+            disabled={isMutating}
           />
         </DialogContent>
         <DialogActions>
-          <Button variant='outlined' onClick={() => setEditRow(null)}>
+          <Button variant='outlined' onClick={() => setEditRow(null)} disabled={isMutating}>
             Cancel
           </Button>
-          <Button variant='contained' onClick={handleSaveEdit}>
-            Save
+          <Button
+            variant='contained'
+            onClick={() => void handleSaveEdit()}
+            disabled={isMutating}
+            startIcon={isMutating ? <CircularProgress color='inherit' size={18} /> : undefined}
+          >
+            {isMutating ? 'Saving…' : 'Save'}
           </Button>
         </DialogActions>
       </Dialog>
 
-      <Dialog open={!!deleteId} onClose={() => setDeleteId(null)}>
+      <Dialog
+        open={!!deleteId}
+        onClose={() => !isMutating && setDeleteId(null)}
+        slotProps={{ paper: { sx: { position: 'relative', overflow: 'hidden' } } }}
+      >
+        <MutationBlockingOverlay open={Boolean(isMutating)} message='Deleting sale…' />
         <DialogTitle>Delete this sale?</DialogTitle>
         <DialogContent>
           <Typography variant='body2' color='text.secondary'>
@@ -300,18 +327,25 @@ const SalesFromShopTable = ({
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button variant='outlined' onClick={() => setDeleteId(null)}>
+          <Button variant='outlined' onClick={() => setDeleteId(null)} disabled={isMutating}>
             Cancel
           </Button>
           <Button
             color='error'
             variant='contained'
-            onClick={() => {
-              if (deleteId) onDelete(deleteId)
-              setDeleteId(null)
+            disabled={isMutating}
+            startIcon={isMutating ? <CircularProgress color='inherit' size={18} /> : undefined}
+            onClick={async () => {
+              if (!deleteId) return
+              try {
+                await Promise.resolve(onDelete(deleteId))
+                setDeleteId(null)
+              } catch {
+                // keep dialog open on failure
+              }
             }}
           >
-            Delete
+            {isMutating ? 'Deleting…' : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>

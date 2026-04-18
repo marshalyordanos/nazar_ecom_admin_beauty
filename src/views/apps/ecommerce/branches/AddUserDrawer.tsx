@@ -14,10 +14,14 @@ import TextField from '@mui/material/TextField'
 import FormHelperText from '@mui/material/FormHelperText'
 import Typography from '@mui/material/Typography'
 import Divider from '@mui/material/Divider'
+import Box from '@mui/material/Box'
+import CircularProgress from '@mui/material/CircularProgress'
 
 // Third-party Imports
 import { useForm, Controller } from 'react-hook-form'
 import { toast } from 'react-toastify'
+
+import MutationBlockingOverlay from '@/components/loading/MutationBlockingOverlay'
 
 // Map Imports
 // NOTE: For demo, using leaflet & react-leaflet. Please install: npm i leaflet react-leaflet
@@ -166,6 +170,7 @@ const AddUserDrawer = (props: Props) => {
 
   // Sync to marker if controlled
   const markerRef = useRef<any>(null)
+  const [saving, setSaving] = useState(false)
 
   // Submit logic: POST if adding, PATCH if editing
   const onSubmit = async (formData: FormValues) => {
@@ -182,6 +187,7 @@ const AddUserDrawer = (props: Props) => {
       longitude
     }
 
+    setSaving(true)
     try {
       if (isEdit) {
         await api.patch(`/shops/locations/${locationId}`, payload)
@@ -195,6 +201,8 @@ const AddUserDrawer = (props: Props) => {
       setMapCenter([8.9806, 38.7578])
     } catch (error: any) {
       toast.error(error?.message || 'Unexpected error')
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -224,12 +232,16 @@ const AddUserDrawer = (props: Props) => {
     >
       <div className='flex items-center justify-between pli-5 plb-4'>
         <Typography variant='h5'>{isEdit ? 'Update Location' : 'Add Location'}</Typography>
-        <IconButton size='small' onClick={handleReset}>
+        <IconButton size='small' onClick={handleReset} disabled={saving}>
           <i className='ri-close-line text-2xl' />
         </IconButton>
       </div>
       <Divider />
-      <div className='p-5'>
+      <Box className='p-5' sx={{ position: 'relative', flex: 1, overflow: 'auto' }}>
+        <MutationBlockingOverlay
+          open={saving}
+          message={isEdit ? 'Updating branch…' : 'Saving branch…'}
+        />
         <form onSubmit={handleSubmit(onSubmit)} className='flex flex-col gap-5'>
           <Controller
             name='name'
@@ -452,15 +464,20 @@ const AddUserDrawer = (props: Props) => {
             </Typography>
           </div>
           <div className='flex items-center gap-4'>
-            <Button variant='contained' type='submit'>
-              {isEdit ? 'Update Location' : 'Save Location'}
+            <Button
+              variant='contained'
+              type='submit'
+              disabled={saving}
+              startIcon={saving ? <CircularProgress color='inherit' size={18} /> : undefined}
+            >
+              {saving ? 'Please wait…' : isEdit ? 'Update Location' : 'Save Location'}
             </Button>
-            <Button variant='outlined' color='error' type='reset' onClick={handleReset}>
+            <Button variant='outlined' color='error' type='reset' onClick={handleReset} disabled={saving}>
               Cancel
             </Button>
           </div>
         </form>
-      </div>
+      </Box>
     </Drawer>
   )
 }

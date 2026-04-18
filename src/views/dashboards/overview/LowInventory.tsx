@@ -5,9 +5,9 @@ import { useState, useMemo } from 'react'
 
 // MUI Imports
 import Card from '@mui/material/Card'
+import Chip from '@mui/material/Chip'
 import Typography from '@mui/material/Typography'
 import Skeleton from '@mui/material/Skeleton'
-import { styled } from '@mui/material/styles'
 
 // Third-party Imports
 import classnames from 'classnames'
@@ -28,9 +28,10 @@ import type { ColumnDef, FilterFn } from '@tanstack/react-table'
 import type { RankingInfo } from '@tanstack/match-sorter-utils'
 
 // Style Imports
-import tableStyles from '@core/styles/table.module.css'
 import { useSelector } from 'react-redux'
-import { RootState } from '@/redux-store'
+
+import tableStyles from '@core/styles/table.module.css'
+import type { RootState } from '@/redux-store'
 import { useDashboardLowInventory } from '@/api/admin/dashboard'
 
 declare module '@tanstack/table-core' {
@@ -42,13 +43,12 @@ declare module '@tanstack/table-core' {
   }
 }
 
-// Styled Components
-const Icon = styled('i')({})
-
 const fuzzyFilter: FilterFn<any> = (row, columnId, value, addMeta) => {
   const itemRank = rankItem(row.getValue(columnId), value)
+
   addMeta({ itemRank })
-  return itemRank.passed
+  
+return itemRank.passed
 }
 
 const columnHelper = createColumnHelper<any>()
@@ -61,87 +61,94 @@ const LowInventory = () => {
 
   // Transform lowInventory into table data with required columns and skeleton for loading
   const rowCount = 9
+
   const data = useMemo(() => {
     if (!Array.isArray(lowInventory)) return []
-    return lowInventory.map((item, idx) => ({
+    
+return lowInventory.map((item, idx) => ({
       id: item.id || idx,
       productName: item.variant?.product?.name || '',
-      variantOption: item.variant?.sku || '', // fallback to sku (can adjust to show option value if available)
+      variantOption: item.variant?.sku || '',
       quantity: typeof item.quantity === 'number' ? item.quantity : 0,
-      reservedQuantity: typeof item.reservedQuantity === 'number' ? item.reservedQuantity : 0
+      reservedQuantity: typeof item.reservedQuantity === 'number' ? item.reservedQuantity : 0,
+      reorderLevel: typeof item.reorderLevel === 'number' ? item.reorderLevel : 0,
+      locationName: item.location?.name || 'Unknown location'
     }))
   }, [lowInventory])
 
-  const dataWithSkeletons = useMemo(() => {
+  const tableData = useMemo(() => {
     if (isLoading) {
       return Array.from({ length: rowCount }, (_, idx) => ({
         id: `skeleton-${idx}`,
         productName: null,
         variantOption: null,
         quantity: null,
-        reservedQuantity: null
+        reservedQuantity: null,
+        reorderLevel: null,
+        locationName: null
       }))
     }
-    if (data.length < rowCount) {
-      return [
-        ...data,
-        ...Array.from({ length: rowCount - data.length }, (_, idx) => ({
-          id: `skeleton-${idx + data.length}`,
-          productName: null,
-          variantOption: null,
-          quantity: null,
-          reservedQuantity: null
-        }))
-      ]
-    }
+
     return data.slice(0, rowCount)
   }, [isLoading, data])
 
-  // Columns: product name, product variant (sku), quantity, reservedQuantity
   const columns = useMemo<ColumnDef<any, any>[]>(
     () => [
       columnHelper.accessor('productName', {
-        header: 'Product Name',
+        header: 'Product',
         cell: ({ row }) =>
           row.original.productName === null ? (
-            <Skeleton variant='text' width={120} />
+            <Skeleton variant='text' width={120} animation={false} />
           ) : (
-            <Typography color='text.primary' className='font-medium'>
-              {row.original.productName}
-            </Typography>
+            <div className='flex flex-col gap-1'>
+              <Typography color='text.primary' className='font-medium'>
+                {row.original.productName}
+              </Typography>
+              <Typography variant='body2' color='text.secondary'>
+                Reorder at {row.original.reorderLevel}
+              </Typography>
+            </div>
           )
       }),
       columnHelper.accessor('variantOption', {
-        header: 'Variant (SKU)',
+        header: 'SKU',
         cell: ({ row }) =>
           row.original.variantOption === null ? (
-            <Skeleton variant='text' width={80} />
+            <Skeleton variant='text' width={80} animation={false} />
           ) : (
-            <Typography>
+            <Typography className='font-medium'>
               {row.original.variantOption}
             </Typography>
           )
       }),
-      columnHelper.accessor('quantity', {
-        header: 'Quantity',
+      columnHelper.accessor('locationName', {
+        header: 'Location',
         cell: ({ row }) =>
-          row.original.quantity === null ? (
-            <Skeleton variant='text' width={40} />
+          row.original.locationName === null ? (
+            <Skeleton variant='text' width={90} animation={false} />
           ) : (
-            <Typography>
-              {row.original.quantity}
+            <Typography color='text.secondary'>
+              {row.original.locationName}
             </Typography>
           )
       }),
-      columnHelper.accessor('reservedQuantity', {
-        header: 'Reserved',
+      columnHelper.accessor('quantity', {
+        header: 'Stock Status',
         cell: ({ row }) =>
-          row.original.reservedQuantity === null ? (
-            <Skeleton variant='text' width={40} />
+          row.original.quantity === null ? (
+            <Skeleton variant='rounded' width={120} height={28} animation={false} />
           ) : (
-            <Typography>
-              {row.original.reservedQuantity}
-            </Typography>
+            <div className='flex flex-col items-start gap-2'>
+              <Typography className='font-medium'>
+                {row.original.quantity} available / {row.original.reservedQuantity} reserved
+              </Typography>
+              <Chip
+                size='small'
+                variant='tonal'
+                color={row.original.quantity <= 0 ? 'error' : 'warning'}
+                label={row.original.quantity <= 0 ? 'Out of stock' : 'Low stock'}
+              />
+            </div>
           )
       })
     ],
@@ -149,7 +156,7 @@ const LowInventory = () => {
   )
 
   const table = useReactTable({
-    data: dataWithSkeletons,
+    data: tableData,
     columns,
     filterFns: {
       fuzzy: fuzzyFilter
@@ -182,7 +189,7 @@ const LowInventory = () => {
 
   return (
     <>
-      <Card>
+      <Card className='border border-[var(--mui-palette-divider)] shadow-none'>
         <div className='overflow-x-auto'>
           <table className={tableStyles.table}>
             <thead>
@@ -216,7 +223,7 @@ const LowInventory = () => {
               {filteredRows.length === 0 ? (
                 <tr>
                   <td colSpan={table.getVisibleFlatColumns().length} className='text-center'>
-                    No data available
+                    No low inventory items right now
                   </td>
                 </tr>
               ) : (

@@ -1,278 +1,106 @@
 'use client'
 
-// React Imports
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import type { SyntheticEvent } from 'react'
 
-// MUI Import
-import Tab from '@mui/material/Tab'
-import Card from '@mui/material/Card'
-import CardHeader from '@mui/material/CardHeader'
-import Chip from '@mui/material/Chip'
+import TabContext from '@mui/lab/TabContext'
 import TabList from '@mui/lab/TabList'
 import TabPanel from '@mui/lab/TabPanel'
 import Avatar from '@mui/material/Avatar'
-import TabContext from '@mui/lab/TabContext'
+import Card from '@mui/material/Card'
+import CardHeader from '@mui/material/CardHeader'
+import Chip from '@mui/material/Chip'
+import Skeleton from '@mui/material/Skeleton'
+import Tab from '@mui/material/Tab'
+import Typography from '@mui/material/Typography'
+import { useSelector } from 'react-redux'
 
-// Third-party Imports
-import classnames from 'classnames'
-
-// Types Imports
-import type { ThemeColor } from '@core/types'
-
-// Components Imports
-import OptionMenu from '@core/components/option-menu'
 import CustomAvatar from '@core/components/mui/Avatar'
 
-// Style Imports
+import { useDashboardEcommerceHighlights } from '@/api/admin/dashboard'
+import type { RootState } from '@/redux-store'
+
 import tableStyles from '@core/styles/table.module.css'
 
-interface TabAvatarType {
-  imgWidth: number
-  category: string
-  imgHeight: number
-}
-interface TabContentType {
-  price: string
-  profit: 'negative' | 'positive'
-  profitValue: string
-  imgAlt: string
-  imgSrc: string
-  chipColor?: ThemeColor
-  chipLabel: string
-  product: string
-}
-interface TabContentDataType {
-  mobile: TabContentType[]
-  desktop: TabContentType[]
-  console: TabContentType[]
+type HighlightType = {
+  categoryId: string
+  categoryName: string
+  revenue: number
+  orderCount: number
+  totalViews: number
+  image: string | null
+  topProduct: {
+    productId: string
+    productName: string
+    revenue: number
+    orderCount: number
+    views: number
+    image: string | null
+  } | null
 }
 
-const tabAvatars: TabAvatarType[] = [
-  {
-    imgWidth: 26,
-    imgHeight: 52,
-    category: 'mobile'
-  },
-  {
-    imgWidth: 50,
-    imgHeight: 40,
-    category: 'desktop'
-  },
-  {
-    imgWidth: 57,
-    imgHeight: 40,
-    category: 'console'
-  }
-]
+const formatCurrency = (value: number) =>
+  `${new Intl.NumberFormat('en', { maximumFractionDigits: value >= 1000 ? 0 : 2 }).format(value)} Br`
 
-const tabContentData: TabContentDataType = {
-  mobile: [
-    {
-      price: '$12.5k',
-      profit: 'positive',
-      profitValue: '+24%',
-      imgAlt: 'samsung-s22',
-      product: 'Samsung s22',
-      imgSrc: '/images/cards/samsung-s22.png',
-      chipColor: 'primary',
-      chipLabel: 'Out of Stock'
-    },
-    {
-      price: '$45k',
-      profit: 'negative',
-      profitValue: '-18%',
-      imgAlt: 'apple-iPhone-13-pro',
-      product: 'iPhone 14 Pro',
-      imgSrc: '/images/cards/apple-iPhone-13-pro.png',
-      chipColor: 'success',
-      chipLabel: 'In Stock'
-    },
-    {
-      price: '$98.2k',
-      profit: 'positive',
-      profitValue: '+55%',
-      imgAlt: 'oneplus-9-pro',
-      product: 'Oneplus 9 Pro',
-      imgSrc: '/images/cards/oneplus-9-pro.png',
-      chipColor: 'warning',
-      chipLabel: 'Upcoming'
-    },
-    {
-      price: '$210k',
-      profit: 'positive',
-      profitValue: '+8%',
-      imgAlt: 'google-pixel-6',
-      product: 'Google Pixel 6',
-      imgSrc: '/images/cards/google-pixel-6.png',
-      chipColor: 'success',
-      chipLabel: 'In Stock'
-    }
-  ],
-  desktop: [
-    {
-      price: '$17.5k',
-      profit: 'positive',
-      profitValue: '+24%',
-      imgAlt: 'apple-mac-mini',
-      product: 'Apple Mac Mini',
-      imgSrc: '/images/cards/apple-mac-mini.png',
-      chipColor: 'primary',
-      chipLabel: 'Out of Stock'
-    },
-    {
-      price: '$35k',
-      profit: 'negative',
-      profitValue: '-16%',
-      imgAlt: 'hp-envy-x360',
-      product: 'Newest HP Envy x360',
-      imgSrc: '/images/cards/hp-envy-x360.png',
-      chipColor: 'success',
-      chipLabel: 'In Stock'
-    },
-    {
-      price: '$220k',
-      profit: 'positive',
-      profitValue: '+80%',
-      imgAlt: 'dell-inspiron-3000',
-      product: 'Dell Inspiron 3000',
-      imgSrc: '/images/cards/dell-inspiron-3000.png',
-      chipColor: 'success',
-      chipLabel: 'In Stock'
-    },
-    {
-      price: '$88.2k',
-      profit: 'positive',
-      profitValue: '+54%',
-      imgAlt: 'apple-iMac-4k',
-      product: 'Apple iMac 4k',
-      imgSrc: '/images/cards/apple-iMac-4k.png',
-      chipColor: 'warning',
-      chipLabel: 'Upcoming'
-    }
-  ],
-  console: [
-    {
-      price: '$599',
-      profit: 'positive',
-      profitValue: '+80%',
-      imgAlt: 'sony-play-station-5',
-      product: 'Sony Play Station 5',
-      imgSrc: '/images/cards/sony-play-station-5.png',
-      chipColor: 'success',
-      chipLabel: 'In Stock'
-    },
-    {
-      price: '$489',
-      profit: 'negative',
-      profitValue: '-16%',
-      imgAlt: 'xbox-series-x',
-      product: 'XBOX Series X',
-      imgSrc: '/images/cards/xbox-series-x.png',
-      chipColor: 'warning',
-      chipLabel: 'Upcoming'
-    },
-    {
-      price: '$335',
-      profit: 'positive',
-      profitValue: '+54%',
-      imgAlt: 'nintendo-switch',
-      product: 'Nintendo Switch',
-      imgSrc: '/images/cards/nintendo-switch.png',
-      chipColor: 'primary',
-      chipLabel: 'Out of Stock'
-    },
-    {
-      price: '$14',
-      profit: 'negative',
-      profitValue: '-28%',
-      imgAlt: 'sup-game-box-400',
-      product: 'SUP Game Box 400',
-      imgSrc: '/images/cards/sup-game-box-400.png',
-      chipColor: 'success',
-      chipLabel: 'In Stock'
-    }
-  ]
-}
-
-const RenderTabContent = ({ data }: { data: TabContentType[] }) => {
-  return (
-    <div className='overflow-x-auto'>
-      <table className={tableStyles.table}>
-        <thead className='border-be border-bs'>
-          <tr>
-            <th className='uppercase bg-transparent'>Image</th>
-            <th className='uppercase bg-transparent'>Name</th>
-            <th className='uppercase bg-transparent text-end'>Status</th>
-            <th className='uppercase bg-transparent text-end'>Revenue</th>
-            <th className='uppercase bg-transparent text-end'>Profit</th>
-          </tr>
-        </thead>
-        <tbody>
-          {data.map((row: TabContentType, index: number) => (
-            <tr key={index}>
-              <td>
-                <CustomAvatar alt={row.imgAlt} src={row.imgSrc} variant='rounded' size={34} />
-              </td>
-              <td>{row.product}</td>
-              <td className='text-end'>
-                <Chip label={row.chipLabel} color={row.chipColor} size='small' variant='tonal' />
-              </td>
-              <td className='font-medium text-end'>{row.price}</td>
-              <td
-                className={classnames(
-                  row.profit === 'negative' ? 'text-error' : 'text-success',
-                  'font-medium text-end'
-                )}
-              >
-                {row.profitValue}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  )
-}
+const formatCompactNumber = (value: number) =>
+  new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(value)
 
 const TopReferralSources = () => {
-  // State
-  const [value, setValue] = useState<string>('mobile')
+  const shop: any = useSelector((state: RootState) => state.shopReducer.shops)
+  const { data, isLoading } = useDashboardEcommerceHighlights(shop?.[0]?.id, 4)
 
-  const handleChange = (event: SyntheticEvent, newValue: string) => {
+  const categories = useMemo<HighlightType[]>(() => {
+    return Array.isArray(data?.categoryHighlights) ? data.categoryHighlights : []
+  }, [data])
+
+  const [value, setValue] = useState<string>('')
+
+  useEffect(() => {
+    if (!value && categories[0]?.categoryId) {
+      setValue(categories[0].categoryId)
+    }
+  }, [categories, value])
+
+  const handleChange = (_event: SyntheticEvent, newValue: string) => {
     setValue(newValue)
   }
 
-  const RenderTabAvatar = ({ data }: { data: TabAvatarType }) => (
-    <Avatar
-      variant='rounded'
-      className={classnames(
-        value === data.category ? 'border-solid border-primary' : 'border-dashed',
-        'is-[92px] bs-[86px] border-2 bg-transparent rounded'
-      )}
-    >
-      <img
-        src={`/images/cards/${data.category}.png`}
-        alt={`${data.category}`}
-        width={data.imgWidth}
-        height={data.imgHeight}
-      />
-    </Avatar>
-  )
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader title='Top Categories' subheader='Parent categories with their best-selling product' />
+        <div className='p-5'>
+          <div className='flex gap-4 overflow-hidden pb-4'>
+            {[0, 1, 2].map(item => (
+              <Skeleton key={item} variant='rounded' width={120} height={86} animation={false} />
+            ))}
+          </div>
+          <Skeleton variant='rounded' height={190} animation={false} />
+        </div>
+      </Card>
+    )
+  }
+
+  if (!categories.length) {
+    return (
+      <Card>
+        <CardHeader title='Top Categories' subheader='Parent categories with their best-selling product' />
+        <div className='p-6'>
+          <Typography color='text.secondary'>No category sales data is available yet.</Typography>
+        </div>
+      </Card>
+    )
+  }
 
   return (
     <Card>
-      <CardHeader
-        title='Top Referral Sources'
-        subheader='Number of Sales'
-        action={<OptionMenu options={['Last 28 Days', 'Last Month', 'Last Year']} />}
-      />
-      <TabContext value={value}>
+      <CardHeader title='Top Categories' subheader='Parent categories with their best-selling product' />
+      <TabContext value={value || categories[0].categoryId}>
         <TabList
           variant='scrollable'
           scrollButtons='auto'
           onChange={handleChange}
-          aria-label='top referral sources tabs'
+          aria-label='top categories tabs'
           className='!border-be-0 pli-5'
           sx={{
             '& .MuiTab-root:not(:last-child)': { mr: 4 },
@@ -280,32 +108,78 @@ const TopReferralSources = () => {
             '& .MuiTabs-indicator': { display: 'none !important' }
           }}
         >
-          <Tab disableRipple value='mobile' className='p-0' label={<RenderTabAvatar data={tabAvatars[0]} />} />
-          <Tab disableRipple value='desktop' className='p-0' label={<RenderTabAvatar data={tabAvatars[1]} />} />
-          <Tab disableRipple value='console' className='p-0' label={<RenderTabAvatar data={tabAvatars[2]} />} />
-          <Tab
-            disabled
-            value='add'
-            className='p-0'
-            label={
-              <Avatar variant='rounded' className='is-[92px] bs-[86px] border-2 border-dashed bg-transparent rounded'>
-                <div className='flex justify-center items-center bg-actionSelected rounded-lg p-1'>
-                  <i className='ri-add-line text-textSecondary text-[22px]' />
-                </div>
-              </Avatar>
-            }
-          />
+          {categories.map(category => (
+            <Tab
+              key={category.categoryId}
+              disableRipple
+              value={category.categoryId}
+              className='p-0'
+              label={
+                <Avatar
+                  variant='rounded'
+                  src={category.image ?? undefined}
+                  className='is-[120px] bs-[86px] border border-dashed border-[var(--mui-palette-divider)] bg-transparent rounded'
+                >
+                  <Typography variant='subtitle2' className='px-3 text-center'>
+                    {category.categoryName}
+                  </Typography>
+                </Avatar>
+              }
+            />
+          ))}
         </TabList>
 
-        <TabPanel sx={{ p: 0 }} value='mobile'>
-          <RenderTabContent data={tabContentData['mobile']} />
-        </TabPanel>
-        <TabPanel sx={{ p: 0 }} value='desktop'>
-          <RenderTabContent data={tabContentData['desktop']} />
-        </TabPanel>
-        <TabPanel sx={{ p: 0 }} value='console'>
-          <RenderTabContent data={tabContentData['console']} />
-        </TabPanel>
+        {categories.map(category => (
+          <TabPanel key={category.categoryId} sx={{ p: 0 }} value={category.categoryId}>
+            <div className='overflow-x-auto'>
+              <table className={tableStyles.table}>
+                <thead className='border-be border-bs'>
+                  <tr>
+                    <th className='uppercase bg-transparent'>Product</th>
+                    <th className='uppercase bg-transparent'>Category</th>
+                    <th className='uppercase bg-transparent text-end'>Orders</th>
+                    <th className='uppercase bg-transparent text-end'>Revenue</th>
+                    <th className='uppercase bg-transparent text-end'>Views</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      <div className='flex items-center gap-3'>
+                        <CustomAvatar
+                          variant='rounded'
+                          src={category.topProduct?.image ?? category.image ?? undefined}
+                          alt={category.topProduct?.productName ?? category.categoryName}
+                          size={42}
+                        >
+                          {(category.topProduct?.productName ?? category.categoryName).slice(0, 1)}
+                        </CustomAvatar>
+                        <div className='flex flex-col'>
+                          <Typography color='text.primary' className='font-medium'>
+                            {category.topProduct?.productName ?? 'No product'}
+                          </Typography>
+                          <Typography variant='body2' color='text.secondary'>
+                            Best seller in this parent category
+                          </Typography>
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <Chip label={category.categoryName} color='primary' size='small' variant='tonal' />
+                    </td>
+                    <td className='text-end font-medium'>
+                      {formatCompactNumber(category.topProduct?.orderCount ?? category.orderCount)}
+                    </td>
+                    <td className='text-end font-medium'>{formatCurrency(category.topProduct?.revenue ?? category.revenue)}</td>
+                    <td className='text-end font-medium'>
+                      {formatCompactNumber(category.topProduct?.views ?? category.totalViews)}
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </TabPanel>
+        ))}
       </TabContext>
     </Card>
   )

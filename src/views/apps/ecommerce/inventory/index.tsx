@@ -27,6 +27,7 @@ import MenuItem from '@mui/material/MenuItem'
 import Select from '@mui/material/Select'
 import InputLabel from '@mui/material/InputLabel'
 import FormControl from '@mui/material/FormControl'
+import CircularProgress from '@mui/material/CircularProgress'
 
 import OptionMenu from '@core/components/option-menu'
 import tableStyles from '@core/styles/table.module.css'
@@ -35,6 +36,7 @@ import { useDashboardSummary } from '@/api/admin/dashboard'
 import HorizontalWithSubtitle from '@components/card-statistics/HorizontalWithSubtitle'
 import { useShops } from '@/api/shops/useShops'
 import { useParams } from 'next/navigation'
+import MutationBlockingOverlay from '@/components/loading/MutationBlockingOverlay'
 
 const MOVEMENT_TYPES = [
   'PURCHASE',
@@ -381,7 +383,14 @@ const InventoryManagement = () => {
       </Card>
 
       {/* Per-row Add Movement Dialog */}
-      <Dialog open={moveDialogOpen} onClose={() => setMoveDialogOpen(false)} fullWidth maxWidth='xs'>
+      <Dialog
+        open={moveDialogOpen}
+        onClose={() => !addMovementMutation.isPending && setMoveDialogOpen(false)}
+        fullWidth
+        maxWidth='xs'
+        slotProps={{ paper: { sx: { position: 'relative', overflow: 'hidden' } } }}
+      >
+        <MutationBlockingOverlay open={addMovementMutation.isPending} message='Adding movement…' />
         <DialogTitle>Add Inventory Movement</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ p: 1, mt: 0.5 }}>
@@ -464,6 +473,7 @@ const InventoryManagement = () => {
             onClick={handleAddMovement}
             disabled={addMovementMutation.isPending}
             sx={{ minWidth: 120, boxShadow: "0 1px 6px 0 rgba(99,102,241,0.11)" }}
+            startIcon={addMovementMutation.isPending ? <CircularProgress color='inherit' size={18} /> : undefined}
           >
             {addMovementMutation.isPending ? 'Adding...' : 'Submit'}
           </Button>
@@ -471,7 +481,14 @@ const InventoryManagement = () => {
       </Dialog>
 
       {/* Inventory Edit Dialog */}
-      <Dialog open={editDialogOpen} onClose={() => setEditDialogOpen(false)} fullWidth maxWidth='xs'>
+      <Dialog
+        open={editDialogOpen}
+        onClose={() => !updateInventory.isPending && setEditDialogOpen(false)}
+        fullWidth
+        maxWidth='xs'
+        slotProps={{ paper: { sx: { position: 'relative', overflow: 'hidden' } } }}
+      >
+        <MutationBlockingOverlay open={updateInventory.isPending} message='Saving inventory…' />
         <DialogTitle>Edit Inventory</DialogTitle>
         <DialogContent>
           <Grid container spacing={2} sx={{ p: 1, mt: 0.5 }}>
@@ -561,6 +578,7 @@ const InventoryManagement = () => {
             onClick={handleEditInventory}
             disabled={updateInventory.isPending}
             sx={{ minWidth: 120, boxShadow: "0 1px 6px 0 rgba(99,102,241,0.11)" }}
+            startIcon={updateInventory.isPending ? <CircularProgress color='inherit' size={18} /> : undefined}
           >
             {updateInventory.isPending ? 'Saving...' : 'Submit'}
           </Button>

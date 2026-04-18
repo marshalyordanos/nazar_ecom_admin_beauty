@@ -25,6 +25,8 @@ import classnames from 'classnames'
 import tableStyles from '@core/styles/table.module.css'
 import Grid from '@mui/material/Grid'
 import HorizontalWithSubtitle from '@components/card-statistics/HorizontalWithSubtitle'
+import MutationBlockingOverlay from '@/components/loading/MutationBlockingOverlay'
+import CircularProgress from '@mui/material/CircularProgress'
 
 import { useRef, useEffect } from 'react'
 
@@ -375,7 +377,11 @@ const OrdersAdminManagement = () => {
         ) : null}
       </Grid>
       <Typography variant="h4" className="mb-6 font-medium">Order Management</Typography>
-      <Card>
+      <Card sx={{ position: 'relative', overflow: 'hidden' }}>
+        <MutationBlockingOverlay
+          open={completeMut.isPending || cancelMut.isPending}
+          message='Updating order…'
+        />
         <CardContent>
           <div className="flex flex-col gap-3 mb-4">
             <div className="flex flex-col sm:flex-row flex-wrap gap-3 items-start sm:items-end">
@@ -570,7 +576,14 @@ const OrdersAdminManagement = () => {
         </CardContent>
       </Card>
 
-      <Dialog open={openCreate} onClose={() => setOpenCreate(false)} fullWidth maxWidth="md">
+      <Dialog
+        open={openCreate}
+        onClose={() => !createMut.isPending && setOpenCreate(false)}
+        fullWidth
+        maxWidth="md"
+        slotProps={{ paper: { sx: { position: 'relative', overflow: 'hidden' } } }}
+      >
+        <MutationBlockingOverlay open={createMut.isPending} message='Creating order…' />
         <DialogTitle>Create Order (Admin)</DialogTitle>
         <DialogContent>
           <TextField
@@ -579,12 +592,17 @@ const OrdersAdminManagement = () => {
             minRows={14}
             value={payload}
             onChange={e => setPayload(e.target.value)}
+            disabled={createMut.isPending}
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenCreate(false)}>Cancel</Button>
+          <Button onClick={() => setOpenCreate(false)} disabled={createMut.isPending}>
+            Cancel
+          </Button>
           <Button
             variant="contained"
+            disabled={createMut.isPending}
+            startIcon={createMut.isPending ? <CircularProgress color='inherit' size={18} /> : undefined}
             onClick={async () => {
               try {
                 await createMut.mutateAsync(JSON.parse(payload))
@@ -594,7 +612,7 @@ const OrdersAdminManagement = () => {
               }
             }}
           >
-            Submit
+            {createMut.isPending ? 'Creating…' : 'Submit'}
           </Button>
         </DialogActions>
       </Dialog>

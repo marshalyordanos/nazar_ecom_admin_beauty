@@ -48,6 +48,7 @@ export interface ProductVariant {
     optionValue: {
       id: string;
       value: string;
+      colorValue?: string | null;
       optionId: string;
       createdAt: string;
       option: {

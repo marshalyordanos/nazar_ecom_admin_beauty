@@ -16,8 +16,9 @@ import { RootState } from '@/redux-store'
 import { useSelector } from 'react-redux'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useProduct } from '@/api/products/useProduct'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { Box } from '@mui/material'
+import MutationBlockingOverlay from '@/components/loading/MutationBlockingOverlay'
 import { useProductVariation } from '@/api/productVariation/useProductVariation' 
 
 const eCommerceProductsAdd = () => {
@@ -102,10 +103,12 @@ const eCommerceProductsAdd = () => {
   }, [product, onlyVariation, isUpdate, variant, methods]);
 
   const { handleSubmit } = methods
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
   const onSubmit = async (data: any) => {
     console.log("shops onSubmit", data)
 
+    setIsSubmitting(true)
     try {
       let productId = null;
 
@@ -209,10 +212,14 @@ const eCommerceProductsAdd = () => {
       router.push('/apps/ecommerce/products/list')
     } catch (err) {
       console.error(err);
+    } finally {
+      setIsSubmitting(false)
     }
   }
   return (
     <FormProvider {...methods}>
+      <Box sx={{ position: 'relative' }}>
+      <MutationBlockingOverlay open={isSubmitting} message='Saving product…' />
       <form onSubmit={handleSubmit(onSubmit)}>
       <Box
       sx={{
@@ -227,7 +234,7 @@ const eCommerceProductsAdd = () => {
         py: 5
       }}
     >
-      <ProductAddHeader productId={productId2 ?? undefined} />
+      <ProductAddHeader productId={productId2 ?? undefined} isSubmitting={isSubmitting} />
     </Box>
     <Grid container spacing={6}>
       {/* <Grid size={{ xs: 12 }}>
@@ -266,6 +273,7 @@ const eCommerceProductsAdd = () => {
       </Grid>}
     </Grid>
     </form>
+    </Box>
     </FormProvider>
   )
 }

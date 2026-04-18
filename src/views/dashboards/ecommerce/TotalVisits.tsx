@@ -6,10 +6,14 @@ import Divider from '@mui/material/Divider'
 import Typography from '@mui/material/Typography'
 import CardContent from '@mui/material/CardContent'
 import MuiLinearProgress from '@mui/material/LinearProgress'
+import Skeleton from '@mui/material/Skeleton'
 import { styled } from '@mui/material/styles'
+import { useSelector } from 'react-redux'
 
 // Components Imports
 import CustomAvatar from '@core/components/mui/Avatar'
+import { useDashboardEcommerceHighlights } from '@/api/admin/dashboard'
+import type { RootState } from '@/redux-store'
 
 // Styled Components
 const LinearProgress = styled(MuiLinearProgress)(() => ({
@@ -20,27 +24,40 @@ const LinearProgress = styled(MuiLinearProgress)(() => ({
   }
 }))
 
-const TotalVisits = ({ totalVisit, totalOrder }: { totalVisit: number, totalOrder: number }) => {
-  // Calculate conversion rates and percentage change
-  const visits = totalVisit ?? 0
-  const orders = totalOrder ?? 0
+const formatK = (num: number) =>
+  new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(num)
 
-  // Conversion rate: orders/visits * 100, but guard for divide-by-zero
-  const conversionRate = visits > 0 ? (orders / visits) * 100 : 0
+const TotalVisits = () => {
+  const shop: any = useSelector((state: RootState) => state.shopReducer.shops)
+  const { data, isLoading } = useDashboardEcommerceHighlights(shop?.[0]?.id, 3)
 
-  // Show values as smart as possible for UI
-  // Use K suffix for thousands for main big font
-  const formatK = (num: number) =>
-    num >= 1000 ? `${(num / 1000).toFixed(1)}k` : num.toString()
+  const visits = data?.visitsSummary?.totalVisits ?? 0
+  const orders = data?.visitsSummary?.totalOrders ?? 0
+  const conversionRate = data?.visitsSummary?.conversionRate ?? 0
+  const visitsPercentChange = data?.visitsSummary?.visitsChangePct ?? 0
+  const progressBarValue = Math.min(Math.max(conversionRate, 0), 100)
+  const isPositive = visitsPercentChange >= 0
 
-  // We'll show percentage increase if possible, else just "—"
-  // Example static: +18.2%, here just show "-" since no historical value is provided
-  // (Would normally pass a previous count for comparison)
-  const visitsPercentChange = null // or calculate if you have data
-
-  // For progress bar, we can use conversionRate clamped to [0,100]
-  const progressBarValue =
-    conversionRate > 100 ? 100 : conversionRate < 0 ? 0 : conversionRate
+  if (isLoading) {
+    return (
+      <Card className='flex flex-col justify-between bs-full'>
+        <CardContent className='flex justify-between items-start'>
+          <div className='flex flex-col gap-2'>
+            <Skeleton variant='text' width={90} animation={false} />
+            <Skeleton variant='text' width={110} height={40} animation={false} />
+          </div>
+          <div className='flex flex-col items-end gap-2'>
+            <Skeleton variant='text' width={60} animation={false} />
+            <Skeleton variant='text' width={28} animation={false} />
+          </div>
+        </CardContent>
+        <CardContent className='flex flex-col gap-4'>
+          <Skeleton variant='rounded' height={92} animation={false} />
+          <Skeleton variant='rounded' height={8} animation={false} />
+        </CardContent>
+      </Card>
+    )
+  }
 
   return (
     <Card className='flex flex-col justify-between bs-full'>
@@ -49,15 +66,11 @@ const TotalVisits = ({ totalVisit, totalOrder }: { totalVisit: number, totalOrde
           <Typography>Total Visits</Typography>
           <Typography variant='h4'>{formatK(visits)}</Typography>
         </div>
-        <div className='flex items-center text-success'>
-          <Typography color='success.main'>
-            {visitsPercentChange !== null ? (
-              visitsPercentChange > 0
-                ? `+${visitsPercentChange.toFixed(1)}%`
-                : `${visitsPercentChange.toFixed(1)}%`
-            ) : '—'}
+        <div className={isPositive ? 'flex items-center text-success' : 'flex items-center text-error'}>
+          <Typography color={isPositive ? 'success.main' : 'error.main'}>
+            {`${isPositive ? '+' : ''}${visitsPercentChange.toFixed(1)}%`}
           </Typography>
-          <i className='ri-arrow-up-s-line text-xl'></i>
+          <i className={isPositive ? 'ri-arrow-up-s-line text-xl' : 'ri-arrow-down-s-line text-xl'}></i>
         </div>
       </CardContent>
       <CardContent className='flex flex-col gap-4'>

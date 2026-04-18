@@ -9,6 +9,7 @@ export interface ProductOption {
   export interface OptionValue {
     id: string;
     value: string;
+    colorValue?: string | null;
     optionId: string;
     createdAt: string; // ISO date string
   }

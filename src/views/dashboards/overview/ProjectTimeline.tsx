@@ -1,6 +1,8 @@
 'use client'
 
 // Next Imports
+import { useMemo, useState } from 'react'
+
 import dynamic from 'next/dynamic'
 
 // MUI Imports
@@ -8,7 +10,6 @@ import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import Typography from '@mui/material/Typography'
 import CardContent from '@mui/material/CardContent'
-import Grid from '@mui/material/Grid'
 import { useTheme } from '@mui/material/styles'
 import Box from '@mui/material/Box'
 import ToggleButton from '@mui/material/ToggleButton'
@@ -18,11 +19,11 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import type { ApexOptions } from 'apexcharts'
 
 // Components Imports
+import { useSelector } from 'react-redux'
+
 import OptionMenu from '@core/components/option-menu'
 import { useDashboardSalesTrends } from '@/api/admin/dashboard'
-import { RootState } from '@/redux-store'
-import { useSelector } from 'react-redux'
-import { useMemo, useState } from 'react'
+import type { RootState } from '@/redux-store'
 
 // Styled Component Imports
 const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexCharts'))
@@ -39,14 +40,17 @@ const ProjectTimeline = () => {
 
   const points = useMemo(() => {
     const arr = Array.isArray(salesTrends?.series) ? salesTrends.series : []
+
     return arr.slice(-5)
   }, [salesTrends])
 
   const categories = useMemo(() => {
     return points.map((p: any) => {
       const date = new Date(p.period)
+
       if (groupBy === 'day') return date.toISOString().slice(0, 10)
       if (groupBy === 'month') return date.toISOString().slice(0, 7)
+
       return date.toISOString().slice(0, 10)
     })
   }, [points, groupBy])
@@ -143,7 +147,7 @@ const ProjectTimeline = () => {
   return (
     <Card>
       <CardHeader
-        title='Sales Trends'
+        title='Revenue Analysis'
         action={
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <ToggleButtonGroup

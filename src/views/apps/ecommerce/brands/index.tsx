@@ -18,6 +18,7 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import Skeleton from '@mui/material/Skeleton'
 import Grid from '@mui/material/Grid'
+import CircularProgress from '@mui/material/CircularProgress'
 import TablePagination from '@mui/material/TablePagination'
 import { styled } from '@mui/material/styles'
 import Switch from '@mui/material/Switch'
@@ -40,6 +41,7 @@ import type { Brand } from '@/types/brand'
 import OptionMenu from '@core/components/option-menu'
 
 import tableStyles from '@core/styles/table.module.css'
+import MutationBlockingOverlay from '@/components/loading/MutationBlockingOverlay'
 
 // Styled Components
 const Icon = styled('i')({})
@@ -353,7 +355,11 @@ const BrandsManagement = () => {
         <Typography variant='h4'>Brand Management</Typography>
       </div>
       <div>
-        <Card>
+        <Card sx={{ position: 'relative', overflow: 'hidden' }}>
+          <MutationBlockingOverlay
+            open={loading || deleting}
+            message={deleting ? 'Deleting brand…' : loading ? 'Saving brand…' : 'Please wait…'}
+          />
           <CardHeader title='List of Brands' className='pbe-4' />
           <Divider />
           <CardContent>
@@ -374,7 +380,15 @@ const BrandsManagement = () => {
                   placeholder='Search Brand'
                   className='max-sm:is-full'
                 />
-                <Button variant='contained' onClick={() => { setEditing(null); setOpen(true) }} className='max-sm:is-full'>
+                <Button
+                  variant='contained'
+                  onClick={() => {
+                    setEditing(null)
+                    setOpen(true)
+                  }}
+                  className='max-sm:is-full'
+                  disabled={loading || deleting}
+                >
                   Add New Brand
                 </Button>
               </div>
@@ -460,7 +474,9 @@ const BrandsManagement = () => {
         onClose={() => setDeleteDialogOpen(false)}
         disableEscapeKeyDown={deleting}
         aria-labelledby='delete-brand-dialog-title'
+        slotProps={{ paper: { sx: { position: 'relative', overflow: 'hidden' } } }}
       >
+        <MutationBlockingOverlay open={deleting} message='Deleting brand…' />
         <DialogTitle id='delete-brand-dialog-title'>Delete Brand?</DialogTitle>
         <DialogContent>
           <DialogContentText>
@@ -472,14 +488,30 @@ const BrandsManagement = () => {
           <Button onClick={() => setDeleteDialogOpen(false)} disabled={deleting}>
             Cancel
           </Button>
-          <Button color='error' variant='contained' onClick={handleConfirmDelete} disabled={deleting}>
+          <Button
+            color='error'
+            variant='contained'
+            onClick={handleConfirmDelete}
+            disabled={deleting}
+            startIcon={deleting ? <CircularProgress color='inherit' size={18} /> : undefined}
+          >
             {deleting ? 'Deleting...' : 'Delete'}
           </Button>
         </DialogActions>
       </Dialog>
 
       {/* Add/Edit dialog */}
-      <Dialog open={open} onClose={handleDialogClose} fullWidth maxWidth='sm'>
+      <Dialog
+        open={open}
+        onClose={handleDialogClose}
+        fullWidth
+        maxWidth='sm'
+        slotProps={{ paper: { sx: { position: 'relative', overflow: 'hidden' } } }}
+      >
+        <MutationBlockingOverlay
+          open={loading}
+          message={editing ? 'Updating brand…' : 'Creating brand…'}
+        />
         <DialogTitle>{editing ? 'Edit Brand' : 'Add Brand'}</DialogTitle>
         <DialogContent className='flex flex-col gap-4 pt-4'>
           <TextField label='Name' value={name} onChange={e => setName(e.target.value)} />
@@ -526,11 +558,14 @@ const BrandsManagement = () => {
           </div>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleDialogClose}>Cancel</Button>
+          <Button onClick={handleDialogClose} disabled={loading}>
+            Cancel
+          </Button>
           <Button
             variant='contained'
             onClick={submit}
             disabled={loading || !name || !slug || (!editing && !image)}
+            startIcon={loading ? <CircularProgress color='inherit' size={18} /> : undefined}
           >
             {loading ? 'Saving...' : 'Save'}
           </Button>

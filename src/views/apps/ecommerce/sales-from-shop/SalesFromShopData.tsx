@@ -92,8 +92,8 @@ const SalesFromShopData = () => {
           isLoading={isLoading}
           listError={isError}
           currency={currency}
-          onEdit={(row, payload) => updateMutation.mutate({ id: row.id, payload })}
-          onDelete={id => deleteMutation.mutate(id)}
+          onEdit={(row, payload) => updateMutation.mutateAsync({ id: row.id, payload })}
+          onDelete={id => deleteMutation.mutateAsync(id)}
           isMutating={isMutating}
         />
       </Grid>

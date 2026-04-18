@@ -1,5 +1,6 @@
 
 import { useQuery } from '@tanstack/react-query'
+
 import { api } from '@/libs/api'
 
 // ------------------------
@@ -106,6 +107,7 @@ export const dashboardKeys = {
   healthSummary: ['dashboard-health-summary'] as const,
   syncStatus: ['dashboard-sync-status'] as const,
   topProducts: ['dashboard-top-products'] as const,
+  ecommerceHighlights: ['dashboard-ecommerce-highlights'] as const,
   recentOrders: ['dashboard-recent-orders'] as const,
   lowInventory:['dashboard-low-inventory'] as const,
   recentActivities:['dashboard-recent-activities'] as const,
@@ -621,6 +623,18 @@ export function useDashboardTopProducts(shopId?: string,limit: number=5) {
   })
 }
 
+export function useDashboardEcommerceHighlights(shopId?: string, limit: number = 3) {
+  return useQuery<any, Error>({
+    queryKey: [...dashboardKeys.ecommerceHighlights, shopId, limit],
+    queryFn: async () =>
+      (
+        await api.get(`/dashboard/ecommerce/highlights${getQuery(shopId)}${shopId ? '&' : '?'}limit=${limit}`)
+      ).data,
+    staleTime: 1000 * 10,
+    enabled: !!shopId
+  })
+}
+
 export function useDashboardRecentOrders(shopId?: string,limit: number=5) {
   return useQuery<any, Error>({
     queryKey: [...dashboardKeys.recentOrders, shopId],
@@ -636,6 +650,7 @@ export function useDashboardLowInventory(shopId?: string) {
     staleTime: 1000 * 10
   })
 }
+
 export function useDashboardRecentActivities(shopId?: string) {
   return useQuery<any, Error>({
     queryKey: [...dashboardKeys.recentActivities, shopId],

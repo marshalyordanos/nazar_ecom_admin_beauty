@@ -1,10 +1,11 @@
 'use client'
 
 import Button from '@mui/material/Button'
+import CircularProgress from '@mui/material/CircularProgress'
 import Typography from '@mui/material/Typography'
 import { useFormContext } from 'react-hook-form'
 
-const ProductAddHeader = ({ productId }: { productId?: string }) => {
+const ProductAddHeader = ({ productId, isSubmitting = false }: { productId?: string; isSubmitting?: boolean }) => {
   const { setValue } = useFormContext() // access form
 
   return (
@@ -15,7 +16,7 @@ const ProductAddHeader = ({ productId }: { productId?: string }) => {
       </div>
 
       <div className='flex gap-4'>
-        <Button variant='outlined' color='secondary'>
+        <Button variant='outlined' color='secondary' disabled={isSubmitting}>
           Discard
         </Button>
 
@@ -23,6 +24,8 @@ const ProductAddHeader = ({ productId }: { productId?: string }) => {
        { !productId && <Button
           type="submit" // important: triggers form submit
           variant='outlined'
+          disabled={isSubmitting}
+          startIcon={isSubmitting ? <CircularProgress color='inherit' size={18} /> : undefined}
           onClick={(e) =>{ 
             // e.preventDefault()
             setValue('status', 'DRAFT')}} // set status before submit
@@ -34,6 +37,8 @@ const ProductAddHeader = ({ productId }: { productId?: string }) => {
         <Button
           type="submit" // important: triggers form submit
           variant='contained'
+          disabled={isSubmitting}
+          startIcon={isSubmitting ? <CircularProgress color='inherit' size={18} /> : undefined}
           onClick={(e) =>{ 
             // e.preventDefault()
             setValue('status', 'ACTIVE')}} // set status before submit
