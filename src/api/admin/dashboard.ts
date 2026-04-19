@@ -111,6 +111,7 @@ export const dashboardKeys = {
   recentOrders: ['dashboard-recent-orders'] as const,
   lowInventory:['dashboard-low-inventory'] as const,
   recentActivities:['dashboard-recent-activities'] as const,
+  all:['dashboard-all'] as const,
 }
 
 // All hooks below are refactored to accept an optional shopId parameter and pass it as query string
