@@ -1,4 +1,4 @@
-import axios, { type AxiosError, type InternalAxiosRequestConfig } from 'axios'
+import axios, { isAxiosError, type AxiosError, type InternalAxiosRequestConfig } from 'axios'
 
 import {
   clearAuthCookies,
@@ -36,21 +36,30 @@ async function doRefresh(): Promise<string> {
     throw new Error('No refresh token')
   }
 
-  const { data } = await axios.post<{
-    accessToken: string
-    refreshToken: string
-    expiresIn?: number
-  }>(`${baseURL}/auth/refresh`, {
-    refreshToken: rt
-  })
+  try {
+    const { data } = await axios.post<{
+      accessToken: string
+      refreshToken: string
+      expiresIn?: number
+    }>(`${baseURL}/auth/refresh`, {
+      refreshToken: rt
+    })
 
-  if (!data?.accessToken || !data?.refreshToken) {
-    throw new Error('Invalid refresh response')
+    if (!data?.accessToken || !data?.refreshToken) {
+      throw new Error('Invalid refresh response')
+    }
+
+    persistAuthTokens(data.accessToken, data.refreshToken, data.expiresIn)
+
+    return data.accessToken
+  } catch (error) {
+    if (isAxiosError(error) && error.response?.status === 401) {
+      clearAuthCookies()
+      throw new Error('Session expired')
+    }
+
+    throw error
   }
-
-  persistAuthTokens(data.accessToken, data.refreshToken, data.expiresIn)
-
-  return data.accessToken
 }
 
 function setAuthorizationHeader(config: InternalAxiosRequestConfig, token: string) {

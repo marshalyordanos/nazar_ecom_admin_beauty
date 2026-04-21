@@ -9,6 +9,7 @@ import Typography from '@mui/material/Typography'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import CircularProgress from '@mui/material/CircularProgress'
 import type { Theme } from '@mui/material/styles'
+import { useParams, useSearchParams } from 'next/navigation'
 
 // Third-party Imports
 import classnames from 'classnames'
@@ -18,9 +19,7 @@ import { Icon } from '@iconify/react'
 
 // Component Imports
 import CustomAvatar from '@core/components/mui/Avatar'
-import { RootState } from '@/redux-store'
-import { useSelector } from 'react-redux'
-import { useProductVariationSummary } from '@/api/productVariation/useProductVariationSummary' 
+import { useProduct } from '@/api/products/useProduct'
 
 type CardStat = {
   title: string
@@ -57,23 +56,33 @@ const PRODUCT_CARDS: CardStat[] = [
 ];
 
 const ProductVariationCard = () => {
-  const shop: any = useSelector((state: RootState) => state.shopReducer.shops)
-  //console.log("shop id ", shop)
-  const { data: productVariationSummary, isLoading } = useProductVariationSummary(shop[0]?.id)
+  const params = useParams()
+  const searchParams = useSearchParams()
+  const productId = params.detail as string
+  const focusedVariantId = searchParams.get('variantId')
+  const { data: product, isLoading } = useProduct(productId, true)
   // Hooks
   const isBelowMdScreen = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'))
   const isSmallScreen = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'))
 
-  // Build card data with summary values from productVariationSummary
-  const data: CardStat[] = productVariationSummary
+  const selectedVariant = focusedVariantId
+    ? product?.variants?.find(v => v.id === focusedVariantId)
+    : null
+
+  const totalVariants = selectedVariant ? 1 : (product?.variants?.length ?? 0)
+  const activeVariants = selectedVariant
+    ? (selectedVariant.status === 'ACTIVE' ? 1 : 0)
+    : (product?.variants?.filter(v => v.status === 'ACTIVE')?.length ?? 0)
+
+  const data: CardStat[] = product
     ? [
         {
           ...PRODUCT_CARDS[0],
-          value: productVariationSummary.totalVariants ?? 0
+          value: totalVariants
         },
         {
           ...PRODUCT_CARDS[1],
-          value: productVariationSummary.activeVariants ?? 0
+          value: activeVariants
         },
         // {
         //   ...PRODUCT_CARDS[2],

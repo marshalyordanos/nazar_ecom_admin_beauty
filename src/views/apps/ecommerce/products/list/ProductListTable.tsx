@@ -315,9 +315,9 @@ const ProductListTable = () => {
         header: 'Actions',
         cell: ({ row }) => (
           <div className='flex items-center'>
-            <IconButton size='small'>
+            {/* <IconButton size='small'>
               <i className='ri-edit-box-line text-[22px] text-textSecondary' />
-            </IconButton>
+            </IconButton> */}
             <Button
               variant='outlined'
               size='small'
@@ -338,6 +338,16 @@ const ProductListTable = () => {
               iconButtonProps={{ size: 'medium' }}
               iconClassName='text-textSecondary text-[22px]'
               options={[
+                { text: 'View', icon: 'ri-eye-line',
+                  menuItemProps: {
+                    onClick: () => {
+                      router.push(
+                        getLocalizedUrl(`/apps/ecommerce/products/list/${encodeURIComponent(row.original.id)}`, locale as Locale)
+
+                      )
+                    }
+                  }
+                },
                 { text: 'Update', icon: 'ri-pencil-line',
                   menuItemProps: {
                     onClick: () => {

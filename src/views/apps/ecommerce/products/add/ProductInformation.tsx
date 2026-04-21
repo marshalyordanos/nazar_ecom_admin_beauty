@@ -217,9 +217,6 @@ const ProductInformation = () => {
               InputLabelProps={{ shrink: true }}
             />
           </Grid>
-          <Grid size={{ xs: 12, sm: 6 }}>
-            <TextField fullWidth label='Barcode' placeholder='0123-4567' {...register('barcode')} />
-          </Grid>
         </Grid>
         <Grid size={{ xs: 12 }}>
             <TextField

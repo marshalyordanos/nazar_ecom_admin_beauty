@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from 'react'
 
 // Next Imports
 import Link from 'next/link'
-import { useParams } from 'next/navigation'
+import { useParams, useSearchParams } from 'next/navigation'
 import { api } from '@/libs/api'
 
 // MUI Imports
@@ -149,6 +149,8 @@ const ProductVariationDetailTable = () => {
   const [page, setPage] = useState(0)
   const [pageSize, setPageSize] = useState(10)
   const { lang: locale } = useParams()
+  const searchParams = useSearchParams()
+  const focusedVariantId = searchParams.get('variantId')
 
   // For delete dialog state
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
@@ -174,6 +176,26 @@ const ProductVariationDetailTable = () => {
     const end = start + pageSize
     return filteredVariants?.slice(start, end)??[]
   }, [filteredVariants, page, pageSize])
+
+  useEffect(() => {
+    if (!focusedVariantId || !filteredVariants?.length) return
+
+    const variantIndex = filteredVariants.findIndex(v => v.id === focusedVariantId)
+    if (variantIndex === -1) return
+
+    const targetPage = Math.floor(variantIndex / pageSize)
+
+    if (targetPage !== page) {
+      setPage(targetPage)
+      return
+    }
+
+    const rowElement = document.getElementById(`variant-row-${focusedVariantId}`)
+
+    if (rowElement) {
+      rowElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+    }
+  }, [focusedVariantId, filteredVariants, pageSize, page])
 
   // Handler to confirm delete
   const handleDeleteVariant = async () => {
@@ -294,7 +316,7 @@ const ProductVariationDetailTable = () => {
               onClick={() =>
                 router.push(
                   getLocalizedUrl(
-                    `/apps/ecommerce/products/add?only_variation=true&isUpdate=true&variantId=${encodeURIComponent(row.original.id)}`,
+                    `/apps/ecommerce/products/add?productId=${id}&only_variation=true&isUpdate=true&variantId=${encodeURIComponent(row.original.id)}`,
                     locale as Locale
                   )
                 )
@@ -417,7 +439,14 @@ const ProductVariationDetailTable = () => {
             ) : (
               <tbody>
                 {table.getRowModel().rows.map(row => (
-                  <tr key={row.id} className={classnames({ selected: row.getIsSelected() })}>
+                  <tr
+                    key={row.id}
+                    id={`variant-row-${row.original.id}`}
+                    className={classnames({
+                      selected: row.getIsSelected(),
+                      'bg-primaryLighter': focusedVariantId === row.original.id
+                    })}
+                  >
                     {row.getVisibleCells().map(cell => (
                       <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
                     ))}

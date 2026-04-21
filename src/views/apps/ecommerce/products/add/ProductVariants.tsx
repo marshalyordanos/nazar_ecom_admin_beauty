@@ -77,7 +77,11 @@ const ProductVariants = ({ optionValue, isUpdate=false }: { optionValue: any, is
   }
 
   useEffect(()=>{
-    setValue(`optionValueIds`, [...rows.map(row => row.valueId as string)])
+    const validOptionValueIds = rows
+      .map(row => row.valueId)
+      .filter((valueId): valueId is string => Boolean(valueId))
+
+    setValue('optionValueIds', validOptionValueIds)
   },[rows])
 
   const deleteForm = (e: SyntheticEvent, index: number) => {

@@ -20,6 +20,8 @@ import { useEffect, useState } from 'react'
 import { Box } from '@mui/material'
 import MutationBlockingOverlay from '@/components/loading/MutationBlockingOverlay'
 import { useProductVariation } from '@/api/productVariation/useProductVariation' 
+import { toast } from 'react-toastify'
+import { getApiErrorMessage } from '@/libs/toastUtils'
 
 const eCommerceProductsAdd = () => {
   const shops:any = useSelector((state: RootState) => state.shopReducer.shops)
@@ -52,6 +54,7 @@ const eCommerceProductsAdd = () => {
 
       // variant
       sku: '',
+      barcode: '',
       price: '',
       comparePrice: '',
       costPrice: '',
@@ -74,6 +77,7 @@ const eCommerceProductsAdd = () => {
     if (onlyVariation && isUpdate === 'true' && variant) {
       methods.reset({
         sku: variant?.sku ?? '',
+        barcode: variant?.barcode ?? '',
         price: variant?.price ? String(variant?.price):  '',
         comparePrice: variant?.comparePrice ? String(variant?.comparePrice):  '',
         costPrice: variant?.costPrice ? String(variant?.costPrice):  '',
@@ -111,6 +115,7 @@ const eCommerceProductsAdd = () => {
     setIsSubmitting(true)
     try {
       let productId = null;
+      let savedVariantId: string | null = null
 
       if(!onlyVariation){
       const productData = {
@@ -162,6 +167,7 @@ const eCommerceProductsAdd = () => {
 
       const variant = variantRes.data;
       const variantId = variant.id;
+      savedVariantId = variantId
 
       // 3️⃣ Add Option Values to Variant
       const optionRes = await api.post(`/products/variants/${variantId}/option-values`, {
@@ -200,6 +206,7 @@ const eCommerceProductsAdd = () => {
 
       const variant2 = variantRes.data;
       const variantId2 = variant2.id;
+      savedVariantId = variantId2
 
       // 3️⃣ Add Option Values to Variant
       const optionRes = await api.post(`/products/variants/${variantId}/option-values`, {
@@ -208,10 +215,18 @@ const eCommerceProductsAdd = () => {
 
       console.log('✅ All requests successful');
     }
-      // Navigate to the product list page after successful submit
-      router.push('/apps/ecommerce/products/list')
+      if (onlyVariation && productId2) {
+        const variantQuery = savedVariantId ? `?variantId=${encodeURIComponent(savedVariantId)}` : ''
+        toast.success(isUpdate ? 'Variant updated successfully' : 'Variant created successfully')
+        router.push(`/apps/ecommerce/products/list/${productId2}${variantQuery}`)
+      } else {
+        // Navigate to the product list page after successful submit
+        toast.success(isUpdate ? 'Product updated successfully' : 'Product created successfully')
+        router.push('/apps/ecommerce/products/list')
+      }
     } catch (err) {
       console.error(err);
+      toast.error(getApiErrorMessage(err, 'Failed to save data'))
     } finally {
       setIsSubmitting(false)
     }
@@ -234,7 +249,19 @@ const eCommerceProductsAdd = () => {
         py: 5
       }}
     >
-      <ProductAddHeader productId={productId2 ?? undefined} isSubmitting={isSubmitting} />
+      <ProductAddHeader
+        productId={productId2 ?? undefined}
+        onlyVariation={Boolean(onlyVariation)}
+        isUpdate={isUpdate === 'true'}
+        isSubmitting={isSubmitting}
+        onBack={() => {
+          if (onlyVariation && productId2) {
+            router.push(`/apps/ecommerce/products/list/${productId2}`)
+            return
+          }
+          router.push('/apps/ecommerce/products/list')
+        }}
+      />
     </Box>
     <Grid container spacing={6}>
       {/* <Grid size={{ xs: 12 }}>
@@ -251,7 +278,7 @@ const eCommerceProductsAdd = () => {
             <ProductImage url={variant?.image??''} />
           </Grid>}
          { (onlyVariation)&& <Grid size={{ xs: 12 }}>
-            <ProductPricing variantStatus={variant?.status ?? 'DRAFT'} />
+            <ProductPricing variantStatus={variant?.status ?? 'ACTIVE'} />
           </Grid>}
           {(onlyVariation)&& <Grid size={{ xs: 12 }}>
             <ProductVariants optionValue= {variant?.variantOptionValues}  isUpdate={isUpdate === 'true' ? true : false} />

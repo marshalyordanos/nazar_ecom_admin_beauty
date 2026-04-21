@@ -31,6 +31,14 @@ const ProductPricing = ({variantStatus}: {variantStatus: string}) => {
             className='mbe-5'
           />
           <TextField
+            {...register('barcode')}
+            fullWidth
+            label='Barcode'
+            name='barcode'
+            placeholder='Enter Barcode'
+            className='mbe-5'
+          />
+          <TextField
             {...register('price')}
             fullWidth
             type='number'
@@ -64,7 +72,7 @@ const ProductPricing = ({variantStatus}: {variantStatus: string}) => {
             fullWidth
             label='Status'
             name='variantStatus'
-            defaultValue={variantStatus ?? 'DRAFT'}
+            defaultValue={variantStatus ?? 'ACTIVE'}
             className='mbe-5'
           >
             {PRODUCT_STATUS_OPTIONS.map(option => (

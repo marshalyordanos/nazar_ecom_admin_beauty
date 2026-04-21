@@ -5,19 +5,38 @@ import CircularProgress from '@mui/material/CircularProgress'
 import Typography from '@mui/material/Typography'
 import { useFormContext } from 'react-hook-form'
 
-const ProductAddHeader = ({ productId, isSubmitting = false }: { productId?: string; isSubmitting?: boolean }) => {
+const ProductAddHeader = ({
+  productId,
+  onlyVariation = false,
+  isUpdate = false,
+  isSubmitting = false,
+  onBack
+}: {
+  productId?: string
+  onlyVariation?: boolean
+  isUpdate?: boolean
+  isSubmitting?: boolean
+  onBack?: () => void
+}) => {
   const { setValue } = useFormContext() // access form
+  const title = onlyVariation
+    ? isUpdate
+      ? 'Edit variant'
+      : 'Add variant'
+    : productId
+      ? 'Edit product'
+      : 'Add product'
 
   return (
     <div className='flex flex-wrap sm:items-center justify-between gap-6'>
       <div>
-        <Typography variant='h4'>Add a new product</Typography>
+        <Typography variant='h4'>{title}</Typography>
         {/* <Typography>Orders placed across your store</Typography> */}
       </div>
 
       <div className='flex gap-4'>
-        <Button variant='outlined' color='secondary' disabled={isSubmitting}>
-          Discard
+        <Button variant='outlined' color='secondary' disabled={isSubmitting} onClick={onBack} startIcon={<i className='ri-arrow-left-line' />}>
+          Back
         </Button>
 
         {/* Save Draft */}
