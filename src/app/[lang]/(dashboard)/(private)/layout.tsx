@@ -22,6 +22,7 @@ import Customizer from '@core/components/customizer'
 import ScrollToTop from '@core/components/scroll-to-top'
 import AuthGuard from '@/hocs/AuthGuard'
 import AuthenticatedShopSync from '@/components/AuthenticatedShopSync'
+import AdminNotificationSocketBridge from '@/components/realtime/AdminNotificationSocketBridge'
 
 // Config Imports
 import { i18n } from '@configs/i18n'
@@ -48,6 +49,7 @@ const Layout = async (props: ChildrenType & { params: Promise<{ lang: string }> 
     <Providers direction={direction}>
       <AuthGuard locale={lang}>
         <AuthenticatedShopSync />
+        <AdminNotificationSocketBridge />
         <LayoutWrapper
           systemMode={systemMode}
           verticalLayout={

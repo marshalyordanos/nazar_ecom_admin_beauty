@@ -11,6 +11,10 @@ import {
 
 const baseURL = process.env.NEXT_PUBLIC_API_URL
 
+export function getSocketBaseUrl(): string {
+  return String(baseURL || '').replace(/\/api\/v1\/?$/, '')
+}
+
 export const api = axios.create({
   baseURL,
   headers: { 'Content-Type': 'application/json' },
