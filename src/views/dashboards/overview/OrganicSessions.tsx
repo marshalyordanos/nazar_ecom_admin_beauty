@@ -99,7 +99,7 @@ const OrganicSessions = ({ paymentSummary }: { paymentSummary: any }) => {
               offsetY: -15,
               fontWeight: 500,
               fontSize: '1.75rem',
-              formatter: value => `${value} Br.`,
+              formatter: value => `${value} `,
               color: 'var(--mui-palette-text-primary)'
             },
             total: {
@@ -107,7 +107,7 @@ const OrganicSessions = ({ paymentSummary }: { paymentSummary: any }) => {
               label: '2022',
               fontSize: '1rem',
               color: 'var(--mui-palette-text-secondary)',
-              formatter: value => `${value.globals.seriesTotals.reduce((total: number, num: number) => total + num)} Br.`
+              formatter: value => `${value.globals.seriesTotals.reduce((total: number, num: number) => total + num)} `
             }
           }
         }
@@ -119,11 +119,14 @@ const OrganicSessions = ({ paymentSummary }: { paymentSummary: any }) => {
     <Card>
       <CardHeader
         title='Payment Summary'
-        action={<OptionMenu options={['Last 28 Days', 'Last Month', 'Last Year']} />}
+        // action={<OptionMenu options={['Last 28 Days', 'Last Month', 'Last Year']} />}
       />
       <CardContent>
         <AppReactApexCharts type='donut' height={373} width='100%' options={options} series={series} />
       </CardContent>
+      <div className='py-12'>
+
+      </div>
     </Card>
   )
 }

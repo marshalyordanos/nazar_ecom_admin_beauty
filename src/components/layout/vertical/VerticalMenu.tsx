@@ -104,7 +104,7 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
         <SubMenu
           label={dictionary['navigation'].dashboards}
           icon={<i className='ri-home-smile-line' />}
-          suffix={<Chip label='5' size='small' color='error' />}
+          // suffix={<Chip label='5' size='small' color='error' />}
         >
           <MenuItem href={`/${locale}/dashboards/overview`}>{dictionary['navigation'].overview}</MenuItem>
           <MenuItem href={`/${locale}/dashboards/analytics`}>{dictionary['navigation'].analytics}</MenuItem>
@@ -234,7 +234,7 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
             {cr('users') && (
               <SubMenu label={dictionary['navigation'].user} icon={<i className='ri-user-line' />}>
                 <MenuItem href={`/${locale}/apps/user/list`}>{dictionary['navigation'].list}</MenuItem>
-                <MenuItem href={`/${locale}/apps/user/view`}>{dictionary['navigation'].view}</MenuItem>
+                {/* <MenuItem href={`/${locale}/apps/user/view`}>{dictionary['navigation'].view}</MenuItem> */}
               </SubMenu>
             )}
 

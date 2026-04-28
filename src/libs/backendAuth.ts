@@ -16,6 +16,8 @@ export type AuthUser = {
   phone?: string | null
   roles?: string[]
   isSuperAdmin?: boolean
+  /** When set, API inventory is scoped to this branch; hide global location filters for this user unless super admin. */
+  locationId?: string | null
   permissions?: PermissionRow[]
 }
 

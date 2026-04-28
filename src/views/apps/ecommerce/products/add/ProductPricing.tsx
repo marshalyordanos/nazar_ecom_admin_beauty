@@ -23,14 +23,6 @@ const ProductPricing = ({variantStatus}: {variantStatus: string}) => {
       <CardContent>
         <Form>
           <TextField
-            {...register('sku')}
-            fullWidth
-            label='SKU'
-            name='sku'
-            placeholder='Enter SKU'
-            className='mbe-5'
-          />
-          <TextField
             {...register('barcode')}
             fullWidth
             label='Barcode'

@@ -514,16 +514,27 @@ export function useDashboardSearchNoResults(shopId?: string) {
   })
 }
 
-export function useDashboardSalesTrends(shopId?: string, groupBy: 'day' | 'week' | 'month' = 'day') {
+export function useDashboardSalesTrends(
+  shopId?: string,
+  groupBy: 'day' | 'week' | 'month' = 'day',
+  options?: { enabled?: boolean; days?: number; year?: number | null }
+) {
+  const days = options?.days ?? 90
+  const year = options?.year
+  const enabled = (options?.enabled !== false) && !!shopId
+  const yearKey = year != null && Number.isFinite(year) ? year : 'rolling'
   return useQuery<any, Error>({
-    queryKey: [...dashboardKeys.salesTrends, shopId, groupBy],
-    queryFn: async () =>
-      (
-        await api.get(
-          `/dashboard/sales/trends${getQuery(shopId)}${shopId ? '&' : '?'}groupBy=${groupBy}`
-        )
-      ).data,
-    staleTime: 1000 * 10
+    queryKey: [...dashboardKeys.salesTrends, shopId, groupBy, days, yearKey],
+    queryFn: async () => {
+      const params = new URLSearchParams()
+      if (shopId) params.set('shopId', shopId)
+      params.set('groupBy', groupBy)
+      if (year != null && Number.isFinite(year)) params.set('year', String(year))
+      else params.set('days', String(days))
+      return (await api.get(`/dashboard/sales/trends?${params.toString()}`)).data
+    },
+    staleTime: 1000 * 10,
+    enabled,
   })
 }
 

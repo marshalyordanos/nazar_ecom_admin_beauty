@@ -21,11 +21,12 @@ import { useDashboardSalesTrends } from '@/api/admin/dashboard'
 const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexCharts'))
 
 const ApexLineChart = () => {
-  const shop: any = useSelector((state: RootState) => state.shopReducer.shops)
+  const shops = useSelector((state: RootState) => state.shopReducer.shops) as { id?: string }[]
+  const shopId = Array.isArray(shops) && shops.length > 0 ? shops[0]?.id : undefined
   const [groupBy, setGroupBy] = useState<'day' | 'month'>('day')
 
   // Fetch sales trends data based on selected groupBy value (day or month)
-  const { data: salesTrends } = useDashboardSalesTrends(shop?.[0]?.id, groupBy)
+  const { data: salesTrends } = useDashboardSalesTrends(shopId, groupBy, { enabled: !!shopId, days: 90 })
 
   // Vars
   const divider = 'var(--mui-palette-divider)'
@@ -37,13 +38,8 @@ const ApexLineChart = () => {
     const arr = Array.isArray(salesTrends?.series) ? salesTrends.series : []
     if (arr.length === 0) {
       return {
-        chartSeries: [
-          { data: [280, 200, 220, 180, 270, 250, 70, 90, 200, 150, 160, 100, 150, 100, 50] }
-        ],
-        chartCategories: [
-          '7/12','8/12','9/12','10/12','11/12','12/12','13/12','14/12','15/12',
-          '16/12','17/12','18/12','19/12','20/12','21/12'
-        ]
+        chartSeries: [{ name: 'Revenue (ETB)', data: [] as number[] }],
+        chartCategories: [] as string[],
       }
     }
 
@@ -68,10 +64,11 @@ const ApexLineChart = () => {
     return {
       chartSeries: [
         {
-          data: points.map((p: any) => Number(p.revenue ?? 0))
-        }
+          name: 'Revenue (ETB)',
+          data: points.map((p: any) => Number(p.revenue ?? 0)),
+        },
       ],
-      chartCategories: categories
+      chartCategories: categories,
     }
   }, [salesTrends, groupBy])
 

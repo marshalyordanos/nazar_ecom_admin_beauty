@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
@@ -35,8 +35,8 @@ import { useAdminInventory, useUpdateInventory, useAddMovement } from '@/api/adm
 import { useDashboardSummary } from '@/api/admin/dashboard'
 import HorizontalWithSubtitle from '@components/card-statistics/HorizontalWithSubtitle'
 import { useShops } from '@/api/shops/useShops'
-import { useParams } from 'next/navigation'
 import MutationBlockingOverlay from '@/components/loading/MutationBlockingOverlay'
+import { getStoredAuthUser, type AuthUser } from '@/libs/backendAuth'
 
 const MOVEMENT_TYPES = [
   'PURCHASE',
@@ -49,13 +49,51 @@ const MOVEMENT_TYPES = [
 const InventoryManagement = () => {
   const { data: summary, isLoading: sumLoading, isError: sumError } = useDashboardSummary()
   const inv = summary?.data?.inventory
+
+  const [authUser, setAuthUser] = useState<AuthUser | null>(null)
+  useEffect(() => {
+    setAuthUser(getStoredAuthUser())
+    const on = () => setAuthUser(getStoredAuthUser())
+    window.addEventListener('auth-user-updated', on)
+    return () => window.removeEventListener('auth-user-updated', on)
+  }, [])
+
+  /** Super admins may filter by branch; users assigned to a single location are already scoped server-side — filter would be redundant/confusing. */
+  const showLocationFilter = authUser?.isSuperAdmin === true || !authUser?.locationId
+
   const [page, setPage] = useState(0)
   const [pageSize, setPageSize] = useState(10)
   const [search, setSearch] = useState('')
+  const [locationFilter, setLocationFilter] = useState('')
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<{ variantId: string, locationId: string } | null>(null)
   const [deleting, setDeleting] = useState(false)
-  const { data: shops } = useShops({})
+  const { data: shopsResponse } = useShops({ page: 1, pageSize: 50 })
+
+  const locationOptions = useMemo(() => {
+    const rows = shopsResponse?.data ?? []
+    if (rows.length === 0) return [] as { id: string; label: string }[]
+    if (rows.length === 1) {
+      return (rows[0].locations ?? []).map(loc => ({ id: loc.id, label: loc.name }))
+    }
+    const out: { id: string; label: string }[] = []
+    for (const s of rows) {
+      for (const loc of s.locations ?? []) {
+        out.push({ id: loc.id, label: `${s.name} — ${loc.name}` })
+      }
+    }
+    return out
+  }, [shopsResponse])
+
+  const locationsForEdit = useMemo(() => {
+    if (authUser?.isSuperAdmin) return locationOptions
+    if (authUser?.locationId) {
+      const hit = locationOptions.find(o => o.id === authUser.locationId)
+      if (hit) return [hit]
+      return [{ id: authUser.locationId, label: 'Assigned location' }]
+    }
+    return locationOptions
+  }, [authUser, locationOptions])
  
 
   // For per-row add movement dialog
@@ -101,9 +139,12 @@ const InventoryManagement = () => {
     () => ({
       page: page + 1,
       pageSize,
-      ...(search.trim() ? { search: { all: search.trim() } } : {})
+      ...(search.trim() ? { search: { all: search.trim() } } : {}),
+      ...(showLocationFilter && locationFilter
+        ? { filter: { locationId: locationFilter } }
+        : {}),
     }),
-    [page, pageSize, search]
+    [page, pageSize, search, showLocationFilter, locationFilter]
   )
 
   const { data, isLoading, isFetching } = useAdminInventory(params)
@@ -231,7 +272,7 @@ const InventoryManagement = () => {
         <CardHeader title='Inventory Management' />
         <Divider />
         <CardContent>
-          <div className="flex justify-between flex-col items-start sm:flex-row sm:items-center gap-y-4 mb-5">
+          <div className="flex justify-between flex-col items-start sm:flex-row sm:items-center gap-y-4 mb-5 flex-wrap gap-4">
             <TextField
               size="small"
               placeholder="Search Inventory"
@@ -242,6 +283,33 @@ const InventoryManagement = () => {
               }}
               style={{ maxWidth: 300 }}
             />
+            {showLocationFilter && locationOptions.length > 0 ? (
+              <FormControl size="small" sx={{ minWidth: 220 }}>
+                <InputLabel id="inventory-location-filter">Location</InputLabel>
+                <Select
+                  labelId="inventory-location-filter"
+                  label="Location"
+                  value={locationFilter}
+                  onChange={e => {
+                    setLocationFilter(e.target.value)
+                    setPage(0)
+                  }}
+                >
+                  <MenuItem value="">
+                    <em>All locations</em>
+                  </MenuItem>
+                  {locationOptions.map(loc => (
+                    <MenuItem key={loc.id} value={loc.id}>
+                      {loc.label}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            ) : authUser?.locationId && !authUser?.isSuperAdmin ? (
+              <Typography variant='body2' color='text.secondary'>
+                Showing inventory for your assigned location only.
+              </Typography>
+            ) : null}
           </div>
           <div className='overflow-x-auto'>
             <table className={tableStyles.table}>
@@ -532,8 +600,10 @@ const InventoryManagement = () => {
                   onChange={e => setEditLocationId(e.target.value)}
                   // For safety in shops data: get from first shop's locations
                 >
-                  {(shops?.data?.[0]?.locations || []).map((loc: any) => (
-                    <MenuItem key={loc.id} value={loc.id}>{loc.name}</MenuItem>
+                  {(locationsForEdit || []).map(loc => (
+                    <MenuItem key={loc.id} value={loc.id}>
+                      {loc.label}
+                    </MenuItem>
                   ))}
                 </Select>
               </FormControl>

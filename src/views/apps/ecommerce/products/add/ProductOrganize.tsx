@@ -13,6 +13,8 @@ import Select from '@mui/material/Select'
 import Autocomplete from '@mui/material/Autocomplete'
 import TextField from '@mui/material/TextField'
 import CircularProgress from '@mui/material/CircularProgress'
+import Switch from '@mui/material/Switch'
+import FormControlLabel from '@mui/material/FormControlLabel'
 
 import { useBrands } from '@/api/brands/useBrands'
 import { useCategories } from '@/api/categories/useCategories'
@@ -20,10 +22,10 @@ import { useCategories } from '@/api/categories/useCategories'
 // Import types
 import type { Brand } from '@/types/brand'
 import type { Category } from '@/types/category'
-import { useFormContext } from 'react-hook-form'
+import { Controller, useFormContext } from 'react-hook-form'
 
 const ProductOrganize = () => {
-  const { register, setValue, watch } = useFormContext()
+  const { register, setValue, watch, control } = useFormContext()
   
   // Watch for brandId, categoryId, brandName, and categoryName from form
   const brandId = watch('brandId')
@@ -192,6 +194,23 @@ const ProductOrganize = () => {
               <MenuItem value="ARCHIVED">Archived</MenuItem>
             </Select>
           </FormControl>
+
+          <Controller
+            name="isFeatured"
+            control={control}
+            render={({ field }) => (
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={Boolean(field.value)}
+                    onChange={(_, checked) => field.onChange(checked)}
+                    inputProps={{ 'aria-label': 'Featured product' }}
+                  />
+                }
+                label="Featured product"
+              />
+            )}
+          />
         </form>
       </CardContent>
     </Card>

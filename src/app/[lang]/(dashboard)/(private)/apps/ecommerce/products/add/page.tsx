@@ -51,9 +51,9 @@ const eCommerceProductsAdd = () => {
       categoryId: '',
       categoryName: '',
       status: 'ACTIVE',
+      isFeatured: false,
 
       // variant
-      sku: '',
       barcode: '',
       price: '',
       comparePrice: '',
@@ -76,7 +76,6 @@ const eCommerceProductsAdd = () => {
     console.log("variant dataas", variant)
     if (onlyVariation && isUpdate === 'true' && variant) {
       methods.reset({
-        sku: variant?.sku ?? '',
         barcode: variant?.barcode ?? '',
         price: variant?.price ? String(variant?.price):  '',
         comparePrice: variant?.comparePrice ? String(variant?.comparePrice):  '',
@@ -100,6 +99,7 @@ const eCommerceProductsAdd = () => {
         brandId: product.brandId ?? '',
         categoryId: product.categoryId ?? '',
         status: product.status ?? 'ACTIVE',
+        isFeatured: Boolean(product.isFeatured),
         brandName: product.brand?.name ?? '',
         categoryName: product.category?.name ?? ''
       });
@@ -127,6 +127,7 @@ const eCommerceProductsAdd = () => {
         brandId: data.brandId,
         categoryId: data.categoryId,
         status: data.status,
+        isFeatured: Boolean(data.isFeatured),
       }
       if (!onlyVariation && !isUpdate) {
       // 1️⃣ Create Product using axios (api)
@@ -143,7 +144,6 @@ const eCommerceProductsAdd = () => {
 
       // 2️⃣ Create Variant for that product, send FormData if image present
       const formData = new FormData();
-      formData.append('sku', data.sku);
       if (data.barcode) formData.append('barcode', data.barcode);
       formData.append('price', data.price ? String(Number(data.price)) : '');
       if (data.comparePrice) formData.append('comparePrice', String(Number(data.comparePrice)));
@@ -181,7 +181,6 @@ const eCommerceProductsAdd = () => {
       
       // 2️⃣ Create Variant for that product, send FormData if image present
       const formData = new FormData();
-      formData.append('sku', data.sku);
       if (data.barcode) formData.append('barcode', data.barcode);
       formData.append('price', data.price ? String(Number(data.price)) : '');
       if (data.comparePrice) formData.append('comparePrice', String(Number(data.comparePrice)));
