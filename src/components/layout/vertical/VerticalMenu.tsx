@@ -76,6 +76,12 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
   const cr = (resource: string) =>
     authUser?.isSuperAdmin === true || can(resource, 'read', authUser)
 
+  /** Branches / store profile need either shops read or update (some roles only assign update). */
+  const shopsNav =
+    authUser?.isSuperAdmin === true ||
+    can('shops', 'read', authUser) ||
+    can('shops', 'update', authUser)
+
   const ScrollWrapper = isBreakpointReached ? 'div' : PerfectScrollbar
 
   return (
@@ -164,13 +170,18 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
           </MenuSection>
         )}
 
-        {(cr('shops') || cr('inventory')) && (
+        {(shopsNav || cr('inventory')) && (
           <MenuSection label='Branch & Operations'>
-            {cr('shops') && (
+            {shopsNav && (
               <MenuItem icon={<i className='ri-building-line' />} href={`/${locale}/apps/ecommerce/branches`}>
                 {dictionary['navigation'].branches}
               </MenuItem>
             )}
+            {/* {shopsNav && ( */}
+              <MenuItem icon={<i className='ri-store-2-line' />} href={`/${locale}/apps/ecommerce/store-settings`}>
+                Store profile
+              </MenuItem>
+            {/* )} */}
             {cr('inventory') && (
               <MenuItem
                 icon={<i className='ri-file-text-line' />}
@@ -248,6 +259,14 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
                 )}
               </SubMenu>
             )}
+          </MenuSection>
+        )}
+
+        {(authUser?.isSuperAdmin === true || cr('settings')) && (
+          <MenuSection label='System'>
+            <MenuItem icon={<i className='ri-tools-line' />} href={`/${locale}/apps/system/maintenance`}>
+              Maintenance mode
+            </MenuItem>
           </MenuSection>
         )}
 

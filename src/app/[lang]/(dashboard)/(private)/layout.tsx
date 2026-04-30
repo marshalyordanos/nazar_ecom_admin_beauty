@@ -23,6 +23,7 @@ import ScrollToTop from '@core/components/scroll-to-top'
 import AuthGuard from '@/hocs/AuthGuard'
 import AuthenticatedShopSync from '@/components/AuthenticatedShopSync'
 import AdminNotificationSocketBridge from '@/components/realtime/AdminNotificationSocketBridge'
+import DashboardMaintenanceGate from '@/components/maintenance/DashboardMaintenanceGate'
 
 // Config Imports
 import { i18n } from '@configs/i18n'
@@ -48,34 +49,36 @@ const Layout = async (props: ChildrenType & { params: Promise<{ lang: string }> 
   return (
     <Providers direction={direction}>
       <AuthGuard locale={lang}>
-        <AuthenticatedShopSync />
-        <AdminNotificationSocketBridge />
-        <LayoutWrapper
-          systemMode={systemMode}
-          verticalLayout={
-            <VerticalLayout
-              navigation={<Navigation dictionary={dictionary} mode={mode} />}
-              navbar={<Navbar />}
-              footer={<VerticalFooter />}
+        <DashboardMaintenanceGate locale={lang}>
+          <AuthenticatedShopSync />
+          <AdminNotificationSocketBridge />
+          <LayoutWrapper
+            systemMode={systemMode}
+            verticalLayout={
+              <VerticalLayout
+                navigation={<Navigation dictionary={dictionary} mode={mode} />}
+                navbar={<Navbar />}
+                footer={<VerticalFooter />}
+              >
+                {children}
+              </VerticalLayout>
+            }
+            horizontalLayout={
+              <HorizontalLayout header={<Header dictionary={dictionary} />} footer={<HorizontalFooter />}>
+                {children}
+              </HorizontalLayout>
+            }
+          />
+          <ScrollToTop className='mui-fixed'>
+            <Button
+              variant='contained'
+              className='is-10 bs-10 rounded-full p-0 min-is-0 flex items-center justify-center'
             >
-              {children}
-            </VerticalLayout>
-          }
-          horizontalLayout={
-            <HorizontalLayout header={<Header dictionary={dictionary} />} footer={<HorizontalFooter />}>
-              {children}
-            </HorizontalLayout>
-          }
-        />
-        <ScrollToTop className='mui-fixed'>
-          <Button
-            variant='contained'
-            className='is-10 bs-10 rounded-full p-0 min-is-0 flex items-center justify-center'
-          >
-            <i className='ri-arrow-up-line' />
-          </Button>
-        </ScrollToTop>
-        <Customizer dir={direction} />
+              <i className='ri-arrow-up-line' />
+            </Button>
+          </ScrollToTop>
+          <Customizer dir={direction} />
+        </DashboardMaintenanceGate>
       </AuthGuard>
     </Providers>
   )

@@ -12,6 +12,11 @@ export interface ShopResponse {
     email: string;
     phone: string;
     logoUrl: string;
+    instagramUrl?: string | null;
+    telegramUrl?: string | null;
+    facebookUrl?: string | null;
+    youtubeUrl?: string | null;
+    xUrl?: string | null;
     description: string;
     currency: string;
     timezone: string;

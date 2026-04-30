@@ -100,6 +100,7 @@ type UserRowWithAction = {
   avatar: string
   status: string
   role: string
+  registrationSource: 'SELF' | 'SYSTEM_GUEST_CHECKOUT'
   createdAt?: string
   updatedAt?: string
   action?: string
@@ -189,6 +190,9 @@ function mapApiUserFromAdmin(u: UserAdmin): UserRowWithAction {
           : 'inactive'
   const fullName = [u.firstName, u.lastName].filter(Boolean).join(' ').trim() || u.email
 
+  const reg =
+    u.registrationSource === 'SYSTEM_GUEST_CHECKOUT' ? 'SYSTEM_GUEST_CHECKOUT' : 'SELF'
+
   // Accept phone as string, use empty string if missing or null.
   return {
     id: u.id,
@@ -199,6 +203,7 @@ function mapApiUserFromAdmin(u: UserAdmin): UserRowWithAction {
     avatar: (u.avatarUrl ?? '') as string,
     status: statusKey,
     role: roleName,
+    registrationSource: reg,
     createdAt: u.createdAt,
     updatedAt: u.updatedAt,
     action: ''
@@ -334,6 +339,22 @@ const UserListTable = () => {
       columnHelper.accessor('phone', {
         header: 'Phone',
         cell: ({ row }) => <Typography>{row.original.phone}</Typography>
+      }),
+      columnHelper.accessor('registrationSource', {
+        header: 'Registered',
+        cell: ({ row }) => {
+          const src = row.original.registrationSource
+          const system = src === 'SYSTEM_GUEST_CHECKOUT'
+
+          return (
+            <Chip
+              variant='tonal'
+              size='small'
+              color={system ? 'warning' : 'success'}
+              label={system ? 'System (guest order)' : 'Self sign-up'}
+            />
+          )
+        }
       }),
       columnHelper.accessor('role', {
         header: 'Role',

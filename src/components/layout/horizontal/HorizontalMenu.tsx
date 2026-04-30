@@ -143,7 +143,13 @@ const HorizontalMenu = ({ dictionary }: { dictionary: Awaited<ReturnType<typeof 
             </MenuItem>
             <MenuItem href={`/${locale}/apps/ecommerce/referrals`}>{dictionary['navigation'].referrals}</MenuItem>
             <MenuItem href={`/${locale}/apps/ecommerce/settings`}>{dictionary['navigation'].settings}</MenuItem>
+            <MenuItem href={`/${locale}/apps/ecommerce/store-settings`} icon={<i className='ri-store-2-line' />}>
+              Store profile
+            </MenuItem>
           </SubMenu>
+          <MenuItem href={`/${locale}/apps/system/maintenance`} icon={<i className='ri-tools-line' />}>
+            Maintenance mode
+          </MenuItem>
           <SubMenu label={dictionary['navigation'].academy} icon={<i className='ri-graduation-cap-line' />}>
             <MenuItem href={`/${locale}/apps/academy/dashboard`}>{dictionary['navigation'].dashboard}</MenuItem>
             <MenuItem href={`/${locale}/apps/academy/my-courses`}>{dictionary['navigation'].myCourses}</MenuItem>

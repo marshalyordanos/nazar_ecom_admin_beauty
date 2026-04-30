@@ -22,6 +22,8 @@ export type UserAdmin = {
 	roles?: { id: string; name: string }[]
 	locationId?: string | null
 	location?: { id: string; name: string; shopId: string } | null
+	/** SELF = signed up on storefront; SYSTEM_GUEST_CHECKOUT = created automatically on guest checkout */
+	registrationSource?: 'SELF' | 'SYSTEM_GUEST_CHECKOUT' | null
 	createdAt?: string
 	updatedAt?: string
 }
