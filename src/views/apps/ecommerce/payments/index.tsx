@@ -18,13 +18,23 @@ import Chip from '@mui/material/Chip'
 import TablePagination from '@mui/material/TablePagination'
 import IconButton from '@mui/material/IconButton'
 import Menu from '@mui/material/Menu'
-import tableStyles from '@core/styles/table.module.css'
-import { useAdminPayments, useCapturePayment, useRefundPayment } from '@/api/admin/payments'
-import { useDashboardSummary } from '@/api/admin/dashboard'
+import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import CircularProgress from '@mui/material/CircularProgress'
+import tableStyles from '@core/styles/table.module.css'
+import {
+  useAdminPayments,
+  useCapturePayment,
+  useRefundPayment,
+  usePaymentsAdminSummary
+} from '@/api/admin/payments'
 import HorizontalWithSubtitle from '@components/card-statistics/HorizontalWithSubtitle'
 import MutationBlockingOverlay from '@/components/loading/MutationBlockingOverlay'
+
+const filterBarSx = {
+  '& .MuiInputBase-root': { minHeight: 48 },
+  '& .MuiInputLabel-root': { lineHeight: 1.2 }
+} as const
 
 // Payment status map for styled chips
 const paymentStatusObj = {
@@ -205,8 +215,22 @@ const PaymentsManagement = () => {
   const [dateTo, setDateTo] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
 
-  const { data: summary, isLoading: sumLoading, isError: sumError } = useDashboardSummary()
-  const pay = summary?.data?.payments
+  const summaryParams = useMemo(() => {
+    const filter: Record<string, string> = {}
+    if (dateFrom) filter.createdAt_gte = new Date(`${dateFrom}T00:00:00.000Z`).toISOString()
+    if (dateTo) filter.createdAt_lte = new Date(`${dateTo}T23:59:59.999Z`).toISOString()
+    if (statusFilter) filter.status = statusFilter
+
+    return {
+      page: 1,
+      pageSize: 1,
+      ...(search.trim() ? { search: { all: search.trim() } } : {}),
+      ...(Object.keys(filter).length ? { filter } : {})
+    }
+  }, [search, dateFrom, dateTo, statusFilter])
+
+  const { data: summaryPayload, isLoading: sumLoading, isError: sumError } = usePaymentsAdminSummary(summaryParams)
+  const pay = summaryPayload?.data
 
   const params = useMemo(() => {
     const filter: Record<string, string> = {}
@@ -229,12 +253,22 @@ const PaymentsManagement = () => {
   const rows = data?.data ?? []
   const total = data?.pagination?.total ?? 0
 
+  const hasActiveFilters = Boolean(dateFrom || dateTo || statusFilter || search.trim())
+
+  const clearFilters = () => {
+    setDateFrom('')
+    setDateTo('')
+    setStatusFilter('')
+    setSearch('')
+    setPage(0)
+  }
+
   return (
     <div className="p-0 md:p-6">
       <Grid container spacing={6} className='mb-6'>
         {sumLoading ? (
-          Array.from({ length: 4 }).map((_, i) => (
-            <Grid key={`pay-s-${i}`} size={{ xs: 12, sm: 6, md: 3 }}>
+          Array.from({ length: 6 }).map((_, i) => (
+            <Grid key={`pay-s-${i}`} size={{ xs: 12, sm: 6, md: 4 }}>
               <div className='p-4 border rounded'>
                 <div className='h-6 w-32 bg-actionHover rounded mb-2' />
                 <div className='h-5 w-24 bg-actionHover rounded mb-1' />
@@ -244,48 +278,64 @@ const PaymentsManagement = () => {
           ))
         ) : pay ? (
           <>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <HorizontalWithSubtitle
-                title='Payments'
+                title='Payments (filtered)'
                 stats={String(pay.totalPayments)}
                 avatarIcon='ri-bill-line'
                 avatarColor='primary'
-                trend={pay.percentChange >= 0 ? 'positive' : 'negative'}
-                trendNumber={`${Math.abs(pay.percentChange).toFixed(1)}%`}
-                subtitle='Total count'
+                trend=''
+                subtitle='Matching current filters'
               />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <HorizontalWithSubtitle
-                title='Paid'
-                stats={String(pay.paidPayments)}
+                title='Paid volume'
+                stats={pay.paidVolume.toFixed(2)}
                 avatarIcon='ri-check-double-line'
                 avatarColor='success'
-                trend='positive'
-                // trendNumber='—'
-                subtitle='Successful'
+                trend=''
+                subtitle={`${pay.paidPayments} successful · ${pay.successfulRatePercent.toFixed(0)}% success rate`}
               />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <HorizontalWithSubtitle
+                title='Total recorded'
+                stats={pay.totalPaymentAmount.toFixed(2)}
+                avatarIcon='ri-money-dollar-circle-line'
+                avatarColor='info'
+                trend=''
+                subtitle={`Avg ${pay.avgPaymentAmount.toFixed(2)} per payment`}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <HorizontalWithSubtitle
+                title='Pending'
+                stats={String(pay.pendingPayments)}
+                avatarIcon='ri-time-line'
+                avatarColor='warning'
+                trend=''
+                subtitle={`Volume ${pay.pendingVolume.toFixed(2)}`}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <HorizontalWithSubtitle
                 title='Failed'
                 stats={String(pay.failedPayments)}
                 avatarIcon='ri-close-circle-line'
                 avatarColor='error'
-                trend='negative'
-                // trendNumber='—'
-                subtitle='Errors'
+                trend=''
+                subtitle='Declined or errored'
               />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <HorizontalWithSubtitle
-                title='Amount'
-                stats={summary?.data ? String(pay.totalPaymentAmount.toFixed(2)) : '0'}
-                avatarIcon='ri-money-dollar-circle-line'
-                avatarColor='info'
-                trend={pay.amountChange >= 0 ? 'positive' : 'negative'}
-                trendNumber={`${Math.abs(pay.amountChange).toFixed(1)}%`}
-                subtitle='Total volume'
+                title='Refunded'
+                stats={String(pay.refundedPayments)}
+                avatarIcon='ri-exchange-dollar-line'
+                avatarColor='secondary'
+                trend=''
+                subtitle={`Volume ${pay.refundedVolume.toFixed(2)}`}
               />
             </Grid>
           </>
@@ -302,13 +352,17 @@ const PaymentsManagement = () => {
           message='Updating payment…'
         />
         <CardContent>
-          <div className="flex flex-col gap-3 mb-4">
+          <Box
+            className="flex flex-col gap-3 mb-4 rounded-lg border border-solid border-divider"
+            sx={{ p: { xs: 2, sm: 2.5 }, bgcolor: 'action.hover' }}
+          >
             <div className="flex flex-col sm:flex-row flex-wrap gap-3 items-start sm:items-end">
               <TextField
-                size="small"
+                size="medium"
                 type="date"
                 label="From"
                 InputLabelProps={{ shrink: true }}
+                sx={{ ...filterBarSx, minWidth: 168 }}
                 value={dateFrom}
                 onChange={e => {
                   setDateFrom(e.target.value)
@@ -316,17 +370,18 @@ const PaymentsManagement = () => {
                 }}
               />
               <TextField
-                size="small"
+                size="medium"
                 type="date"
                 label="To"
                 InputLabelProps={{ shrink: true }}
+                sx={{ ...filterBarSx, minWidth: 168 }}
                 value={dateTo}
                 onChange={e => {
                   setDateTo(e.target.value)
                   setPage(0)
                 }}
               />
-              <FormControl size="small" sx={{ minWidth: 160 }}>
+              <FormControl size="medium" sx={{ ...filterBarSx, minWidth: 180 }}>
                 <InputLabel id="pay-status-filter">Status</InputLabel>
                 <Select
                   labelId="pay-status-filter"
@@ -345,18 +400,30 @@ const PaymentsManagement = () => {
                   ))}
                 </Select>
               </FormControl>
+              <Button
+                variant='outlined'
+                color='secondary'
+                size='medium'
+                disabled={!hasActiveFilters}
+                startIcon={<span className='ri-filter-off-line text-lg' />}
+                onClick={clearFilters}
+                sx={{ minHeight: 48, alignSelf: { xs: 'stretch', sm: 'flex-end' } }}
+              >
+                Clear filters
+              </Button>
             </div>
             <TextField
-              size="small"
+              size="medium"
               placeholder="Search payment, user, order, status etc"
               value={search}
               onChange={e => {
                 setSearch(e.target.value)
                 setPage(0)
               }}
-              className="max-sm:w-full sm:max-w-md"
+              className="max-sm:w-full sm:max-w-lg"
+              sx={filterBarSx}
             />
-          </div>
+          </Box>
           <div className="overflow-x-auto">
             <table className={tableStyles.table}>
               <thead>

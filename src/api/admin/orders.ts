@@ -11,7 +11,9 @@ import { dashboardKeys } from './dashboard'
 
 export const orderKeys = {
   all: ['admin-orders'] as const,
-  list: (params: QueryParams) => [...orderKeys.all, params] as const
+  list: (params: QueryParams) => [...orderKeys.all, 'list', params] as const,
+  summary: (params: QueryParams & { shopId?: string }) => [...orderKeys.all, 'summary', params] as const,
+  detail: (id: string) => [...orderKeys.all, 'detail', id] as const
 }
 
 export function useAdminOrders(params: QueryParams & { shopId?: string }) {
@@ -24,6 +26,46 @@ export function useAdminOrders(params: QueryParams & { shopId?: string }) {
       
 return response.data
     },
+    staleTime: 1000 * 30
+  })
+}
+
+export type OrdersAdminSummaryData = {
+  totalOrders: number
+  completedOrders: number
+  pendingOrders: number
+  paidOrders: number
+  processingOrders: number
+  shippedOrders: number
+  cancelledOrders: number
+  refundedOrders: number
+  totalRevenue: number
+  totalSubtotal: number
+  totalDiscounts: number
+  totalTax: number
+  avgOrderValue: number
+  lineItemsCount: number
+  estimatedProfit: number
+  estimatedMarginPercent: number
+}
+
+export function useOrdersAdminSummary(params: QueryParams & { shopId?: string }) {
+  return useQuery<{ data: OrdersAdminSummaryData }, Error>({
+    queryKey: orderKeys.summary(params),
+    queryFn: async () => {
+      const qs = buildQuery({ ...params, extra: { shopId: params.shopId } })
+
+      return (await api.get(`/orders/admin/summary${qs}`)).data
+    },
+    staleTime: 1000 * 15
+  })
+}
+
+export function useAdminOrder(id: string | undefined) {
+  return useQuery({
+    queryKey: orderKeys.detail(id!),
+    queryFn: async () => (await api.get(`/orders/admin/${id}`)).data,
+    enabled: Boolean(id),
     staleTime: 1000 * 30
   })
 }

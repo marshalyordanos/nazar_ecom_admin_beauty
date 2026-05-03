@@ -9,9 +9,24 @@ import { buildQuery } from './query'
 import type { ApiListResponse, PaymentAdmin } from './types'
 import { dashboardKeys } from './dashboard'
 
+export type PaymentsAdminSummaryData = {
+  totalPayments: number
+  paidPayments: number
+  failedPayments: number
+  pendingPayments: number
+  refundedPayments: number
+  totalPaymentAmount: number
+  paidVolume: number
+  refundedVolume: number
+  pendingVolume: number
+  avgPaymentAmount: number
+  successfulRatePercent: number
+}
+
 export const paymentKeys = {
   all: ['admin-payments'] as const,
-  list: (params: QueryParams) => [...paymentKeys.all, params] as const
+  list: (params: QueryParams) => [...paymentKeys.all, 'list', params] as const,
+  summary: (params: QueryParams & { orderId?: string }) => [...paymentKeys.all, 'summary', params] as const
 }
 
 export function useAdminPayments(params: QueryParams & { orderId?: string }) {
@@ -24,6 +39,18 @@ export function useAdminPayments(params: QueryParams & { orderId?: string }) {
 return (await api.get(`/payments${qs}`)).data
     },
     staleTime: 1000 * 30
+  })
+}
+
+export function usePaymentsAdminSummary(params: QueryParams & { orderId?: string }) {
+  return useQuery<{ data: PaymentsAdminSummaryData }, Error>({
+    queryKey: paymentKeys.summary(params),
+    queryFn: async () => {
+      const qs = buildQuery({ ...params, extra: { orderId: params.orderId } })
+
+      return (await api.get(`/payments/summary-stats${qs}`)).data
+    },
+    staleTime: 1000 * 15
   })
 }
 

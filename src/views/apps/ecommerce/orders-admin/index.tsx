@@ -1,5 +1,8 @@
 'use client'
 
+import Link from 'next/link'
+import { useParams } from 'next/navigation'
+
 import { useMemo, useState } from 'react'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
@@ -18,8 +21,8 @@ import TablePagination from '@mui/material/TablePagination'
 import IconButton from '@mui/material/IconButton'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
-import { useAdminOrders, useCompleteOrder, useCancleOrder, useCreateAdminOrder } from '@/api/admin/orders'
-import { useDashboardSummary } from '@/api/admin/dashboard'
+import Box from '@mui/material/Box'
+import { useAdminOrders, useCompleteOrder, useCancleOrder, useCreateAdminOrder, useOrdersAdminSummary } from '@/api/admin/orders'
 
 import classnames from 'classnames'
 import tableStyles from '@core/styles/table.module.css'
@@ -28,7 +31,13 @@ import HorizontalWithSubtitle from '@components/card-statistics/HorizontalWithSu
 import MutationBlockingOverlay from '@/components/loading/MutationBlockingOverlay'
 import CircularProgress from '@mui/material/CircularProgress'
 
-import { useRef, useEffect } from 'react'
+import type { Locale } from '@/configs/i18n'
+import { getLocalizedUrl } from '@/utils/i18n'
+
+const filterBarSx = {
+  '& .MuiInputBase-root': { minHeight: 48 },
+  '& .MuiInputLabel-root': { lineHeight: 1.2 }
+} as const
 
 // Utility: get standardized date string (UTC, YYYY-MM-DD), less likely to cause hydration errors
 function formatDateISO(dateStr: string) {
@@ -251,6 +260,9 @@ const ORDER_STATUSES = [
 ] as const
 
 const OrdersAdminManagement = () => {
+  const routeParams = useParams()
+  const lang = (routeParams?.lang as Locale) || 'en'
+
   const [page, setPage] = useState(0)
   const [pageSize, setPageSize] = useState(10)
   const [search, setSearch] = useState('')
@@ -258,15 +270,29 @@ const OrdersAdminManagement = () => {
   const [dateTo, setDateTo] = useState('')
   const [statusFilter, setStatusFilter] = useState('')
 
-  const { data: summary, isLoading: sumLoading, isError: sumError } = useDashboardSummary()
-  const ord = summary?.data?.orders
+  const summaryParams = useMemo(() => {
+    const filter: Record<string, string> = {}
+    if (dateFrom) filter.createdAt_gte = new Date(`${dateFrom}T00:00:00.000Z`).toISOString()
+    if (dateTo) filter.createdAt_lte = new Date(`${dateTo}T23:59:59.999Z`).toISOString()
+    if (statusFilter) filter.status = statusFilter
+
+    return {
+      page: 1,
+      pageSize: 1,
+      ...(search.trim() ? { search: { all: search.trim() } } : {}),
+      ...(Object.keys(filter).length ? { filter } : {})
+    }
+  }, [search, dateFrom, dateTo, statusFilter])
+
+  const { data: summaryPayload, isLoading: sumLoading, isError: sumError } = useOrdersAdminSummary(summaryParams)
+  const ord = summaryPayload?.data
 
   const [openCreate, setOpenCreate] = useState(false)
   const [payload, setPayload] = useState(
     '{\n  "shopId": "",\n  "userId": "",\n  "subtotal": 0,\n  "grandTotal": 0,\n  "currency": "USD",\n  "items": [],\n  "address": {\n    "name": "",\n    "phone": "",\n    "addressLine1": "",\n    "city": "",\n    "country": ""\n  }\n}'
   )
 
-  const params = useMemo(() => {
+  const listParams = useMemo(() => {
     const filter: Record<string, string> = {}
     if (dateFrom) filter.createdAt_gte = new Date(`${dateFrom}T00:00:00.000Z`).toISOString()
     if (dateTo) filter.createdAt_lte = new Date(`${dateTo}T23:59:59.999Z`).toISOString()
@@ -279,7 +305,7 @@ const OrdersAdminManagement = () => {
       ...(Object.keys(filter).length ? { filter } : {})
     }
   }, [page, pageSize, search, dateFrom, dateTo, statusFilter])
-  const { data, isLoading, isFetching } = useAdminOrders(params)
+  const { data, isLoading, isFetching } = useAdminOrders(listParams)
   const completeMut = useCompleteOrder()
   const cancelMut = useCancleOrder()
   const createMut = useCreateAdminOrder()
@@ -287,15 +313,22 @@ const OrdersAdminManagement = () => {
   const rows = data?.data ?? []
   const total = data?.pagination?.total ?? 0
 
-  // Fix for hydration errors: Store rendered creation row dates in ref at first render (which is client side)
-  // Only show formatted date as plain yyyy-mm-dd so SSR and CSR match
-  // (if want to show custom locale, must suppressHydrationWarning)
+  const hasActiveFilters = Boolean(dateFrom || dateTo || statusFilter || search.trim())
+
+  const clearFilters = () => {
+    setDateFrom('')
+    setDateTo('')
+    setStatusFilter('')
+    setSearch('')
+    setPage(0)
+  }
+
   return (
     <div className="p-0 md:p-6">
       <Grid container spacing={6} className='mb-6'>
         {sumLoading ? (
-          Array.from({ length: 4 }).map((_, i) => (
-            <Grid key={`ord-s-${i}`} size={{ xs: 12, sm: 6, md: 3 }}>
+          Array.from({ length: 6 }).map((_, i) => (
+            <Grid key={`ord-s-${i}`} size={{ xs: 12, sm: 6, md: 4 }}>
               <div className='p-4 border rounded'>
                 <div className='h-6 w-32 bg-actionHover rounded mb-2' />
                 <div className='h-5 w-24 bg-actionHover rounded mb-1' />
@@ -305,68 +338,64 @@ const OrdersAdminManagement = () => {
           ))
         ) : ord ? (
           <>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <HorizontalWithSubtitle
-                title='Orders'
+                title='Orders (filtered)'
                 stats={String(ord.totalOrders)}
                 avatarIcon='ri-shopping-cart-line'
                 avatarColor='primary'
-                trend={
-                  typeof ord.percentChange === "number"
-                    ? (ord.percentChange >= 0 ? 'positive' : 'negative')
-                    : ''
-                }
-                trendNumber={
-                  typeof ord.percentChange === "number"
-                    ? `${Math.abs(ord.percentChange).toFixed(1)}%`
-                    : '0'
-                }
-                subtitle='Total'
+                trend=''
+                subtitle='Matching current filters'
               />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
               <HorizontalWithSubtitle
-                title='Completed'
-                stats={String(ord.completedOrders)}
-                avatarIcon='ri-checkbox-circle-line'
-                avatarColor='success'
-                trend='positive'
-                // trendNumber='—'
-                subtitle='Fulfilled'
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <HorizontalWithSubtitle
-                title='Pending'
-                stats={String(ord.pendingOrders)}
-                avatarIcon='ri-time-line'
-                avatarColor='warning'
-                trend='negative'
-                // trendNumber='—'
-                subtitle='Awaiting'
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-              <HorizontalWithSubtitle
-                title='Revenue'
-                stats={
-                  typeof ord.totalRevenue === "number"
-                  ? ord.totalRevenue.toFixed(2)
-                  : (ord.totalRevenue ?? '—')
-                }
-                avatarIcon='ri-bar-chart-2-line'
+                title='Gross revenue'
+                stats={ord.totalRevenue.toFixed(2)}
+                avatarIcon='ri-money-dollar-circle-line'
                 avatarColor='info'
-                trend={
-                  typeof ord.revenueChange === "number"
-                    ? (ord.revenueChange >= 0 ? 'positive' : 'negative')
-                    : '0'
-                }
-                trendNumber={
-                  typeof ord.revenueChange === "number"
-                    ? `${Math.abs(ord.revenueChange).toFixed(1)}%`
-                    : '0'
-                }
-                subtitle='Gross'
+                trend=''
+                subtitle={`Discounts ${ord.totalDiscounts.toFixed(2)} · Tax ${ord.totalTax.toFixed(2)}`}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <HorizontalWithSubtitle
+                title='Est. profit'
+                stats={ord.estimatedProfit.toFixed(2)}
+                avatarIcon='ri-line-chart-line'
+                avatarColor='success'
+                trend=''
+                subtitle={`Margin ~${ord.estimatedMarginPercent.toFixed(1)}% · uses variant cost`}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <HorizontalWithSubtitle
+                title='Avg order value'
+                stats={ord.avgOrderValue.toFixed(2)}
+                avatarIcon='ri-pulse-line'
+                avatarColor='secondary'
+                trend=''
+                subtitle='Mean grand total'
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <HorizontalWithSubtitle
+                title='Fulfillment mix'
+                stats={String(ord.completedOrders)}
+                avatarIcon='ri-truck-line'
+                avatarColor='primary'
+                trend=''
+                subtitle={`Pending ${ord.pendingOrders} · Paid ${ord.paidOrders} · Proc. ${ord.processingOrders} · Ship ${ord.shippedOrders}`}
+              />
+            </Grid>
+            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+              <HorizontalWithSubtitle
+                title='Line items'
+                stats={String(ord.lineItemsCount)}
+                avatarIcon='ri-list-check-2'
+                avatarColor='warning'
+                trend=''
+                subtitle={`Cancelled ${ord.cancelledOrders} · Refunded ${ord.refundedOrders}`}
               />
             </Grid>
           </>
@@ -383,13 +412,17 @@ const OrdersAdminManagement = () => {
           message='Updating order…'
         />
         <CardContent>
-          <div className="flex flex-col gap-3 mb-4">
+          <Box
+            className="flex flex-col gap-3 mb-4 rounded-lg border border-solid border-divider"
+            sx={{ p: { xs: 2, sm: 2.5 }, bgcolor: 'action.hover' }}
+          >
             <div className="flex flex-col sm:flex-row flex-wrap gap-3 items-start sm:items-end">
               <TextField
-                size="small"
+                size="medium"
                 type="date"
                 label="From"
                 InputLabelProps={{ shrink: true }}
+                sx={{ ...filterBarSx, minWidth: 168 }}
                 value={dateFrom}
                 onChange={e => {
                   setDateFrom(e.target.value)
@@ -397,17 +430,18 @@ const OrdersAdminManagement = () => {
                 }}
               />
               <TextField
-                size="small"
+                size="medium"
                 type="date"
                 label="To"
                 InputLabelProps={{ shrink: true }}
+                sx={{ ...filterBarSx, minWidth: 168 }}
                 value={dateTo}
                 onChange={e => {
                   setDateTo(e.target.value)
                   setPage(0)
                 }}
               />
-              <FormControl size="small" sx={{ minWidth: 160 }}>
+              <FormControl size="medium" sx={{ ...filterBarSx, minWidth: 180 }}>
                 <InputLabel id="ord-status-filter">Status</InputLabel>
                 <Select
                   labelId="ord-status-filter"
@@ -426,18 +460,30 @@ const OrdersAdminManagement = () => {
                   ))}
                 </Select>
               </FormControl>
+              <Button
+                variant='outlined'
+                color='secondary'
+                size='medium'
+                disabled={!hasActiveFilters}
+                startIcon={<span className='ri-filter-off-line text-lg' />}
+                onClick={clearFilters}
+                sx={{ minHeight: 48, alignSelf: { xs: 'stretch', sm: 'flex-end' } }}
+              >
+                Clear filters
+              </Button>
             </div>
             <TextField
-              size="small"
+              size="medium"
               placeholder="Search order number, user, product, status etc"
               value={search}
               onChange={e => {
                 setSearch(e.target.value)
                 setPage(0)
               }}
-              className="max-sm:w-full sm:max-w-md"
+              className="max-sm:w-full sm:max-w-lg"
+              sx={filterBarSx}
             />
-          </div>
+          </Box>
           <div className="overflow-x-auto">
             <table className={tableStyles.table}>
               <thead>
@@ -474,9 +520,14 @@ const OrdersAdminManagement = () => {
                     <tr key={row.id}>
                       {/* Order number */}
                       <td>
-                        <Typography variant="body2" color="primary.main" className="font-medium">
-                          {row.orderNumber}
-                        </Typography>
+                        <Link
+                          href={getLocalizedUrl(`/apps/ecommerce/orders-admin/${row.id}`, lang)}
+                          className='no-underline'
+                        >
+                          <Typography variant="body2" color="primary.main" className="font-medium hover:underline">
+                            {row.orderNumber}
+                          </Typography>
+                        </Link>
                       </td>
                       {/* Status with color chip */}
                       <td>
