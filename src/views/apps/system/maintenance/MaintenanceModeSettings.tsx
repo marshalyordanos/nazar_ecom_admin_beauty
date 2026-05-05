@@ -104,9 +104,9 @@ export default function MaintenanceModeSettings() {
                     <>
                       <strong>Mobile app</strong>
                       <Typography variant='caption' display='block' color='text.secondary'>
-                        Stored for the Expo app — call{' '}
-                        <code>{`GET /api/v1/maintenance`}</code> and honor{' '}
-                        <code>mobileMaintenance</code>.
+                        Stored for the Expo app 
+                        {/* <code>{`GET /api/v1/maintenance`}</code> and honor{' '}
+                        <code>mobileMaintenance</code>. */}
                       </Typography>
                     </>
                   }
