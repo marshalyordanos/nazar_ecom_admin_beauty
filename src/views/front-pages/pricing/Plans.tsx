@@ -160,13 +160,13 @@ const Plans = () => {
                     </CustomAvatar>
                   </div>
                   <Typography variant='body2' className='capitalize'>
-                    $7.5/Month
+                    7.5 ETB/Month
                   </Typography>
                 </th>
                 <th>
                   <>ENTERPRISE</>
                   <Typography variant='body2' className='capitalize'>
-                    $16/Month
+                    16 ETB/Month
                   </Typography>
                 </th>
               </tr>

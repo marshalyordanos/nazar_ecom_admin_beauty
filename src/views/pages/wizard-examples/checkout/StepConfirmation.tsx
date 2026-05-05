@@ -121,9 +121,9 @@ const StepConfirmation = () => {
                   {product.inStock && <Chip variant='tonal' size='small' color='success' label='In Stock' />}
                 </div>
                 <div className='flex items-center'>
-                  <Typography color='primary.main'>{`$${product.price}/`}</Typography>
+                  <Typography color='primary.main'>{`${product.price} ETB/`}</Typography>
                   <Typography color='text.disabled' className='line-through'>
-                    {`$${product.originalPrice}`}
+                    {`${product.originalPrice} ETB`}
                   </Typography>
                 </div>
               </div>
@@ -140,13 +140,13 @@ const StepConfirmation = () => {
             <div className='flex flex-col gap-4'>
               <div className='flex items-center justify-between gap-2'>
                 <Typography color='text.primary'>Order Total</Typography>
-                <Typography>$1198.00</Typography>
+                <Typography>1198.00 ETB</Typography>
               </div>
               <div className='flex items-center justify-between gap-2'>
                 <Typography color='text.primary'>Delivery Charges</Typography>
                 <div className='flex items-center gap-2'>
                   <Typography className='line-through' color='text.disabled'>
-                    $5.00
+                    5.00 ETB
                   </Typography>
                   <Chip variant='tonal' size='small' color='success' label='Free' className='uppercase' />
                 </div>
@@ -160,7 +160,7 @@ const StepConfirmation = () => {
                 Total
               </Typography>
               <Typography className='font-medium' color='text.primary'>
-                $1198.00
+                1198.00 ETB
               </Typography>
             </div>
           </CardContent>

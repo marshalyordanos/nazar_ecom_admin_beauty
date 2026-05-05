@@ -15,6 +15,8 @@ import CustomAvatar from '@core/components/mui/Avatar'
 import EditUserInfo from '@components/dialogs/edit-user-info'
 import OpenDialogOnElementClick from '@components/dialogs/OpenDialogOnElementClick'
 
+import { formatAmountEt } from '@/libs/currency'
+
 const CustomerDetails = ({ customerData }: { customerData?: Customer }) => {
   // Vars
   const buttonProps: ButtonProps = {
@@ -48,7 +50,7 @@ const CustomerDetails = ({ customerData }: { customerData?: Customer }) => {
                 <i className='ri-coins-line' />
               </CustomAvatar>
               <div>
-                <Typography variant='h5'>${customerData?.totalSpent}</Typography>
+                <Typography variant='h5'>{formatAmountEt(Number(customerData?.totalSpent ?? 0))}</Typography>
                 <Typography>Spent</Typography>
               </div>
             </div>

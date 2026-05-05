@@ -37,10 +37,10 @@ const StepDealUsage = ({ activeStep, handleNext, handlePrev, steps }: Props) => 
         <TextField fullWidth type='number' label='Max Users' placeholder='500' />
       </Grid>
       <Grid size={{ xs: 12, sm: 6 }}>
-        <TextField fullWidth type='number' label='Minimum Cart Amount' placeholder='$99' />
+        <TextField fullWidth type='number' label='Minimum Cart Amount' placeholder='99 ETB' />
       </Grid>
       <Grid size={{ xs: 12, sm: 6 }}>
-        <TextField fullWidth type='number' label='Promotional Fee' placeholder='$9' />
+        <TextField fullWidth type='number' label='Promotional Fee' placeholder='9 ETB' />
       </Grid>
       <Grid size={{ xs: 12, sm: 6 }}>
         <FormControl fullWidth>

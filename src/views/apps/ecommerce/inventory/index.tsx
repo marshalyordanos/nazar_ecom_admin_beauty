@@ -28,7 +28,10 @@ import Select from '@mui/material/Select'
 import InputLabel from '@mui/material/InputLabel'
 import FormControl from '@mui/material/FormControl'
 import CircularProgress from '@mui/material/CircularProgress'
+import Stack from '@mui/material/Stack'
+import Box from '@mui/material/Box'
 
+import CollapsibleFiltersSection from '@/components/layout/CollapsibleFiltersSection'
 import OptionMenu from '@core/components/option-menu'
 import tableStyles from '@core/styles/table.module.css'
 import { useAdminInventory, useUpdateInventory, useAddMovement } from '@/api/admin/inventory'
@@ -204,10 +207,10 @@ const InventoryManagement = () => {
   // Render
   return (
     <>
-      <Grid container spacing={6} className='mb-6'>
+      <Grid container spacing={{ xs: 2, sm: 3, md: 6 }} className='mb-4 md:mb-6'>
         {sumLoading ? (
           Array.from({ length: 4 }).map((_, i) => (
-            <Grid key={`inv-s-${i}`} size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid key={`inv-s-${i}`} size={{ xs: 6, sm: 6, md: 3 }}>
               <div className='p-4 border rounded'>
                 <div className='h-6 w-32 bg-actionHover rounded mb-2' />
                 <div className='h-5 w-24 bg-actionHover rounded mb-1' />
@@ -217,7 +220,7 @@ const InventoryManagement = () => {
           ))
         ) : inv ? (
           <>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 6, sm: 6, md: 3 }}>
               <HorizontalWithSubtitle
                 title='Total Stock'
                 stats={String(inv.totalStock)}
@@ -228,7 +231,7 @@ const InventoryManagement = () => {
                 subtitle='Current period'
               />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 6, sm: 6, md: 3 }}>
               <HorizontalWithSubtitle
                 title='Reserved'
                 stats={String(inv.reservedQuantity)}
@@ -239,7 +242,7 @@ const InventoryManagement = () => {
                 subtitle='Current period'
               />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 6, sm: 6, md: 3 }}>
               <HorizontalWithSubtitle
                 title='Low Stock'
                 stats={String(inv.lowStockAlerts)}
@@ -250,7 +253,7 @@ const InventoryManagement = () => {
                 subtitle='Reorder alerts'
               />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 3 }}>
+            <Grid size={{ xs: 6, sm: 6, md: 3 }}>
               <HorizontalWithSubtitle
                 title='Variants'
                 stats={String(inv.totalVariants)}
@@ -269,48 +272,69 @@ const InventoryManagement = () => {
         ) : null}
       </Grid>
       <Card>
-        <CardHeader title='Inventory Management' />
+        <CardHeader
+          title='Inventory Management'
+          sx={{ '& .MuiCardHeader-title': { fontSize: { xs: '1.125rem', md: '1.5rem' }, fontWeight: 600 } }}
+        />
         <Divider />
-        <CardContent>
-          <div className="flex justify-between flex-col items-start sm:flex-row sm:items-center gap-y-4 mb-5 flex-wrap gap-4">
-            <TextField
-              size="small"
-              placeholder="Search Inventory"
-              value={search}
-              onChange={e => {
-                setSearch(e.target.value)
-                setPage(0)
-              }}
-              style={{ maxWidth: 300 }}
-            />
-            {showLocationFilter && locationOptions.length > 0 ? (
-              <FormControl size="small" sx={{ minWidth: 220 }}>
-                <InputLabel id="inventory-location-filter">Location</InputLabel>
-                <Select
-                  labelId="inventory-location-filter"
-                  label="Location"
-                  value={locationFilter}
-                  onChange={e => {
-                    setLocationFilter(e.target.value)
-                    setPage(0)
-                  }}
-                >
-                  <MenuItem value="">
-                    <em>All locations</em>
-                  </MenuItem>
-                  {locationOptions.map(loc => (
-                    <MenuItem key={loc.id} value={loc.id}>
-                      {loc.label}
+        <CardContent className='px-3 sm:px-5'>
+          <TextField
+            size='small'
+            placeholder='Search inventory'
+            value={search}
+            onChange={e => {
+              setSearch(e.target.value)
+              setPage(0)
+            }}
+            fullWidth
+            sx={{ mb: 2, display: { xs: 'flex', md: 'none' } }}
+          />
+          <CollapsibleFiltersSection
+            summaryHint={
+              showLocationFilter && locationFilter ? ' · Location filter' : undefined
+            }
+          >
+            <div className='flex justify-between flex-col items-stretch md:flex-row md:items-center gap-y-4 mb-5 flex-wrap gap-4'>
+              <TextField
+                size='small'
+                placeholder='Search Inventory'
+                value={search}
+                onChange={e => {
+                  setSearch(e.target.value)
+                  setPage(0)
+                }}
+                sx={{ maxWidth: { xs: '100%', md: 300 }, display: { xs: 'none', md: 'flex' } }}
+              />
+              {showLocationFilter && locationOptions.length > 0 ? (
+                <FormControl size='small' sx={{ minWidth: { xs: '100%', md: 220 }, width: { xs: '100%', md: 'auto' } }}>
+                  <InputLabel id='inventory-location-filter'>Location</InputLabel>
+                  <Select
+                    labelId='inventory-location-filter'
+                    label='Location'
+                    value={locationFilter}
+                    onChange={e => {
+                      setLocationFilter(e.target.value)
+                      setPage(0)
+                    }}
+                  >
+                    <MenuItem value=''>
+                      <em>All locations</em>
                     </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            ) : authUser?.locationId && !authUser?.isSuperAdmin ? (
-              <Typography variant='body2' color='text.secondary'>
-                Showing inventory for your assigned location only.
-              </Typography>
-            ) : null}
-          </div>
+                    {locationOptions.map(loc => (
+                      <MenuItem key={loc.id} value={loc.id}>
+                        {loc.label}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              ) : authUser?.locationId && !authUser?.isSuperAdmin ? (
+                <Typography variant='body2' color='text.secondary'>
+                  Showing inventory for your assigned location only.
+                </Typography>
+              ) : null}
+            </div>
+          </CollapsibleFiltersSection>
+          <Box sx={{ display: { xs: 'none', md: 'block' } }}>
           <div className='overflow-x-auto'>
             <table className={tableStyles.table}>
               <thead>
@@ -434,6 +458,92 @@ const InventoryManagement = () => {
               )}
             </table>
           </div>
+          </Box>
+
+          <Stack spacing={2} sx={{ display: { xs: 'flex', md: 'none' } }}>
+            {isLoading || isFetching ? (
+              <Typography className='text-center py-6'>Loading...</Typography>
+            ) : rows.length === 0 ? (
+              <Typography className='text-center py-6'>No data available</Typography>
+            ) : (
+              rows.map(r => (
+                <Card key={r.id} variant='outlined' sx={{ borderRadius: 2 }}>
+                  <CardContent className='flex flex-col gap-2 p-4'>
+                    <Link href={`/apps/ecommerce/inventory/${r.id}`} passHref legacyBehavior>
+                      <Typography
+                        component='a'
+                        className='font-semibold text-lg'
+                        sx={{ color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+                      >
+                        {r.variant?.product?.name || '—'}
+                      </Typography>
+                    </Link>
+                    <Typography variant='caption' color='text.secondary'>
+                      {r.variant?.product?.slug}
+                    </Typography>
+                    <Divider />
+                    <Typography variant='body2'>
+                      SKU <strong>{r.variant?.sku || '—'}</strong>
+                    </Typography>
+                    <Typography variant='body2' color='text.secondary'>
+                      {(r.variant?.variantOptionValues?.length
+                        ? r.variant.variantOptionValues
+                            .map((vov: { optionValue?: { value?: string } }) => vov?.optionValue?.value)
+                            .filter(Boolean)
+                            .join(' | ')
+                        : '—') as string}
+                    </Typography>
+                    <Typography variant='body2'>
+                      Location: <strong>{r.location?.name || r.locationId}</strong>
+                    </Typography>
+                    <div className='flex gap-4'>
+                      <Typography variant='body2'>Qty: <strong>{r.quantity}</strong></Typography>
+                      <Typography variant='body2'>Reserved: <strong>{r.reservedQuantity}</strong></Typography>
+                    </div>
+                    <Chip
+                      size='small'
+                      variant='tonal'
+                      color={
+                        r.variant?.status === 'ACTIVE'
+                          ? 'success'
+                          : r.variant?.status === 'ARCHIVED'
+                            ? 'error'
+                            : 'secondary'
+                      }
+                      label={r.variant?.status || 'Unknown'}
+                      sx={{ alignSelf: 'flex-start' }}
+                    />
+                    <div className='flex flex-col gap-2 is-full'>
+                      <Button
+                        size='small'
+                        variant='outlined'
+                        fullWidth
+                        onClick={() => openAddMovementForRow(r.variantId, r.locationId, r.variant, r.location)}
+                      >
+                        Add Movement
+                      </Button>
+                      <Box className='flex justify-end'>
+                        <OptionMenu
+                          iconButtonProps={{ size: 'medium' }}
+                          iconClassName='text-textSecondary text-[22px]'
+                          options={[
+                            {
+                              text: 'Edit',
+                              icon: 'ri-pencil-line',
+                              menuItemProps: {
+                                onClick: () => openEditDialog(r)
+                              }
+                            }
+                          ]}
+                        />
+                      </Box>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </Stack>
+
           <TablePagination
             rowsPerPageOptions={[10, 25, 50]}
             component='div'

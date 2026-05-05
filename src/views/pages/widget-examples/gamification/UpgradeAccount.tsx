@@ -26,7 +26,7 @@ const UpgradeAccount = () => {
             </div>
             <div className='flex flex-col'>
               <Typography variant='h4' color='primary.main'>
-                $199
+                199 ETB
               </Typography>
               <Typography>40% OFF 😍</Typography>
             </div>

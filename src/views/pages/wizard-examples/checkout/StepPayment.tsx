@@ -70,7 +70,7 @@ const StepPayment = ({ handleNext }: { handleNext: () => void }) => {
                 - 10% Instant Discount on Bank of America Corp Bank Debit and Credit cards
               </Typography>
               <Typography color='success.main'>
-                - 25% Cashback Voucher of up to $60 on first ever PayPal transaction. TCA
+                - 25% Cashback Voucher of up to 60 ETB on first ever PayPal transaction. TCA
               </Typography>
             </Alert>
           </Fade>
@@ -158,13 +158,13 @@ const StepPayment = ({ handleNext }: { handleNext: () => void }) => {
             <div className='flex flex-col gap-2'>
               <div className='flex items-center justify-between gap-2'>
                 <Typography color='text.primary'>Order Total</Typography>
-                <Typography>$1198.00</Typography>
+                <Typography>1198.00 ETB</Typography>
               </div>
               <div className='flex items-center justify-between gap-2'>
                 <Typography color='text.primary'>Delivery Charges</Typography>
                 <div className='flex gap-2'>
                   <Typography color='text.disabled' className='line-through'>
-                    $5.00
+                    5.00 ETB
                   </Typography>
                   <Chip variant='tonal' size='small' color='success' label='Free' className='uppercase' />
                 </div>
@@ -178,7 +178,7 @@ const StepPayment = ({ handleNext }: { handleNext: () => void }) => {
                 <Typography className='font-medium' color='text.primary'>
                   Total
                 </Typography>
-                <Typography className='font-medium'>$1198.00</Typography>
+                <Typography className='font-medium'>1198.00 ETB</Typography>
               </div>
               <div className='flex items-center justify-between gap-2'>
                 <Typography className='font-medium' color='text.primary'>

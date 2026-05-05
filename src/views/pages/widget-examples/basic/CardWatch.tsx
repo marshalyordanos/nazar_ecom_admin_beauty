@@ -13,7 +13,7 @@ const CardWatch = () => {
         <Typography variant='h5' className='mbe-2'>
           Apple Watch
         </Typography>
-        <Typography className='mbe-2'>$249.40</Typography>
+        <Typography className='mbe-2'>249.40 ETB</Typography>
         <Typography>3.1GHz 6-core 10th-generation Intel Core i5 processor, Turbo Boost up to 4.5GHz</Typography>
       </CardContent>
       <Button variant='contained' fullWidth className='rounded-none'>

@@ -23,7 +23,7 @@ const ManageReviewsData = () => {
   const stats = computeReviewStats(adminReviews)
 
   return (
-    <Grid container spacing={6}>
+    <Grid container spacing={{ xs: 3, md: 6 }}>
       <Grid size={{ xs: 12, md: 6 }}>
         <TotalReviews
           averageRating={stats.averageRating}

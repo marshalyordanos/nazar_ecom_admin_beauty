@@ -43,7 +43,7 @@ const data: CustomInputVerticalData[] = [
   {
     title: 'Flat Amount',
     value: 'flat-amount',
-    content: 'Create a deal which offer uses flat $ off (i.e $5 OFF) on the total.',
+    content: 'Create a deal which offer uses flat ETB off (i.e 5 ETB OFF) on the total.',
     asset: 'ri-coins-line'
   },
   {

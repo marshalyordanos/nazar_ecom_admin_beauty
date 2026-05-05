@@ -86,7 +86,7 @@ const StepCart = ({ handleNext }: { handleNext: () => void }) => {
                 - 10% Instant Discount on Bank of America Corp Bank Debit and Credit cards
               </Typography>
               <Typography color='success.main'>
-                - 25% Cashback Voucher of up to $60 on first ever PayPal transaction. TCA
+                - 25% Cashback Voucher of up to 60 ETB on first ever PayPal transaction. TCA
               </Typography>
             </Alert>
           </Fade>
@@ -130,8 +130,8 @@ const StepCart = ({ handleNext }: { handleNext: () => void }) => {
                 </div>
                 <div className='flex flex-col justify-between items-center gap-4 sm:items-end'>
                   <div className='flex'>
-                    <Typography color='primary.main'>{`$${product.price}/`}</Typography>
-                    <Typography className='line-through'>{`$${product.originalPrice}`}</Typography>
+                    <Typography color='primary.main'>{`${product.price} ETB/`}</Typography>
+                    <Typography className='line-through'>{`${product.originalPrice} ETB`}</Typography>
                   </div>
                   <Button variant='outlined' size='small'>
                     Move to wishlist
@@ -168,7 +168,7 @@ const StepCart = ({ handleNext }: { handleNext: () => void }) => {
               <Typography className='font-medium' color='text.primary'>
                 Buying gift for a loved one?
               </Typography>
-              <Typography>Gift wrap and personalized message on card, Only for $2.</Typography>
+              <Typography>Gift wrap and personalized message on card, Only for 2 ETB.</Typography>
               <Typography
                 href='/'
                 component={Link}
@@ -188,7 +188,7 @@ const StepCart = ({ handleNext }: { handleNext: () => void }) => {
             <div className='flex flex-col gap-2'>
               <div className='flex items-center flex-wrap justify-between'>
                 <Typography color='text.primary'>Bag Total</Typography>
-                <Typography>$1198.00</Typography>
+                <Typography>1198.00 ETB</Typography>
               </div>
               <div className='flex items-center flex-wrap justify-between'>
                 <Typography color='text.primary'>Coup Discount</Typography>
@@ -198,13 +198,13 @@ const StepCart = ({ handleNext }: { handleNext: () => void }) => {
               </div>
               <div className='flex items-center flex-wrap justify-between'>
                 <Typography color='text.primary'>Order Total</Typography>
-                <Typography>$1198.00</Typography>
+                <Typography>1198.00 ETB</Typography>
               </div>
               <div className='flex items-center flex-wrap justify-between gap-2'>
                 <Typography color='text.primary'>Delivery Charges</Typography>
                 <div className='flex items-center gap-2'>
                   <Typography color='text.disabled' className='line-through'>
-                    $5.00
+                    5.00 ETB
                   </Typography>
                   <Chip variant='tonal' size='small' color='success' label='Free' className='uppercase' />
                 </div>
@@ -218,7 +218,7 @@ const StepCart = ({ handleNext }: { handleNext: () => void }) => {
                 Total
               </Typography>
               <Typography className='font-medium' color='text.primary'>
-                $1198.00
+                1198.00 ETB
               </Typography>
             </div>
           </CardContent>

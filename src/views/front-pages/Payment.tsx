@@ -229,7 +229,7 @@ const Payment = ({ data }: { data: PricingPlanType[] }) => {
                 <div className='flex flex-col gap-4 p-6 bg-actionHover rounded-sm'>
                   <Typography>A simple start for everyone</Typography>
                   <div className='flex items-baseline'>
-                    <Typography variant='h1'>$59.99</Typography>
+                    <Typography variant='h1'>59.99 ETB</Typography>
                     <Typography component='sub' color='text.secondary' className='font-medium'>
                       /month
                     </Typography>
@@ -245,20 +245,20 @@ const Payment = ({ data }: { data: PricingPlanType[] }) => {
                   <div className='flex gap-2 items-center justify-between mbe-2'>
                     <Typography>Subscription</Typography>
                     <Typography color='text.primary' className='font-medium'>
-                      $85.99
+                      85.99 ETB
                     </Typography>
                   </div>
                   <div className='flex gap-2 items-center justify-between'>
                     <Typography>Tax</Typography>
                     <Typography color='text.primary' className='font-medium'>
-                      $4.99
+                      4.99 ETB
                     </Typography>
                   </div>
                   <Divider className='mlb-4' />
                   <div className='flex gap-2 items-center justify-between'>
                     <Typography>Total</Typography>
                     <Typography color='text.primary' className='font-medium'>
-                      $90.98
+                      90.98 ETB
                     </Typography>
                   </div>
                 </div>

@@ -181,7 +181,7 @@ const AddAction = ({ invoiceData }: { invoiceData?: InvoiceType[] }) => {
                   <div>
                     <div className='flex items-center gap-4'>
                       <Typography className='min-is-[100px]'>Total Due:</Typography>
-                      <Typography>$12,110.55</Typography>
+                      <Typography>12,110.55 ETB</Typography>
                     </div>
                     <div className='flex items-center gap-4'>
                       <Typography className='min-is-[100px]'>Bank name:</Typography>
@@ -288,7 +288,7 @@ const AddAction = ({ invoiceData }: { invoiceData?: InvoiceType[] }) => {
                       <Typography className='font-medium md:absolute md:-top-[38px]' color='text.primary'>
                         Price
                       </Typography>
-                      <Typography color='text.primary'>$24.00</Typography>
+                      <Typography color='text.primary'>24.00 ETB</Typography>
                     </Grid>
                   </Grid>
                   <div className='flex flex-col justify-start border-is'>
@@ -327,13 +327,13 @@ const AddAction = ({ invoiceData }: { invoiceData?: InvoiceType[] }) => {
                   <div className='flex items-center justify-between'>
                     <Typography>Subtotal:</Typography>
                     <Typography className='font-medium' color='text.primary'>
-                      $1800
+                      1800 ETB
                     </Typography>
                   </div>
                   <div className='flex items-center justify-between'>
                     <Typography>Discount:</Typography>
                     <Typography className='font-medium' color='text.primary'>
-                      $28
+                      28 ETB
                     </Typography>
                   </div>
                   <div className='flex items-center justify-between'>
@@ -346,7 +346,7 @@ const AddAction = ({ invoiceData }: { invoiceData?: InvoiceType[] }) => {
                   <div className='flex items-center justify-between'>
                     <Typography>Total:</Typography>
                     <Typography className='font-medium' color='text.primary'>
-                      $1690
+                      1690 ETB
                     </Typography>
                   </div>
                 </div>

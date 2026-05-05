@@ -18,7 +18,7 @@ import OptionMenu from '@core/components/option-menu'
 // Styled Component Imports
 const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexCharts'))
 
-const series = [{ name: 'Avarage cost per interaction is $5.65', data: [7, 65, 40, 7, 40, 80, 45, 65, 65] }]
+const series = [{ name: 'Average cost per interaction is 5.65 ETB', data: [7, 65, 40, 7, 40, 80, 45, 65, 65] }]
 
 const PerformanceOverview = () => {
   const options: ApexOptions = {
@@ -83,7 +83,7 @@ const PerformanceOverview = () => {
         <AppReactApexCharts type='line' height={202} width='100%' options={options} series={series} />
         <div className='flex items-center justify-center gap-1.5 mbs-6'>
           <i className='ri-checkbox-blank-circle-fill text-warning text-[10px]' />
-          <Typography color='text.disabled'>Average cost per interaction is $5.65</Typography>
+          <Typography color='text.disabled'>Average cost per interaction is 5.65 ETB</Typography>
         </div>
       </CardContent>
     </Card>

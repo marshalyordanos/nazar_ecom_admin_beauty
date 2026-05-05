@@ -17,7 +17,7 @@ type DataType = {
 const data: DataType[] = [
   {
     description: 'Create & validate your referral link and get',
-    value: '$50',
+    value: '50 ETB',
     icon: (
       <svg xmlns='http://www.w3.org/2000/svg' width='42' height='42' viewBox='0 0 43 42' fill='none'>
         <path
@@ -60,7 +60,7 @@ const data: DataType[] = [
   },
   {
     description: 'Get other friends to generate link and get',
-    value: '$100',
+    value: '100 ETB',
     icon: (
       <svg xmlns='http://www.w3.org/2000/svg' width='42' height='42' viewBox='0 0 43 42' fill='none'>
         <path

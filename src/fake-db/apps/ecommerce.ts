@@ -9,7 +9,7 @@ export const db: ECommerceType = {
       category: 'Electronics',
       stock: true,
       sku: 19472,
-      price: '$999',
+      price: '999',
       qty: 665,
       status: 'Inactive',
       image: '/images/apps/ecommerce/product-1.png',
@@ -21,7 +21,7 @@ export const db: ECommerceType = {
       category: 'Electronics',
       stock: false,
       sku: 72836,
-      price: '$25.50',
+      price: '25.50',
       qty: 827,
       status: 'Published',
       image: '/images/apps/ecommerce/product-2.png',
@@ -33,7 +33,7 @@ export const db: ECommerceType = {
       category: 'Accessories',
       stock: false,
       sku: 29540,
-      price: '$16.34',
+      price: '16.34',
       qty: 804,
       status: 'Published',
       image: '/images/apps/ecommerce/product-3.png',
@@ -45,7 +45,7 @@ export const db: ECommerceType = {
       category: 'Shoes',
       stock: false,
       sku: 49402,
-      price: '$36.98',
+      price: '36.98',
       qty: 528,
       status: 'Scheduled',
       image: '/images/apps/ecommerce/product-4.png',
@@ -57,7 +57,7 @@ export const db: ECommerceType = {
       category: 'Office',
       stock: false,
       sku: 46658,
-      price: '$799',
+      price: '799',
       qty: 851,
       status: 'Scheduled',
       image: '/images/apps/ecommerce/product-5.png',
@@ -69,7 +69,7 @@ export const db: ECommerceType = {
       category: 'Office',
       stock: true,
       sku: 57640,
-      price: '$299',
+      price: '299',
       qty: 962,
       status: 'Scheduled',
       image: '/images/apps/ecommerce/product-6.png',
@@ -81,7 +81,7 @@ export const db: ECommerceType = {
       category: 'Electronics',
       stock: true,
       sku: 92885,
-      price: '$2648.95',
+      price: '2648.95',
       qty: 965,
       status: 'Published',
       image: '/images/apps/ecommerce/product-7.png',
@@ -93,7 +93,7 @@ export const db: ECommerceType = {
       category: 'Electronics',
       stock: true,
       sku: 75257,
-      price: '$899',
+      price: '899',
       qty: 447,
       status: 'Published',
       image: '/images/apps/ecommerce/product-8.png',
@@ -105,7 +105,7 @@ export const db: ECommerceType = {
       category: 'Shoes',
       stock: false,
       sku: 31063,
-      price: '$125',
+      price: '125',
       qty: 942,
       status: 'Inactive',
       image: '/images/apps/ecommerce/product-9.png',
@@ -117,7 +117,7 @@ export const db: ECommerceType = {
       category: 'Home Decor',
       stock: false,
       sku: 91848,
-      price: '$190.45',
+      price: '190.45',
       qty: 133,
       status: 'Scheduled',
       image: '/images/apps/ecommerce/product-10.png',
@@ -129,7 +129,7 @@ export const db: ECommerceType = {
       category: 'Games',
       stock: true,
       sku: 52575,
-      price: '$296.99',
+      price: '296.99',
       qty: 870,
       status: 'Inactive',
       image: '/images/apps/ecommerce/product-11.png',
@@ -141,7 +141,7 @@ export const db: ECommerceType = {
       category: 'Games',
       stock: true,
       sku: 59551,
-      price: '$499',
+      price: '499',
       qty: 145,
       status: 'Scheduled',
       image: '/images/apps/ecommerce/product-12.png',
@@ -153,7 +153,7 @@ export const db: ECommerceType = {
       category: 'Electronics',
       stock: false,
       sku: 5829,
-      price: '$263.49',
+      price: '263.49',
       qty: 587,
       status: 'Scheduled',
       image: '/images/apps/ecommerce/product-13.png',
@@ -165,7 +165,7 @@ export const db: ECommerceType = {
       category: 'Home Decor',
       stock: false,
       sku: 24456,
-      price: '$34.99',
+      price: '34.99',
       qty: 310,
       status: 'Scheduled',
       image: '/images/apps/ecommerce/product-14.png',
@@ -177,7 +177,7 @@ export const db: ECommerceType = {
       category: 'Electronics',
       stock: true,
       sku: 35946,
-      price: '$248.39',
+      price: '248.39',
       qty: 468,
       status: 'Published',
       image: '/images/apps/ecommerce/product-15.png',
@@ -189,7 +189,7 @@ export const db: ECommerceType = {
       category: 'Office',
       stock: true,
       sku: 41867,
-      price: '$79.99',
+      price: '79.99',
       qty: 519,
       status: 'Inactive',
       image: '/images/apps/ecommerce/product-16.png',
@@ -201,7 +201,7 @@ export const db: ECommerceType = {
       category: 'Games',
       stock: true,
       sku: 43224,
-      price: '$49.99',
+      price: '49.99',
       qty: 787,
       status: 'Published',
       image: '/images/apps/ecommerce/product-17.png',
@@ -213,7 +213,7 @@ export const db: ECommerceType = {
       category: 'Electronics',
       stock: true,
       sku: 63474,
-      price: '$399',
+      price: '399',
       qty: 810,
       status: 'Scheduled',
       image: '/images/apps/ecommerce/product-18.png',
@@ -225,7 +225,7 @@ export const db: ECommerceType = {
       category: 'Home Decor',
       stock: false,
       sku: 15859,
-      price: '$23.99',
+      price: '23.99',
       qty: 735,
       status: 'Inactive',
       image: '/images/apps/ecommerce/product-19.png',
@@ -237,7 +237,7 @@ export const db: ECommerceType = {
       category: 'Shoes',
       stock: false,
       sku: 28844,
-      price: '$922.09',
+      price: '922.09',
       qty: 294,
       status: 'Inactive',
       image: '/images/apps/ecommerce/product-20.png',
@@ -249,7 +249,7 @@ export const db: ECommerceType = {
       category: 'Accessories',
       stock: true,
       sku: 99009,
-      price: '$719.13',
+      price: '719.13',
       qty: 927,
       status: 'Scheduled',
       image: '/images/apps/ecommerce/product-1.png',
@@ -261,7 +261,7 @@ export const db: ECommerceType = {
       category: 'Home Decor',
       stock: false,
       sku: 53795,
-      price: '$775.80',
+      price: '775.80',
       qty: 442,
       status: 'Scheduled',
       image: '/images/apps/ecommerce/product-2.png',
@@ -273,7 +273,7 @@ export const db: ECommerceType = {
       category: 'Shoes',
       stock: true,
       sku: 77663,
-      price: '$817.60',
+      price: '817.60',
       qty: 256,
       status: 'Published',
       image: '/images/apps/ecommerce/product-3.png',
@@ -285,7 +285,7 @@ export const db: ECommerceType = {
       category: 'Accessories',
       stock: false,
       sku: 45282,
-      price: '$167.19',
+      price: '167.19',
       qty: 728,
       status: 'Published',
       image: '/images/apps/ecommerce/product-4.png',
@@ -297,7 +297,7 @@ export const db: ECommerceType = {
       category: 'Home Decor',
       stock: false,
       sku: 5622,
-      price: '$189.77',
+      price: '189.77',
       qty: 445,
       status: 'Scheduled',
       image: '/images/apps/ecommerce/product-5.png',
@@ -309,7 +309,7 @@ export const db: ECommerceType = {
       category: 'Accessories',
       stock: true,
       sku: 38920,
-      price: '$411.46',
+      price: '411.46',
       qty: 857,
       status: 'Scheduled',
       image: '/images/apps/ecommerce/product-6.png',
@@ -321,7 +321,7 @@ export const db: ECommerceType = {
       category: 'Accessories',
       stock: true,
       sku: 78211,
-      price: '$961.76',
+      price: '961.76',
       qty: 975,
       status: 'Published',
       image: '/images/apps/ecommerce/product-7.png',
@@ -333,7 +333,7 @@ export const db: ECommerceType = {
       category: 'Accessories',
       stock: true,
       sku: 98552,
-      price: '$514.14',
+      price: '514.14',
       qty: 39,
       status: 'Published',
       image: '/images/apps/ecommerce/product-8.png',
@@ -345,7 +345,7 @@ export const db: ECommerceType = {
       category: 'Shoes',
       stock: true,
       sku: 7151,
-      price: '$591.30',
+      price: '591.30',
       qty: 74,
       status: 'Published',
       image: '/images/apps/ecommerce/product-9.png',
@@ -357,7 +357,7 @@ export const db: ECommerceType = {
       category: 'Accessories',
       stock: true,
       sku: 79571,
-      price: '$928.07',
+      price: '928.07',
       qty: 245,
       status: 'Inactive',
       image: '/images/apps/ecommerce/product-10.png',
@@ -369,7 +369,7 @@ export const db: ECommerceType = {
       category: 'Home Decor',
       stock: false,
       sku: 51597,
-      price: '$312.03',
+      price: '312.03',
       qty: 657,
       status: 'Inactive',
       image: '/images/apps/ecommerce/product-11.png',
@@ -381,7 +381,7 @@ export const db: ECommerceType = {
       category: 'Accessories',
       stock: true,
       sku: 6506,
-      price: '$951.29',
+      price: '951.29',
       qty: 770,
       status: 'Published',
       image: '/images/apps/ecommerce/product-12.png',
@@ -393,7 +393,7 @@ export const db: ECommerceType = {
       category: 'Shoes',
       stock: false,
       sku: 33523,
-      price: '$600.43',
+      price: '600.43',
       qty: 622,
       status: 'Inactive',
       image: '/images/apps/ecommerce/product-13.png',
@@ -405,7 +405,7 @@ export const db: ECommerceType = {
       category: 'Accessories',
       stock: false,
       sku: 60307,
-      price: '$337.90',
+      price: '337.90',
       qty: 896,
       status: 'Scheduled',
       image: '/images/apps/ecommerce/product-14.png',
@@ -417,7 +417,7 @@ export const db: ECommerceType = {
       category: 'Accessories',
       stock: true,
       sku: 75059,
-      price: '$959.47',
+      price: '959.47',
       qty: 239,
       status: 'Inactive',
       image: '/images/apps/ecommerce/product-15.png',
@@ -429,7 +429,7 @@ export const db: ECommerceType = {
       category: 'Accessories',
       stock: true,
       sku: 69072,
-      price: '$756.81',
+      price: '756.81',
       qty: 410,
       status: 'Scheduled',
       image: '/images/apps/ecommerce/product-16.png',
@@ -441,7 +441,7 @@ export const db: ECommerceType = {
       category: 'Accessories',
       stock: false,
       sku: 68290,
-      price: '$256.86',
+      price: '256.86',
       qty: 630,
       status: 'Published',
       image: '/images/apps/ecommerce/product-17.png',
@@ -453,7 +453,7 @@ export const db: ECommerceType = {
       category: 'Shoes',
       stock: true,
       sku: 89552,
-      price: '$378.54',
+      price: '378.54',
       qty: 247,
       status: 'Inactive',
       image: '/images/apps/ecommerce/product-18.png',
@@ -465,7 +465,7 @@ export const db: ECommerceType = {
       category: 'Shoes',
       stock: true,
       sku: 50863,
-      price: '$166.17',
+      price: '166.17',
       qty: 672,
       status: 'Inactive',
       image: '/images/apps/ecommerce/product-19.png',
@@ -477,7 +477,7 @@ export const db: ECommerceType = {
       category: 'Accessories',
       stock: false,
       sku: 90484,
-      price: '$745.76',
+      price: '745.76',
       qty: 697,
       status: 'Published',
       image: '/images/apps/ecommerce/product-20.png',
@@ -489,7 +489,7 @@ export const db: ECommerceType = {
       category: 'Accessories',
       stock: true,
       sku: 76980,
-      price: '$603.16',
+      price: '603.16',
       qty: 74,
       status: 'Published',
       image: '/images/apps/ecommerce/product-1.png',
@@ -501,7 +501,7 @@ export const db: ECommerceType = {
       category: 'Home Decor',
       stock: true,
       sku: 66971,
-      price: '$772.51',
+      price: '772.51',
       qty: 280,
       status: 'Published',
       image: '/images/apps/ecommerce/product-2.png',
@@ -513,7 +513,7 @@ export const db: ECommerceType = {
       category: 'Shoes',
       stock: false,
       sku: 16589,
-      price: '$986.22',
+      price: '986.22',
       qty: 758,
       status: 'Inactive',
       image: '/images/apps/ecommerce/product-3.png',
@@ -525,7 +525,7 @@ export const db: ECommerceType = {
       category: 'Accessories',
       stock: true,
       sku: 73896,
-      price: '$988.47',
+      price: '988.47',
       qty: 14,
       status: 'Inactive',
       image: '/images/apps/ecommerce/product-4.png',
@@ -537,7 +537,7 @@ export const db: ECommerceType = {
       category: 'Accessories',
       stock: false,
       sku: 67489,
-      price: '$946.62',
+      price: '946.62',
       qty: 35,
       status: 'Inactive',
       image: '/images/apps/ecommerce/product-5.png',
@@ -549,7 +549,7 @@ export const db: ECommerceType = {
       category: 'Shoes',
       stock: true,
       sku: 48177,
-      price: '$224.28',
+      price: '224.28',
       qty: 935,
       status: 'Scheduled',
       image: '/images/apps/ecommerce/product-1.png',
@@ -561,7 +561,7 @@ export const db: ECommerceType = {
       category: 'Home Decor',
       stock: true,
       sku: 225,
-      price: '$952.14',
+      price: '952.14',
       qty: 361,
       status: 'Published',
       image: '/images/apps/ecommerce/product-6.png',
@@ -573,7 +573,7 @@ export const db: ECommerceType = {
       category: 'Accessories',
       stock: false,
       sku: 29438,
-      price: '$646.21',
+      price: '646.21',
       qty: 908,
       status: 'Scheduled',
       image: '/images/apps/ecommerce/product-7.png',
@@ -585,7 +585,7 @@ export const db: ECommerceType = {
       category: 'Home Decor',
       stock: true,
       sku: 55666,
-      price: '$583.13',
+      price: '583.13',
       qty: 898,
       status: 'Scheduled',
       image: '/images/apps/ecommerce/product-1.png',
@@ -597,7 +597,7 @@ export const db: ECommerceType = {
       category: 'Accessories',
       stock: false,
       sku: 55860,
-      price: '$273.67',
+      price: '273.67',
       qty: 332,
       status: 'Published',
       image: '/images/apps/ecommerce/product-9.png',
@@ -2014,8 +2014,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/1.png',
       referredId: 3398,
       status: 'Unpaid',
-      value: '$6655.92',
-      earning: '$380.17'
+      value: '6655.92',
+      earning: '380.17'
     },
     {
       id: 2,
@@ -2024,8 +2024,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/5.png',
       referredId: 6740,
       status: 'Unpaid',
-      value: '$2113.04',
-      earning: '$716.72'
+      value: '2113.04',
+      earning: '716.72'
     },
     {
       id: 3,
@@ -2034,8 +2034,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/1.png',
       referredId: 2749,
       status: 'Unpaid',
-      value: '$6717.09',
-      earning: '$699.02'
+      value: '6717.09',
+      earning: '699.02'
     },
     {
       id: 4,
@@ -2044,8 +2044,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/7.png',
       referredId: 1413,
       status: 'Paid',
-      value: '$9465.13',
-      earning: '$98.23'
+      value: '9465.13',
+      earning: '98.23'
     },
     {
       id: 5,
@@ -2054,8 +2054,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/1.png',
       referredId: 9176,
       status: 'Paid',
-      value: '$6202.81',
-      earning: '$882.51'
+      value: '6202.81',
+      earning: '882.51'
     },
     {
       id: 6,
@@ -2064,8 +2064,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/8.png',
       referredId: 6975,
       status: 'Unpaid',
-      value: '$9802.40',
-      earning: '$219.52'
+      value: '9802.40',
+      earning: '219.52'
     },
     {
       id: 7,
@@ -2074,8 +2074,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/1.png',
       referredId: 4552,
       status: 'Paid',
-      value: '$6470.46',
-      earning: '$831.45'
+      value: '6470.46',
+      earning: '831.45'
     },
     {
       id: 8,
@@ -2084,8 +2084,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/1.png',
       referredId: 4131,
       status: 'Unpaid',
-      value: '$6199.28',
-      earning: '$856.00'
+      value: '6199.28',
+      earning: '856.00'
     },
     {
       id: 9,
@@ -2094,8 +2094,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/1.png',
       referredId: 4072,
       status: 'Unpaid',
-      value: '$6774.33',
-      earning: '$821.78'
+      value: '6774.33',
+      earning: '821.78'
     },
     {
       id: 10,
@@ -2104,8 +2104,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/1.png',
       referredId: 3070,
       status: 'Unpaid',
-      value: '$1067.14',
-      earning: '$804.91'
+      value: '1067.14',
+      earning: '804.91'
     },
     {
       id: 11,
@@ -2114,8 +2114,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/3.png',
       referredId: 7828,
       status: 'Unpaid',
-      value: '$5375.10',
-      earning: '$447.01'
+      value: '5375.10',
+      earning: '447.01'
     },
     {
       id: 12,
@@ -2124,8 +2124,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/3.png',
       referredId: 8561,
       status: 'Unpaid',
-      value: '$3104.91',
-      earning: '$552.75'
+      value: '3104.91',
+      earning: '552.75'
     },
     {
       id: 13,
@@ -2134,8 +2134,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/2.png',
       referredId: 9287,
       status: 'Paid',
-      value: '$9375.13',
-      earning: '$690.75'
+      value: '9375.13',
+      earning: '690.75'
     },
     {
       id: 14,
@@ -2144,8 +2144,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/7.png',
       referredId: 4892,
       status: 'Paid',
-      value: '$8797.12',
-      earning: '$679.71'
+      value: '8797.12',
+      earning: '679.71'
     },
     {
       id: 15,
@@ -2154,8 +2154,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/5.png',
       referredId: 9180,
       status: 'Unpaid',
-      value: '$2996.63',
-      earning: '$610.27'
+      value: '2996.63',
+      earning: '610.27'
     },
     {
       id: 16,
@@ -2164,8 +2164,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/1.png',
       referredId: 9102,
       status: 'Paid',
-      value: '$7048.18',
-      earning: '$369.06'
+      value: '7048.18',
+      earning: '369.06'
     },
     {
       id: 17,
@@ -2174,8 +2174,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/1.png',
       referredId: 7049,
       status: 'Unpaid',
-      value: '$6049.95',
-      earning: '$642.78'
+      value: '6049.95',
+      earning: '642.78'
     },
     {
       id: 18,
@@ -2184,8 +2184,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/6.png',
       referredId: 9826,
       status: 'Paid',
-      value: '$2221.71',
-      earning: '$347.19'
+      value: '2221.71',
+      earning: '347.19'
     },
     {
       id: 19,
@@ -2194,8 +2194,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/1.png',
       referredId: 4555,
       status: 'Paid',
-      value: '$5918.70',
-      earning: '$543.44'
+      value: '5918.70',
+      earning: '543.44'
     },
     {
       id: 20,
@@ -2204,8 +2204,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/4.png',
       referredId: 5591,
       status: 'Paid',
-      value: '$9073.50',
-      earning: '$980.62'
+      value: '9073.50',
+      earning: '980.62'
     },
     {
       id: 21,
@@ -2214,8 +2214,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/1.png',
       referredId: 4491,
       status: 'Unpaid',
-      value: '$8389.56',
-      earning: '$746.81'
+      value: '8389.56',
+      earning: '746.81'
     },
     {
       id: 22,
@@ -2224,8 +2224,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/8.png',
       referredId: 2946,
       status: 'Paid',
-      value: '$7471.34',
-      earning: '$747.24'
+      value: '7471.34',
+      earning: '747.24'
     },
     {
       id: 23,
@@ -2234,8 +2234,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/2.png',
       referredId: 2328,
       status: 'Paid',
-      value: '$8484.83',
-      earning: '$815.79'
+      value: '8484.83',
+      earning: '815.79'
     },
     {
       id: 24,
@@ -2244,8 +2244,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/2.png',
       referredId: 5725,
       status: 'Paid',
-      value: '$7088.56',
-      earning: '$329.64'
+      value: '7088.56',
+      earning: '329.64'
     },
     {
       id: 25,
@@ -2254,8 +2254,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/6.png',
       referredId: 2821,
       status: 'Unpaid',
-      value: '$2938.87',
-      earning: '$317.42'
+      value: '2938.87',
+      earning: '317.42'
     },
     {
       id: 26,
@@ -2264,8 +2264,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/7.png',
       referredId: 1661,
       status: 'Unpaid',
-      value: '$6256.70',
-      earning: '$521.01'
+      value: '6256.70',
+      earning: '521.01'
     },
     {
       id: 27,
@@ -2274,8 +2274,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/4.png',
       referredId: 3363,
       status: 'Unpaid',
-      value: '$9106.99',
-      earning: '$705.15'
+      value: '9106.99',
+      earning: '705.15'
     },
     {
       id: 28,
@@ -2284,8 +2284,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/3.png',
       referredId: 7814,
       status: 'Rejected',
-      value: '$6300.60',
-      earning: '$234.28'
+      value: '6300.60',
+      earning: '234.28'
     },
     {
       id: 29,
@@ -2294,8 +2294,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/4.png',
       referredId: 8324,
       status: 'Paid',
-      value: '$1874.21',
-      earning: '$899.72'
+      value: '1874.21',
+      earning: '899.72'
     },
     {
       id: 30,
@@ -2304,8 +2304,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/8.png',
       referredId: 6069,
       status: 'Paid',
-      value: '$6098.09',
-      earning: '$269.32'
+      value: '6098.09',
+      earning: '269.32'
     },
     {
       id: 31,
@@ -2314,8 +2314,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/5.png',
       referredId: 5286,
       status: 'Paid',
-      value: '$4752.66',
-      earning: '$546.63'
+      value: '4752.66',
+      earning: '546.63'
     },
     {
       id: 32,
@@ -2324,8 +2324,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/1.png',
       referredId: 7944,
       status: 'Unpaid',
-      value: '$5959.05',
-      earning: '$888.10'
+      value: '5959.05',
+      earning: '888.10'
     },
     {
       id: 33,
@@ -2334,8 +2334,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/5.png',
       referredId: 6876,
       status: 'Unpaid',
-      value: '$6588.37',
-      earning: '$680.51'
+      value: '6588.37',
+      earning: '680.51'
     },
     {
       id: 34,
@@ -2344,8 +2344,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/2.png',
       referredId: 7802,
       status: 'Rejected',
-      value: '$7542.30',
-      earning: '$208.96'
+      value: '7542.30',
+      earning: '208.96'
     },
     {
       id: 35,
@@ -2354,8 +2354,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/7.png',
       referredId: 6946,
       status: 'Paid',
-      value: '$4447.48',
-      earning: '$410.48'
+      value: '4447.48',
+      earning: '410.48'
     },
     {
       id: 36,
@@ -2364,8 +2364,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/7.png',
       referredId: 1372,
       status: 'Paid',
-      value: '$3700.16',
-      earning: '$858.94'
+      value: '3700.16',
+      earning: '858.94'
     },
     {
       id: 37,
@@ -2374,8 +2374,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/4.png',
       referredId: 2384,
       status: 'Unpaid',
-      value: '$7456.86',
-      earning: '$280.52'
+      value: '7456.86',
+      earning: '280.52'
     },
     {
       id: 38,
@@ -2384,8 +2384,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/5.png',
       referredId: 1971,
       status: 'Paid',
-      value: '$5563.94',
-      earning: '$515.34'
+      value: '5563.94',
+      earning: '515.34'
     },
     {
       id: 39,
@@ -2394,8 +2394,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/5.png',
       referredId: 7323,
       status: 'Unpaid',
-      value: '$7400.29',
-      earning: '$167.44'
+      value: '7400.29',
+      earning: '167.44'
     },
     {
       id: 40,
@@ -2404,8 +2404,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/7.png',
       referredId: 5719,
       status: 'Paid',
-      value: '$1977.34',
-      earning: '$652.01'
+      value: '1977.34',
+      earning: '652.01'
     },
     {
       id: 41,
@@ -2414,8 +2414,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/3.png',
       referredId: 9347,
       status: 'Paid',
-      value: '$2155.12',
-      earning: '$101.49'
+      value: '2155.12',
+      earning: '101.49'
     },
     {
       id: 42,
@@ -2424,8 +2424,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/1.png',
       referredId: 1559,
       status: 'Rejected',
-      value: '$7110.30',
-      earning: '$95.40'
+      value: '7110.30',
+      earning: '95.40'
     },
     {
       id: 43,
@@ -2434,8 +2434,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/8.png',
       referredId: 3307,
       status: 'Paid',
-      value: '$2178.00',
-      earning: '$173.10'
+      value: '2178.00',
+      earning: '173.10'
     },
     {
       id: 44,
@@ -2444,8 +2444,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/7.png',
       referredId: 4426,
       status: 'Rejected',
-      value: '$6921.60',
-      earning: '$365.93'
+      value: '6921.60',
+      earning: '365.93'
     },
     {
       id: 45,
@@ -2454,8 +2454,8 @@ export const db: ECommerceType = {
       avatar: '/images/avatars/8.png',
       referredId: 3570,
       status: 'Paid',
-      value: '$6891.09',
-      earning: '$900.25'
+      value: '6891.09',
+      earning: '900.25'
     }
   ],
   orderData: [

@@ -39,6 +39,8 @@ import type { ThemeColor } from '@core/types'
 import type { OrderType } from '@/types/apps/ecommerceTypes'
 import type { Locale } from '@configs/i18n'
 
+import { formatAmountEt } from '@/libs/currency'
+
 // Component Imports
 import OptionMenu from '@core/components/option-menu'
 
@@ -167,7 +169,7 @@ const OrderListTable = ({ orderData }: { orderData?: OrderType[] }) => {
       }),
       columnHelper.accessor('spent', {
         header: 'Spent',
-        cell: ({ row }) => <Typography>${row.original.spent}</Typography>
+        cell: ({ row }) => <Typography>{formatAmountEt(Number(row.original.spent ?? 0))}</Typography>
       }),
       columnHelper.accessor('action', {
         header: 'Actions',

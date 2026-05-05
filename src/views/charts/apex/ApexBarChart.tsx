@@ -63,7 +63,7 @@ const ApexBarChart = () => {
     <Card>
       <CardHeader
         title='Data Science'
-        subheader='$74,382.72'
+        subheader='74,382.72 ETB'
         sx={{
           flexDirection: ['column', 'row'],
           alignItems: ['flex-start', 'center'],

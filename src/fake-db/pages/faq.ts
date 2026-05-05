@@ -58,7 +58,7 @@ export const db: FaqType[] = [
         id: 'delivery-cost',
         question: 'What is the delivery cost of my order?',
         answer:
-          'The cost of scheduled delivery is $69 or $99 per order, depending on the destination postal code. The parcel delivery is free.'
+          'The cost of scheduled delivery is 69 ETB or 99 ETB per order, depending on the destination postal code. The parcel delivery is free.'
       },
       {
         id: 'product-damaged',

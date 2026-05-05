@@ -28,7 +28,7 @@ const data: DataType[] = [
   {
     title: 'Credit Card',
     subtitle: 'Digital Ocean',
-    amount: '-$850',
+    amount: '-850 ETB',
     transaction: 'debit',
     avatarColor: 'success',
     avatarIcon: 'ri-bank-card-line'
@@ -36,7 +36,7 @@ const data: DataType[] = [
   {
     title: 'Paypal',
     subtitle: 'Received Money',
-    amount: '+$34,456',
+    amount: '+34,456 ETB',
     transaction: 'credit',
     avatarColor: 'primary',
     avatarIcon: 'ri-paypal-line'
@@ -44,7 +44,7 @@ const data: DataType[] = [
   {
     title: 'Mastercard',
     subtitle: 'Netflix',
-    amount: '-$199',
+    amount: '-199 ETB',
     transaction: 'debit',
     avatarColor: 'info',
     avatarIcon: 'ri-mastercard-line'
@@ -52,7 +52,7 @@ const data: DataType[] = [
   {
     title: 'Wallet',
     subtitle: `Mac'D`,
-    amount: '-$156',
+    amount: '-156 ETB',
     transaction: 'debit',
     avatarColor: 'error',
     avatarIcon: 'ri-wallet-3-line'
@@ -60,7 +60,7 @@ const data: DataType[] = [
   {
     title: 'Paypal',
     subtitle: 'Received Money',
-    amount: '+$12.872',
+    amount: '+12.872 ETB',
     transaction: 'credit',
     avatarColor: 'primary',
     avatarIcon: 'ri-paypal-line'
@@ -68,7 +68,7 @@ const data: DataType[] = [
   {
     title: 'Stripe',
     subtitle: 'Buy Apple Watch',
-    amount: '-$299',
+    amount: '-299 ETB',
     transaction: 'debit',
     avatarColor: 'warning',
     avatarIcon: 'ri-bank-card-2-line'

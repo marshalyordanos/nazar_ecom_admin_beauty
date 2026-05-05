@@ -89,7 +89,7 @@ const AddPaymentDrawer = ({ open, handleClose }: Props) => {
             type='number'
             slotProps={{
               input: {
-                startAdornment: <InputAdornment position='start'>$</InputAdornment>
+                startAdornment: <InputAdornment position='start'>ETB</InputAdornment>
               }
             }}
             value={formData.paymentAmount}

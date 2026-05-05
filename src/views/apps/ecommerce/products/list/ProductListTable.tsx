@@ -11,11 +11,14 @@ import { formatAmountEt } from '@/libs/currency'
 
 // MUI Imports
 import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
 import CardHeader from '@mui/material/CardHeader'
 import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
 import Checkbox from '@mui/material/Checkbox'
 import Divider from '@mui/material/Divider'
+import Stack from '@mui/material/Stack'
+import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
 import Switch from '@mui/material/Switch'
 import TablePagination from '@mui/material/TablePagination'
@@ -52,6 +55,7 @@ import type { Locale } from '@configs/i18n'
 // import type { ProductType } from '@/types/apps/ecommerceTypes'
 
 // Component Imports
+import CollapsibleFiltersSection from '@/components/layout/CollapsibleFiltersSection'
 import TableFilters from './TableFilters'
 import CustomAvatar from '@core/components/mui/Avatar'
 import OptionMenu from '@core/components/option-menu'
@@ -427,17 +431,21 @@ const ProductListTable = () => {
   return (
     <>
       <Card>
-        <CardHeader title='Filters' />
-        <TableFilters setData={setFilteredData} productData={products} />
+        <CollapsibleFiltersSection>
+          <>
+            <CardHeader title='Filters' sx={{ display: { xs: 'none', md: 'flex' } }} />
+            <TableFilters setData={setFilteredData} productData={products} />
+          </>
+        </CollapsibleFiltersSection>
         <Divider />
-        <div className='flex justify-between flex-col items-start sm:flex-row sm:items-center gap-y-4 p-5'>
+        <div className='flex justify-between flex-col items-start sm:flex-row sm:items-center gap-y-4 p-4 md:p-5'>
           <DebouncedInput
             value={globalFilter ?? ''}
             onChange={value => setGlobalFilter(String(value))}
             placeholder='Search Product'
-            className='max-sm:is-full'
+            className='is-full sm:flex-1 max-sm:is-full'
           />
-          <div className='flex items-center max-sm:flex-col gap-4 max-sm:is-full is-auto'>
+          <div className='flex items-center max-sm:flex-col gap-4 max-sm:is-full is-auto is-full sm:is-auto'>
             <Button
               color='secondary'
               variant='outlined'
@@ -457,6 +465,7 @@ const ProductListTable = () => {
             </Button>
           </div>
         </div>
+        <Box sx={{ display: { xs: 'none', md: 'block' } }}>
         <div className='overflow-x-auto'>
           <table className={tableStyles.table}>
             <thead>
@@ -517,6 +526,128 @@ const ProductListTable = () => {
             )}
           </table>
         </div>
+        </Box>
+
+        <Stack spacing={2} sx={{ display: { xs: 'flex', md: 'none' }, px: 2, pb: 2 }}>
+          {isLoading || isFetching ? (
+            <Typography className='text-center py-6'>Loading...</Typography>
+          ) : table.getFilteredRowModel().rows.length === 0 ? (
+            <Typography className='text-center py-6'>No data available</Typography>
+          ) : (
+            table.getFilteredRowModel().rows.map(row => {
+              const p = row.original
+              const firstImage = p.variants?.length ? p.variants[0].image : ''
+              const catName = p.category?.name
+              const catImg = p.category?.image
+              return (
+                <Card key={row.id} variant='outlined' sx={{ borderRadius: 2 }}>
+                  <CardContent className='flex flex-col gap-2 p-4'>
+                    <div className='flex gap-3'>
+                      {firstImage ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={firstImage} width={44} height={44} className='rounded-md bg-actionHover shrink-0' alt='' />
+                      ) : null}
+                      <div className='min-w-0'>
+                        <Typography
+                          component={Link}
+                          href={getLocalizedUrl(`/apps/ecommerce/products/list/${encodeURIComponent(p.id)}`, locale as Locale)}
+                          color='primary.main'
+                          className='font-semibold line-clamp-2 block'
+                        >
+                          {p.name}
+                        </Typography>
+                        <Typography variant='caption' color='text.secondary'>
+                          {p.brand?.name}
+                        </Typography>
+                      </div>
+                    </div>
+                    <Divider />
+                    <div className='flex items-center gap-2'>
+                      {catImg ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={catImg} width={24} height={24} className='rounded-full bg-actionHover' alt='' />
+                      ) : null}
+                      <Typography variant='body2'>{catName}</Typography>
+                    </div>
+                    <Typography variant='caption'>
+                      SKU {p.variants?.[0]?.sku ?? '—'} · Variants {p.variants?.length ?? 0}
+                    </Typography>
+                    <Typography variant='subtitle1' className='font-semibold'>
+                      {p.variants?.[0]?.price != null ? formatAmountEt(p.variants[0].price) : '—'}
+                    </Typography>
+                    <Chip
+                      label={productStatusObj[p.status]?.title ?? p.status}
+                      variant='tonal'
+                      color={productStatusObj[p.status]?.color ?? 'secondary'}
+                      size='small'
+                      sx={{ alignSelf: 'flex-start' }}
+                    />
+                    <Divider />
+                    <div className='flex flex-wrap gap-2'>
+                      <Button
+                        variant='outlined'
+                        size='small'
+                        component={Link}
+                        href={getLocalizedUrl(
+                          `/apps/ecommerce/products/add?only_variation=true&productId=${encodeURIComponent(p.id)}`,
+                          locale as Locale
+                        )}
+                      >
+                        Add Variation
+                      </Button>
+                      <OptionMenu
+                        iconButtonProps={{ size: 'medium' }}
+                        iconClassName='text-textSecondary text-[22px]'
+                        options={[
+                          {
+                            text: 'View',
+                            icon: 'ri-eye-line',
+                            menuItemProps: {
+                              onClick: () => {
+                                router.push(
+                                  getLocalizedUrl(
+                                    `/apps/ecommerce/products/list/${encodeURIComponent(p.id)}`,
+                                    locale as Locale
+                                  )
+                                )
+                              }
+                            }
+                          },
+                          {
+                            text: 'Update',
+                            icon: 'ri-pencil-line',
+                            menuItemProps: {
+                              onClick: () => {
+                                router.push(
+                                  getLocalizedUrl(
+                                    `/apps/ecommerce/products/add?productId=${encodeURIComponent(p.id)}&isUpdate=true`,
+                                    locale as Locale
+                                  )
+                                )
+                              }
+                            }
+                          },
+                          {
+                            text: 'Delete',
+                            icon: 'ri-delete-bin-7-line',
+                            menuItemProps: {
+                              onClick: () => {
+                                setDeleteId(p.id)
+                                setDeleteDialogOpen(true)
+                              }
+                            }
+                          },
+                          { text: 'Duplicate', icon: 'ri-stack-line' }
+                        ]}
+                      />
+                    </div>
+                  </CardContent>
+                </Card>
+              )
+            })
+          )}
+        </Stack>
+
         <TablePagination
           rowsPerPageOptions={[10, 25, 50]}
           component='div'

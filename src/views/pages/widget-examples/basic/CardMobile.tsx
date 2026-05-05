@@ -48,7 +48,7 @@ const CardMobile = () => {
             <div className='flex gap-1'>
               <Typography color='text.primary'>Price:</Typography>
               <Typography className='font-medium' color='text.primary'>
-                $899
+                899 ETB
               </Typography>
             </div>
           </CardContent>

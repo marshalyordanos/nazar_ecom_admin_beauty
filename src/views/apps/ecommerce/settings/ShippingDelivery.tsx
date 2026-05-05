@@ -24,15 +24,15 @@ type ShippingRateCardProps = {
 
 // Vars
 const domesticTableData: tableData[] = [
-  { rate: 'Weight', condition: '5Kg-10Kg', price: '$9' },
-  { rate: 'VAT', condition: '12%', price: '$25' },
+  { rate: 'Weight', condition: '5Kg-10Kg', price: '9 ETB' },
+  { rate: 'VAT', condition: '12%', price: '25 ETB' },
   { rate: 'Duty', condition: '-', price: '-' }
 ]
 
 const internationalTableData: tableData[] = [
-  { rate: 'Weight', condition: '5Kg-10Kg', price: '$19' },
-  { rate: 'VAT', condition: '12%', price: '$25' },
-  { rate: 'Duty', condition: 'Japan', price: '$49' }
+  { rate: 'Weight', condition: '5Kg-10Kg', price: '19 ETB' },
+  { rate: 'VAT', condition: '12%', price: '25 ETB' },
+  { rate: 'Duty', condition: 'Japan', price: '49 ETB' }
 ]
 
 const ShippingRateCard = (props: ShippingRateCardProps) => {

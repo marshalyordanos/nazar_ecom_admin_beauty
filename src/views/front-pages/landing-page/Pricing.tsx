@@ -129,11 +129,11 @@ const PricingPlan = () => {
                     {plan.title}
                   </Typography>
                   <div className='flex items-center gap-3'>
-                    <div className='flex items-start'>
-                      <Typography variant='h5'>$</Typography>
+                    <div className='flex items-baseline gap-1'>
                       <Typography variant='h1' className='font-bold text-5xl'>
                         {plan.price}
                       </Typography>
+                      <Typography variant='h5'>ETB</Typography>
                     </div>
                     <div className='flex flex-col gap-0.5'>
                       <Typography color='text.primary' className='font-medium'>

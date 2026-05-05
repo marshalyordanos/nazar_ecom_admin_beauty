@@ -48,15 +48,12 @@ const PlanDetails = ({ data, pricingPlan }: Props) => {
         <Typography>{data?.subtitle}</Typography>
       </div>
       <div className='relative mbe-[1.125rem]'>
-        <div className='flex justify-center'>
-          <Typography component='sup' className='self-start font-medium'>
-            $
-          </Typography>
+        <div className='flex justify-center items-baseline gap-1'>
           <Typography variant='h1' component='span' color='primary.main'>
             {pricingPlan === 'monthly' ? data?.monthlyPrice : data?.yearlyPlan.monthly}
           </Typography>
-          <Typography component='sub' className='self-end font-medium'>
-            /month
+          <Typography component='span' className='self-end font-medium text-textSecondary'>
+            ETB/month
           </Typography>
         </div>
         {pricingPlan !== 'monthly' && data?.monthlyPrice !== 0 ? (
@@ -66,7 +63,7 @@ const PlanDetails = ({ data, pricingPlan }: Props) => {
               'absolute inline-end-1/2',
               theme.direction === 'rtl' ? 'translate-x-[-50%]' : 'translate-x-[50%]'
             )}
-          >{`USD ${data?.yearlyPlan.annually}/year`}</Typography>
+          >{`ETB ${data?.yearlyPlan.annually}/year`}</Typography>
         ) : null}
       </div>
       <div className='flex flex-col gap-4'>

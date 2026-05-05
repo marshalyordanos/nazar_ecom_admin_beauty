@@ -26,7 +26,7 @@ const Award = () => {
           </div>
           <div className='flex flex-col'>
             <Typography variant='h4' color='primary.main'>
-              $42.8k
+              42.8k ETB
             </Typography>
             <Typography>78% of target 🚀</Typography>
           </div>

@@ -28,12 +28,12 @@ const data = [
     icon: 'ri-pages-line'
   },
   {
-    title: '$2.46k',
+    title: 'ETB 2.46k',
     subtitle: 'Paid',
     icon: 'ri-wallet-line'
   },
   {
-    title: '$876',
+    title: '876 ETB',
     subtitle: 'Unpaid',
     icon: 'ri-coins-line'
   }

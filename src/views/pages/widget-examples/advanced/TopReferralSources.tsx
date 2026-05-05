@@ -69,7 +69,7 @@ const tabAvatars: TabAvatarType[] = [
 const tabContentData: TabContentDataType = {
   mobile: [
     {
-      price: '$12.5k',
+      price: '12.5k ETB',
       profit: 'positive',
       profitValue: '+24%',
       imgAlt: 'samsung-s22',
@@ -79,7 +79,7 @@ const tabContentData: TabContentDataType = {
       chipLabel: 'Out of Stock'
     },
     {
-      price: '$45k',
+      price: '45k ETB',
       profit: 'negative',
       profitValue: '-18%',
       imgAlt: 'apple-iPhone-13-pro',
@@ -89,7 +89,7 @@ const tabContentData: TabContentDataType = {
       chipLabel: 'In Stock'
     },
     {
-      price: '$98.2k',
+      price: '98.2k ETB',
       profit: 'positive',
       profitValue: '+55%',
       imgAlt: 'oneplus-9-pro',
@@ -99,7 +99,7 @@ const tabContentData: TabContentDataType = {
       chipLabel: 'Upcoming'
     },
     {
-      price: '$210k',
+      price: '210k ETB',
       profit: 'positive',
       profitValue: '+8%',
       imgAlt: 'google-pixel-6',
@@ -111,7 +111,7 @@ const tabContentData: TabContentDataType = {
   ],
   desktop: [
     {
-      price: '$17.5k',
+      price: '17.5k ETB',
       profit: 'positive',
       profitValue: '+24%',
       imgAlt: 'apple-mac-mini',
@@ -121,7 +121,7 @@ const tabContentData: TabContentDataType = {
       chipLabel: 'Out of Stock'
     },
     {
-      price: '$35k',
+      price: '35k ETB',
       profit: 'negative',
       profitValue: '-16%',
       imgAlt: 'hp-envy-x360',
@@ -131,7 +131,7 @@ const tabContentData: TabContentDataType = {
       chipLabel: 'In Stock'
     },
     {
-      price: '$220k',
+      price: '220k ETB',
       profit: 'positive',
       profitValue: '+80%',
       imgAlt: 'dell-inspiron-3000',
@@ -141,7 +141,7 @@ const tabContentData: TabContentDataType = {
       chipLabel: 'In Stock'
     },
     {
-      price: '$88.2k',
+      price: '88.2k ETB',
       profit: 'positive',
       profitValue: '+54%',
       imgAlt: 'apple-iMac-4k',
@@ -153,7 +153,7 @@ const tabContentData: TabContentDataType = {
   ],
   console: [
     {
-      price: '$599',
+      price: '599 ETB',
       profit: 'positive',
       profitValue: '+80%',
       imgAlt: 'sony-play-station-5',
@@ -163,7 +163,7 @@ const tabContentData: TabContentDataType = {
       chipLabel: 'In Stock'
     },
     {
-      price: '$489',
+      price: '489 ETB',
       profit: 'negative',
       profitValue: '-16%',
       imgAlt: 'xbox-series-x',
@@ -173,7 +173,7 @@ const tabContentData: TabContentDataType = {
       chipLabel: 'Upcoming'
     },
     {
-      price: '$335',
+      price: '335 ETB',
       profit: 'positive',
       profitValue: '+54%',
       imgAlt: 'nintendo-switch',
@@ -183,7 +183,7 @@ const tabContentData: TabContentDataType = {
       chipLabel: 'Out of Stock'
     },
     {
-      price: '$14',
+      price: '14 ETB',
       profit: 'negative',
       profitValue: '-28%',
       imgAlt: 'sup-game-box-400',

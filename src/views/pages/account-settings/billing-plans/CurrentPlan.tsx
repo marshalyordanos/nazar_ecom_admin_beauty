@@ -48,7 +48,7 @@ const CurrentPlan = ({ data }: { data?: PricingPlanType[] }) => {
             <div className='flex flex-col gap-1'>
               <div className='flex items-center gap-2'>
                 <Typography className='font-medium' color='text.primary'>
-                  $199 Per Month
+                  199 ETB Per Month
                 </Typography>
                 <Chip variant='tonal' color='primary' label='Popular' size='small' />
               </div>

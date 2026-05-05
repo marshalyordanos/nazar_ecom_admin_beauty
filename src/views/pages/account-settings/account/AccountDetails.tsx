@@ -46,7 +46,7 @@ const initialData: Data = {
   country: 'usa',
   language: 'arabic',
   timezone: 'gmt-12',
-  currency: 'usd'
+  currency: 'etb'
 }
 
 const languageData = ['English', 'Arabic', 'French', 'German', 'Portuguese']
@@ -276,7 +276,7 @@ const AccountDetails = () => {
                   value={formData.currency}
                   onChange={e => handleFormChange('currency', e.target.value)}
                 >
-                  <MenuItem value='usd'>USD</MenuItem>
+                  <MenuItem value='etb'>ETB</MenuItem>
                   <MenuItem value='euro'>EUR</MenuItem>
                   <MenuItem value='pound'>Pound</MenuItem>
                   <MenuItem value='bitcoin'>Bitcoin</MenuItem>

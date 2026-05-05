@@ -54,10 +54,10 @@ const UpgradePlan = ({ open, setOpen }: UpgradePlanProps) => {
                 id='user-view-plans-select'
                 labelId='user-view-plans-select-label'
               >
-                <MenuItem value='Basic'>Basic - $0/month</MenuItem>
-                <MenuItem value='Standard'>Standard - $99/month</MenuItem>
-                <MenuItem value='Enterprise'>Enterprise - $499/month</MenuItem>
-                <MenuItem value='Company'>Company - $999/month</MenuItem>
+                <MenuItem value='Basic'>Basic - 0 ETB/month</MenuItem>
+                <MenuItem value='Standard'>Standard - 99 ETB/month</MenuItem>
+                <MenuItem value='Enterprise'>Enterprise - 499 ETB/month</MenuItem>
+                <MenuItem value='Company'>Company - 999 ETB/month</MenuItem>
               </Select>
             </FormControl>
             <Button variant='contained' className='capitalize max-sm:is-full'>
@@ -69,14 +69,11 @@ const UpgradePlan = ({ open, setOpen }: UpgradePlanProps) => {
             <Typography>User current plan is standard plan</Typography>
             <div className='flex items-center justify-between flex-wrap gap-2'>
               <div className='flex justify-center items-baseline gap-1'>
-                <Typography component='sup' className='self-start' color='primary.main'>
-                  $
-                </Typography>
                 <Typography component='span' color='primary.main' variant='h1'>
                   99
                 </Typography>
-                <Typography component='sub' className='self-baseline' variant='body2'>
-                  /month
+                <Typography component='span' color='primary.main' className='self-baseline text-xl font-medium'>
+                  ETB/month
                 </Typography>
               </div>
               <Button variant='outlined' className='capitalize' color='error' onClick={() => setOpenConfirmation(true)}>

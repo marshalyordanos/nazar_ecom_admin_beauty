@@ -70,26 +70,53 @@ const SalesFromShopStatsCards = ({ stats, isLoading, isError, currency = DEFAULT
   ]
 
   return (
-    <Grid container spacing={4}>
+    <Grid container spacing={{ xs: 2, sm: 3, md: 4 }}>
       {items.map((item, i) => (
-        <Grid key={i} size={{ xs: 12, sm: 6, md: 3 }}>
+        <Grid key={i} size={{ xs: 6, sm: 6, md: 3 }}>
           <Card sx={{ height: '100%', position: 'relative', overflow: 'visible' }}>
-            <CardContent sx={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: 2, justifyContent: 'space-between' }}>
-              <Box sx={{ flex: 1 }}>
-                <Typography variant='body2' color='text.secondary' gutterBottom>
+            <CardContent
+              sx={{
+                display: 'flex',
+                flexDirection: 'row',
+                alignItems: 'center',
+                gap: { xs: 1, sm: 2 },
+                justifyContent: 'space-between',
+                py: { xs: 1.5, sm: 2 },
+                px: { xs: 1.5, sm: 2 }
+              }}
+            >
+              <Box sx={{ flex: 1, minWidth: 0 }}>
+                <Typography
+                  variant='caption'
+                  color='text.secondary'
+                  gutterBottom
+                  sx={{ display: 'block', fontWeight: 600, textTransform: 'uppercase', letterSpacing: 0.4 }}
+                >
                   {item.label}
                 </Typography>
                 {isLoading ? (
-                  <Skeleton variant='text' width='60%' height={40} />
+                  <Skeleton variant='text' width='60%' height={32} />
                 ) : isError ? (
-                  <Typography color='error'>Failed to load</Typography>
+                  <Typography color='error' variant='caption'>
+                    Failed to load
+                  </Typography>
                 ) : (
                   <>
-                    <Typography variant='h4' className='font-medium'>
+                    <Typography variant='h6' sx={{ fontWeight: 700, fontSize: { xs: '1rem', sm: '1.35rem' } }}>
                       {item.value}
                     </Typography>
                     {item.sub ? (
-                      <Typography variant='caption' color='text.secondary'>
+                      <Typography
+                        variant='caption'
+                        color='text.secondary'
+                        sx={{
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          mt: 0.25
+                        }}
+                      >
                         {item.sub}
                       </Typography>
                     ) : null}
@@ -98,16 +125,18 @@ const SalesFromShopStatsCards = ({ stats, isLoading, isError, currency = DEFAULT
               </Box>
               <Box
                 sx={{
-                  minWidth: 40,
-                  minHeight: 40,
+                  minWidth: { xs: 32, sm: 40 },
+                  minHeight: { xs: 32, sm: 40 },
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
                   borderRadius: '50%',
                   background: iconStyles[i].bg,
                   color: iconStyles[i].color,
-                  boxShadow: 3,
-                  marginLeft: 2
+                  boxShadow: { xs: 1, sm: 3 },
+                  marginLeft: { xs: 0.5, sm: 2 },
+                  flexShrink: 0,
+                  '& .ri-2x': { fontSize: { xs: '1rem', sm: '1.5rem' } }
                 }}
               >
                 {iconStyles[i].icon}

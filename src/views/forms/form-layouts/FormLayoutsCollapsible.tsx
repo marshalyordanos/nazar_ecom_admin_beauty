@@ -54,13 +54,13 @@ const data: CustomInputHorizontalData[] = [
   },
   {
     title: 'Express',
-    meta: '$5.00',
+    meta: '5.00 ETB',
     content: 'Friday, 15 Nov - Sunday, 17 Nov',
     value: 'express'
   },
   {
     title: 'Overnight',
-    meta: '$10.00',
+    meta: '10.00 ETB',
     content: 'Friday, 15 Nov - Saturday, 16 Nov',
     value: 'overnight'
   }

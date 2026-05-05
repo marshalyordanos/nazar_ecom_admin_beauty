@@ -22,6 +22,10 @@ import IconButton from '@mui/material/IconButton'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import Box from '@mui/material/Box'
+import Stack from '@mui/material/Stack'
+import Divider from '@mui/material/Divider'
+
+import CollapsibleFiltersSection from '@/components/layout/CollapsibleFiltersSection'
 import { useAdminOrders, useCompleteOrder, useCancleOrder, useCreateAdminOrder, useOrdersAdminSummary } from '@/api/admin/orders'
 
 import classnames from 'classnames'
@@ -325,10 +329,10 @@ const OrdersAdminManagement = () => {
 
   return (
     <div className="p-0 md:p-6">
-      <Grid container spacing={6} className='mb-6'>
+      <Grid container spacing={{ xs: 2, sm: 3, md: 6 }} className='mb-4 md:mb-6'>
         {sumLoading ? (
           Array.from({ length: 6 }).map((_, i) => (
-            <Grid key={`ord-s-${i}`} size={{ xs: 12, sm: 6, md: 4 }}>
+            <Grid key={`ord-s-${i}`} size={{ xs: 6, sm: 6, md: 4 }}>
               <div className='p-4 border rounded'>
                 <div className='h-6 w-32 bg-actionHover rounded mb-2' />
                 <div className='h-5 w-24 bg-actionHover rounded mb-1' />
@@ -338,7 +342,7 @@ const OrdersAdminManagement = () => {
           ))
         ) : ord ? (
           <>
-            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <Grid size={{ xs: 6, sm: 6, md: 4 }}>
               <HorizontalWithSubtitle
                 title='Orders (filtered)'
                 stats={String(ord.totalOrders)}
@@ -348,7 +352,7 @@ const OrdersAdminManagement = () => {
                 subtitle='Matching current filters'
               />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <Grid size={{ xs: 6, sm: 6, md: 4 }}>
               <HorizontalWithSubtitle
                 title='Gross revenue'
                 stats={ord.totalRevenue.toFixed(2)}
@@ -358,7 +362,7 @@ const OrdersAdminManagement = () => {
                 subtitle={`Discounts ${ord.totalDiscounts.toFixed(2)} · Tax ${ord.totalTax.toFixed(2)}`}
               />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <Grid size={{ xs: 6, sm: 6, md: 4 }}>
               <HorizontalWithSubtitle
                 title='Est. profit'
                 stats={ord.estimatedProfit.toFixed(2)}
@@ -368,7 +372,7 @@ const OrdersAdminManagement = () => {
                 subtitle={`Margin ~${ord.estimatedMarginPercent.toFixed(1)}% · uses variant cost`}
               />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <Grid size={{ xs: 6, sm: 6, md: 4 }}>
               <HorizontalWithSubtitle
                 title='Avg order value'
                 stats={ord.avgOrderValue.toFixed(2)}
@@ -378,7 +382,7 @@ const OrdersAdminManagement = () => {
                 subtitle='Mean grand total'
               />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <Grid size={{ xs: 6, sm: 6, md: 4 }}>
               <HorizontalWithSubtitle
                 title='Fulfillment mix'
                 stats={String(ord.completedOrders)}
@@ -388,7 +392,7 @@ const OrdersAdminManagement = () => {
                 subtitle={`Pending ${ord.pendingOrders} · Paid ${ord.paidOrders} · Proc. ${ord.processingOrders} · Ship ${ord.shippedOrders}`}
               />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <Grid size={{ xs: 6, sm: 6, md: 4 }}>
               <HorizontalWithSubtitle
                 title='Line items'
                 stats={String(ord.lineItemsCount)}
@@ -405,73 +409,19 @@ const OrdersAdminManagement = () => {
           </Grid>
         ) : null}
       </Grid>
-      <Typography variant="h4" className="mb-6 font-medium">Order Management</Typography>
+      <Typography variant="h4" className="mb-4 md:mb-6 font-medium text-xl md:text-4xl">
+        Order Management
+      </Typography>
       <Card sx={{ position: 'relative', overflow: 'hidden' }}>
         <MutationBlockingOverlay
           open={completeMut.isPending || cancelMut.isPending}
           message='Updating order…'
         />
-        <CardContent>
+        <CardContent className='px-3 sm:px-5'>
           <Box
             className="flex flex-col gap-3 mb-4 rounded-lg border border-solid border-divider"
             sx={{ p: { xs: 2, sm: 2.5 }, bgcolor: 'action.hover' }}
           >
-            <div className="flex flex-col sm:flex-row flex-wrap gap-3 items-start sm:items-end">
-              <TextField
-                size="medium"
-                type="date"
-                label="From"
-                InputLabelProps={{ shrink: true }}
-                sx={{ ...filterBarSx, minWidth: 168 }}
-                value={dateFrom}
-                onChange={e => {
-                  setDateFrom(e.target.value)
-                  setPage(0)
-                }}
-              />
-              <TextField
-                size="medium"
-                type="date"
-                label="To"
-                InputLabelProps={{ shrink: true }}
-                sx={{ ...filterBarSx, minWidth: 168 }}
-                value={dateTo}
-                onChange={e => {
-                  setDateTo(e.target.value)
-                  setPage(0)
-                }}
-              />
-              <FormControl size="medium" sx={{ ...filterBarSx, minWidth: 180 }}>
-                <InputLabel id="ord-status-filter">Status</InputLabel>
-                <Select
-                  labelId="ord-status-filter"
-                  label="Status"
-                  value={statusFilter}
-                  onChange={e => {
-                    setStatusFilter(e.target.value)
-                    setPage(0)
-                  }}
-                >
-                  <MenuItem value="">All</MenuItem>
-                  {ORDER_STATUSES.map(s => (
-                    <MenuItem key={s} value={s}>
-                      {s}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-              <Button
-                variant='outlined'
-                color='secondary'
-                size='medium'
-                disabled={!hasActiveFilters}
-                startIcon={<span className='ri-filter-off-line text-lg' />}
-                onClick={clearFilters}
-                sx={{ minHeight: 48, alignSelf: { xs: 'stretch', sm: 'flex-end' } }}
-              >
-                Clear filters
-              </Button>
-            </div>
             <TextField
               size="medium"
               placeholder="Search order number, user, product, status etc"
@@ -480,11 +430,81 @@ const OrdersAdminManagement = () => {
                 setSearch(e.target.value)
                 setPage(0)
               }}
-              className="max-sm:w-full sm:max-w-lg"
-              sx={filterBarSx}
+              fullWidth
+              sx={{ ...filterBarSx, display: { xs: 'flex', md: 'none' } }}
             />
+            <CollapsibleFiltersSection summaryHint={hasActiveFilters ? ' · Active' : undefined}>
+              <div className="flex flex-col sm:flex-row flex-wrap gap-3 items-start sm:items-end">
+                <TextField
+                  size="medium"
+                  type="date"
+                  label="From"
+                  InputLabelProps={{ shrink: true }}
+                  sx={{ ...filterBarSx, minWidth: 168, width: { xs: '100%', sm: 'auto' } }}
+                  value={dateFrom}
+                  onChange={e => {
+                    setDateFrom(e.target.value)
+                    setPage(0)
+                  }}
+                />
+                <TextField
+                  size="medium"
+                  type="date"
+                  label="To"
+                  InputLabelProps={{ shrink: true }}
+                  sx={{ ...filterBarSx, minWidth: 168, width: { xs: '100%', sm: 'auto' } }}
+                  value={dateTo}
+                  onChange={e => {
+                    setDateTo(e.target.value)
+                    setPage(0)
+                  }}
+                />
+                <FormControl size="medium" sx={{ ...filterBarSx, minWidth: 180, width: { xs: '100%', sm: 'auto' } }}>
+                  <InputLabel id="ord-status-filter">Status</InputLabel>
+                  <Select
+                    labelId="ord-status-filter"
+                    label="Status"
+                    value={statusFilter}
+                    onChange={e => {
+                      setStatusFilter(e.target.value)
+                      setPage(0)
+                    }}
+                  >
+                    <MenuItem value="">All</MenuItem>
+                    {ORDER_STATUSES.map(s => (
+                      <MenuItem key={s} value={s}>
+                        {s}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+                <Button
+                  variant='outlined'
+                  color='secondary'
+                  size='medium'
+                  disabled={!hasActiveFilters}
+                  startIcon={<span className='ri-filter-off-line text-lg' />}
+                  onClick={clearFilters}
+                  sx={{ minHeight: 48, alignSelf: { xs: 'stretch', sm: 'flex-end' }, width: { xs: '100%', sm: 'auto' } }}
+                >
+                  Clear filters
+                </Button>
+              </div>
+              <TextField
+                size="medium"
+                placeholder="Search order number, user, product, status etc"
+                value={search}
+                onChange={e => {
+                  setSearch(e.target.value)
+                  setPage(0)
+                }}
+                className="sm:max-w-lg"
+                sx={{ ...filterBarSx, display: { xs: 'none', md: 'flex' }, width: { md: '100%', lg: 'auto' } }}
+              />
+            </CollapsibleFiltersSection>
           </Box>
-          <div className="overflow-x-auto">
+          <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+            <div className="overflow-x-auto">
             <table className={tableStyles.table}>
               <thead>
                 <tr>
@@ -611,6 +631,103 @@ const OrdersAdminManagement = () => {
               )}
             </table>
           </div>
+          </Box>
+
+          <Stack spacing={2} sx={{ display: { xs: 'flex', md: 'none' } }}>
+            {isLoading || isFetching ? (
+              <Typography color='text.secondary' className='text-center py-6'>
+                Loading...
+              </Typography>
+            ) : rows.length === 0 ? (
+              <Typography color='text.secondary' className='text-center py-6'>
+                No data available
+              </Typography>
+            ) : (
+              rows.map((row: any) => (
+                <Card key={row.id} variant='outlined' sx={{ borderRadius: 2 }}>
+                  <CardContent className='flex flex-col gap-2 p-4'>
+                    <div className='flex items-start justify-between gap-2'>
+                      <div className='min-w-0'>
+                        <Link
+                          href={getLocalizedUrl(`/apps/ecommerce/orders-admin/${row.id}`, lang)}
+                          className='no-underline'
+                        >
+                          <Typography variant='subtitle1' color='primary.main' className='font-semibold hover:underline'>
+                            {row.orderNumber}
+                          </Typography>
+                        </Link>
+                        <Typography variant='caption' color='text.secondary' display='block'>
+                          {formatDateISO(row.createdAt)}
+                        </Typography>
+                      </div>
+                      <Chip
+                        size='small'
+                        color={orderStatusObj[row.status as keyof typeof orderStatusObj]?.color ?? 'secondary'}
+                        label={orderStatusObj[row.status as keyof typeof orderStatusObj]?.title ?? row.status}
+                        variant='tonal'
+                      />
+                    </div>
+                    <Divider flexItem />
+                    <Typography variant='body2'>
+                      {row.user ? (
+                        <>
+                          <span className='font-medium'>
+                            {row.user.firstName} {row.user.lastName}
+                          </span>
+                          <span className='block text-xs text-textSecondary'>{row.user.email}</span>
+                        </>
+                      ) : (
+                        row.userId
+                      )}
+                    </Typography>
+                    <Divider flexItem />
+                    <Typography variant='caption' color='text.secondary' className='font-medium uppercase tracking-wide'>
+                      Items
+                    </Typography>
+                    <div className='flex flex-col gap-2'>
+                      {Array.isArray(row.items) &&
+                        row.items.map((item: any) => (
+                          <div key={item.id} className='flex gap-2'>
+                            {item.variant?.image ? (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={item.variant.image}
+                                alt=''
+                                width={40}
+                                height={40}
+                                className='rounded-md bg-actionHover shrink-0'
+                              />
+                            ) : null}
+                            <div className='min-w-0'>
+                              <Typography variant='body2' className='font-medium line-clamp-2'>
+                                {item.productName}
+                              </Typography>
+                              <Typography variant='caption' display='block'>
+                                Qty {item.quantity} × {formatCurrency(item.price, row.currency)}
+                              </Typography>
+                              <VariantOptions values={item.variant?.variantOptionValues || []} />
+                            </div>
+                          </div>
+                        ))}
+                    </div>
+                    <Divider flexItem />
+                    <div className='flex items-center justify-between gap-2'>
+                      <Typography variant='subtitle2' color='text.secondary'>
+                        Total
+                      </Typography>
+                      <Typography variant='subtitle1' className='font-bold'>
+                        {formatCurrency(row.grandTotal, row.currency)}
+                      </Typography>
+                    </div>
+                    <Box className='flex justify-end'>
+                      <OrderActions row={row} completeMut={completeMut} cancelMut={cancelMut} />
+                    </Box>
+                  </CardContent>
+                </Card>
+              ))
+            )}
+          </Stack>
+
           <TablePagination
             component="div"
             count={total}

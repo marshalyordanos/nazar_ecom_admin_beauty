@@ -32,7 +32,7 @@ const initialData: FormDataType = {
 
 Thank you for your business, always a pleasure to work with you!
 
-We have generated a new invoice in the amount of $95.59
+We have generated a new invoice in the amount of 95.59 ETB
 
 We would appreciate payment of this invoice by 05/11/2019`
 }

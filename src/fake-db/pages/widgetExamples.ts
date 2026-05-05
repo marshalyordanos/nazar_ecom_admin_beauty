@@ -12,7 +12,7 @@ export const db: CardStatsType = {
       avatarIcon: 'ri-shopping-cart-line'
     },
     {
-      stats: '$89.34k',
+      stats: '89.34k ETB',
       title: 'Total Profit',
       trend: 'negative',
       trendNumber: '18%',
@@ -29,7 +29,7 @@ export const db: CardStatsType = {
       avatarIcon: 'ri-link'
     },
     {
-      stats: '$13.4k',
+      stats: '13.4k ETB',
       title: 'Total Sales',
       trendNumber: '38%',
       chipText: 'Last Six Months',
@@ -37,7 +37,7 @@ export const db: CardStatsType = {
       avatarIcon: 'ri-handbag-line'
     },
     {
-      stats: '$8.16k',
+      stats: '8.16k ETB',
       title: 'Total Expenses',
       trend: 'negative',
       trendNumber: '16%',
@@ -46,7 +46,7 @@ export const db: CardStatsType = {
       avatarIcon: 'ri-bank-card-line'
     },
     {
-      stats: '$2.55k',
+      stats: '2.55k ETB',
       title: 'Transactions',
       trendNumber: '38%',
       chipText: 'Last One Year',
@@ -98,7 +98,7 @@ export const db: CardStatsType = {
       avatarIcon: 'ri-user-star-line'
     },
     {
-      stats: '$28.5K',
+      stats: '28.5K ETB',
       title: 'Total Profit',
       trend: 'up',
       trendNumber: '18.2%',
@@ -113,7 +113,7 @@ export const db: CardStatsType = {
       avatarIcon: 'ri-bank-card-line'
     },
     {
-      stats: '$48.2K',
+      stats: '48.2K ETB',
       title: 'Total Revenue',
       trend: 'up',
       trendNumber: '22.5%',
@@ -123,13 +123,13 @@ export const db: CardStatsType = {
   ],
   statsHorizontalWithAvatar: [
     {
-      stats: '$24,983',
+      stats: '24,983 ETB',
       title: 'Total Earning',
       avatarIcon: 'ri-coins-line',
       avatarColor: 'primary'
     },
     {
-      stats: '$8,647',
+      stats: '8,647 ETB',
       title: 'Unpaid Earning',
       avatarIcon: 'ri-gift-line',
       avatarColor: 'success'
@@ -182,7 +182,7 @@ export const db: CardStatsType = {
       color: 'primary',
       avatarIcon: 'ri-coins-line',
       title: 'account balance',
-      stats: '$7480',
+      stats: '7480 ETB',
       content: ' Credit Left',
       description: 'Account balance for next purchase'
     },

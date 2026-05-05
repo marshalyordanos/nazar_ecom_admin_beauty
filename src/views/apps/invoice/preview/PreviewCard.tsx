@@ -22,28 +22,28 @@ const data = [
     Description: 'Branding & Promotion',
     Hours: 48,
     Qty: 1,
-    Total: '$32'
+    Total: '32 ETB'
   },
   {
     Item: 'Social Media',
     Description: 'Social media templates',
     Hours: 42,
     Qty: 1,
-    Total: '$28'
+    Total: '28 ETB'
   },
   {
     Item: 'Web Design',
     Description: 'Web designing package',
     Hours: 46,
     Qty: 1,
-    Total: '$24'
+    Total: '24 ETB'
   },
   {
     Item: 'SEO',
     Description: 'Search engine optimization',
     Hours: 40,
     Qty: 1,
-    Total: '$22'
+    Total: '22 ETB'
   }
 ]
 
@@ -99,7 +99,7 @@ const PreviewCard = ({ invoiceData, id }: { invoiceData?: InvoiceType; id: strin
                   <div>
                     <div className='flex items-center gap-4'>
                       <Typography className='min-is-[100px]'>Total Due:</Typography>
-                      <Typography>$12,110.55</Typography>
+                      <Typography>12,110.55 ETB</Typography>
                     </div>
                     <div className='flex items-center gap-4'>
                       <Typography className='min-is-[100px]'>Bank name:</Typography>
@@ -173,13 +173,13 @@ const PreviewCard = ({ invoiceData, id }: { invoiceData?: InvoiceType; id: strin
                 <div className='flex items-center justify-between'>
                   <Typography>Subtotal:</Typography>
                   <Typography className='font-medium' color='text.primary'>
-                    $1800
+                    1800 ETB
                   </Typography>
                 </div>
                 <div className='flex items-center justify-between'>
                   <Typography>Discount:</Typography>
                   <Typography className='font-medium' color='text.primary'>
-                    $28
+                    28 ETB
                   </Typography>
                 </div>
                 <div className='flex items-center justify-between'>
@@ -192,7 +192,7 @@ const PreviewCard = ({ invoiceData, id }: { invoiceData?: InvoiceType; id: strin
                 <div className='flex items-center justify-between'>
                   <Typography>Total:</Typography>
                   <Typography className='font-medium' color='text.primary'>
-                    $1690
+                    1690 ETB
                   </Typography>
                 </div>
               </div>

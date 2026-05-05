@@ -3,7 +3,11 @@
 import { useEffect, useState } from 'react'
 
 import Button from '@mui/material/Button'
+import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
+import CardContent from '@mui/material/CardContent'
+import Divider from '@mui/material/Divider'
+import Stack from '@mui/material/Stack'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
@@ -26,6 +30,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import type { TextFieldProps } from '@mui/material/TextField'
 
 import MutationBlockingOverlay from '@/components/loading/MutationBlockingOverlay'
+import CollapsibleFiltersSection from '@/components/layout/CollapsibleFiltersSection'
 
 import type { SaleFromShopRow } from '@/api/sales/useSaleFromShop'
 import type { Shop } from '@/types/shop'
@@ -144,50 +149,62 @@ const SalesFromShopTable = ({
     <>
       <Card sx={{ position: 'relative', overflow: 'hidden' }}>
         <MutationBlockingOverlay open={Boolean(isMutating)} message='Updating sales…' />
-        <div className='flex flex-col gap-4 p-5'>
-          <Typography variant='h5'>Shop sales</Typography>
-          <div className='flex flex-wrap items-center gap-4 max-sm:flex-col max-sm:is-full'>
-            <DebouncedInput
-              value={search}
-              onChange={onSearchChange}
-              placeholder='Search product, SKU, shop, location…'
-              className='max-sm:is-full sm:is-[280px]'
-            />
-            <FormControl size='small' className='min-is-[180px] max-sm:is-full'>
-              <InputLabel id='sfs-shop'>Shop</InputLabel>
-              <Select
-                labelId='sfs-shop'
-                label='Shop'
-                value={shopFilter}
-                onChange={e => onShopFilter(e.target.value)}
-              >
-                <MenuItem value=''>All shops</MenuItem>
-                {shops.map(s => (
-                  <MenuItem key={s.id} value={s.id}>
-                    {s.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl size='small' className='min-is-[180px] max-sm:is-full' disabled={!shopFilter}>
-              <InputLabel id='sfs-loc'>Location</InputLabel>
-              <Select
-                labelId='sfs-loc'
-                label='Location'
-                value={locationFilter}
-                onChange={e => onLocationFilter(e.target.value)}
-              >
-                <MenuItem value=''>All locations</MenuItem>
-                {locations.map(l => (
-                  <MenuItem key={l.id} value={l.id}>
-                    {l.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </div>
+        <div className='flex flex-col gap-4 p-4 md:p-5'>
+          <Typography variant='h5' className='text-lg md:text-2xl'>
+            Shop sales
+          </Typography>
+          <DebouncedInput
+            value={search}
+            onChange={onSearchChange}
+            placeholder='Search product, SKU, shop, location…'
+            className='is-full md:hidden'
+          />
+          <CollapsibleFiltersSection
+            summaryHint={shopFilter || locationFilter ? ' · Branch filters' : undefined}
+          >
+            <div className='flex flex-wrap items-center gap-4 max-md:flex-col max-md:is-full'>
+              <DebouncedInput
+                value={search}
+                onChange={onSearchChange}
+                placeholder='Search product, SKU, shop, location…'
+                className='hidden md:flex md:is-[280px]'
+              />
+              <FormControl size='small' className='min-is-[180px] max-md:is-full is-full md:is-auto'>
+                <InputLabel id='sfs-shop'>Shop</InputLabel>
+                <Select
+                  labelId='sfs-shop'
+                  label='Shop'
+                  value={shopFilter}
+                  onChange={e => onShopFilter(e.target.value)}
+                >
+                  <MenuItem value=''>All shops</MenuItem>
+                  {shops.map(s => (
+                    <MenuItem key={s.id} value={s.id}>
+                      {s.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl size='small' className='min-is-[180px] max-md:is-full is-full md:is-auto' disabled={!shopFilter}>
+                <InputLabel id='sfs-loc'>Location</InputLabel>
+                <Select
+                  labelId='sfs-loc'
+                  label='Location'
+                  value={locationFilter}
+                  onChange={e => onLocationFilter(e.target.value)}
+                >
+                  <MenuItem value=''>All locations</MenuItem>
+                  {locations.map(l => (
+                    <MenuItem key={l.id} value={l.id}>
+                      {l.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </div>
+          </CollapsibleFiltersSection>
         </div>
-        <TableContainer>
+        <TableContainer sx={{ display: { xs: 'none', md: 'block' } }}>
           <Table className={tableStyles.table}>
             <TableHead>
               <TableRow>
@@ -261,6 +278,70 @@ const SalesFromShopTable = ({
             </TableBody>
           </Table>
         </TableContainer>
+
+        <Stack spacing={2} sx={{ display: { xs: 'flex', md: 'none' }, px: 2, pb: 2 }}>
+          {listError ? (
+            <Typography color='error'>Could not load sales. Try again.</Typography>
+          ) : isLoading ? (
+            <Typography color='text.secondary' className='text-center py-6'>
+              Loading…
+            </Typography>
+          ) : rows.length === 0 ? (
+            <Typography color='text.secondary' className='text-center py-6'>
+              No sales found
+            </Typography>
+          ) : (
+            rows.map(row => (
+              <Card key={row.id} variant='outlined' sx={{ borderRadius: 2 }}>
+                <CardContent className='flex flex-col gap-2 p-4'>
+                  <Typography variant='subtitle2' color='text.secondary'>
+                    {new Date(row.createdAt).toLocaleString(undefined, {
+                      dateStyle: 'short',
+                      timeStyle: 'short'
+                    })}
+                  </Typography>
+                  <Typography variant='subtitle1' className='font-semibold line-clamp-2'>
+                    {row.variant.product.name}
+                  </Typography>
+                  <Typography variant='caption' color='text.secondary'>
+                    SKU {row.variant.sku}
+                  </Typography>
+                  <Divider />
+                  <Typography variant='body2'>
+                    <strong>{row.location.shop.name}</strong>
+                    <span className='text-textSecondary'> · {row.location.name}</span>
+                  </Typography>
+                  <div className='flex justify-between gap-2'>
+                    <Typography variant='caption'>Qty {row.quantity}</Typography>
+                    <Typography variant='caption'>{fmtMoney(row.price)} each</Typography>
+                  </div>
+                  <Typography variant='h6' className='font-bold'>
+                    {fmtMoney(row.total)}
+                  </Typography>
+                  <Box className='flex justify-end gap-1'>
+                    <IconButton
+                      size='small'
+                      onClick={() => setEditRow(row)}
+                      disabled={isMutating}
+                      aria-label='Edit'
+                    >
+                      <i className='ri-edit-line text-textSecondary' />
+                    </IconButton>
+                    <IconButton
+                      size='small'
+                      onClick={() => setDeleteId(row.id)}
+                      disabled={isMutating}
+                      aria-label='Delete'
+                    >
+                      <i className='ri-delete-bin-7-line text-error' />
+                    </IconButton>
+                  </Box>
+                </CardContent>
+              </Card>
+            ))
+          )}
+        </Stack>
+
         <TablePagination
           component='div'
           count={total}

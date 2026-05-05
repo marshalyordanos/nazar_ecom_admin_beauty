@@ -113,7 +113,7 @@ const dataIcons: CustomInputVerticalData[] = [
     asset: 'ri-star-smile-line',
     content: (
       <>
-        <Chip label='$10' variant='tonal' size='small' color='secondary' className='absolute inline-end-4' />
+        <Chip label='10 ETB' variant='tonal' size='small' color='secondary' className='absolute inline-end-4' />
         <VerticalContent variant='body2' className='my-auto'>
           Get your product in 3-4 days.
         </VerticalContent>
@@ -126,7 +126,7 @@ const dataIcons: CustomInputVerticalData[] = [
     asset: 'ri-vip-crown-line',
     content: (
       <>
-        <Chip label='$15' variant='tonal' size='small' color='secondary' className='absolute inline-end-4' />
+        <Chip label='15 ETB' variant='tonal' size='small' color='secondary' className='absolute inline-end-4' />
         <VerticalContent variant='body2' className='my-auto'>
           Get your product in 1 day.
         </VerticalContent>
@@ -256,13 +256,13 @@ const StepAddress = ({ handleNext }: { handleNext: () => void }) => {
             <div className='flex flex-col gap-2'>
               <div className='flex gap-2 justify-between flex-wrap'>
                 <Typography color='text.primary'>Order Total</Typography>
-                <Typography>$1198.00</Typography>
+                <Typography>1198.00 ETB</Typography>
               </div>
               <div className='flex justify-between flex-wrap'>
                 <Typography color='text.primary'>Delivery Charges</Typography>
                 <div className='flex gap-2'>
                   <Typography color='text.disabled' className='line-through'>
-                    $5.00
+                    5.00 ETB
                   </Typography>
                   <Chip size='small' variant='tonal' color='success' label='Free' className='uppercase' />
                 </div>
@@ -275,7 +275,7 @@ const StepAddress = ({ handleNext }: { handleNext: () => void }) => {
               Total
             </Typography>
             <Typography className='font-medium' color='text.primary'>
-              $1198.00
+              1198.00 ETB
             </Typography>
           </CardContent>
         </div>
