@@ -77,7 +77,7 @@ const DonutChart = () => {
     <Card>
       <CardContent className='pbe-0'>
         <div className='flex flex-wrap items-center gap-1'>
-          <Typography variant='h5'>$27.9k</Typography>
+          <Typography variant='h5'>ETB 27.9k</Typography>
           <Typography color='success.main'>+16%</Typography>
         </div>
         <Typography variant='subtitle1'>Total Growth</Typography>

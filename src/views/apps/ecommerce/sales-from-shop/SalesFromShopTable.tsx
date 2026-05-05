@@ -32,6 +32,8 @@ import type { Shop } from '@/types/shop'
 
 import tableStyles from '@core/styles/table.module.css'
 
+import { DEFAULT_CURRENCY_CODE } from '@/libs/currency'
+
 const DebouncedInput = ({
   value: initialValue,
   onChange,
@@ -96,7 +98,7 @@ const SalesFromShopTable = ({
   onLocationFilter,
   isLoading,
   listError,
-  currency = 'USD',
+  currency = DEFAULT_CURRENCY_CODE,
   onEdit,
   onDelete,
   isMutating

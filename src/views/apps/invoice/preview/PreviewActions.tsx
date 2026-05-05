@@ -65,7 +65,7 @@ const PreviewActions = ({ id, onButtonClick }: { id: string; onButtonClick: () =
             variant='contained'
             className='capitalize'
             onClick={() => setPaymentDrawerOpen(true)}
-            startIcon={<i className='ri-money-dollar-circle-line' />}
+            startIcon={<i className='ri-coins-line' />}
           >
             Add Payment
           </Button>

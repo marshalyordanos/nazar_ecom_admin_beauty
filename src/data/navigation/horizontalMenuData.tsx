@@ -248,7 +248,7 @@ const horizontalMenuData = (dictionary: Awaited<ReturnType<typeof getDictionary>
       },
       {
         label: dictionary['navigation'].pricing,
-        icon: 'ri-money-dollar-circle-line',
+        icon: 'ri-coins-line',
         href: '/pages/pricing'
       },
       {

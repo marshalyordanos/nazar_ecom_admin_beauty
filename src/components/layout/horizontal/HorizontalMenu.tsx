@@ -211,7 +211,7 @@ const HorizontalMenu = ({ dictionary }: { dictionary: Awaited<ReturnType<typeof 
           <MenuItem href={`/${locale}/pages/faq`} icon={<i className='ri-question-line' />}>
             {dictionary['navigation'].faq}
           </MenuItem>
-          <MenuItem href={`/${locale}/pages/pricing`} icon={<i className='ri-money-dollar-circle-line' />}>
+          <MenuItem href={`/${locale}/pages/pricing`} icon={<i className='ri-coins-line' />}>
             {dictionary['navigation'].pricing}
           </MenuItem>
           <SubMenu label={dictionary['navigation'].miscellaneous} icon={<i className='ri-file-info-line' />}>

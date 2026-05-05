@@ -18,7 +18,7 @@ export const db: CardStatsType = {
       trendNumber: '18%',
       chipText: 'Last One Year',
       avatarColor: 'warning',
-      avatarIcon: 'ri-money-dollar-circle-line'
+      avatarIcon: 'ri-coins-line'
     },
     {
       stats: '142.8k',
@@ -118,14 +118,14 @@ export const db: CardStatsType = {
       trend: 'up',
       trendNumber: '22.5%',
       avatarColor: 'success',
-      avatarIcon: 'ri-money-dollar-circle-line'
+      avatarIcon: 'ri-coins-line'
     }
   ],
   statsHorizontalWithAvatar: [
     {
       stats: '$24,983',
       title: 'Total Earning',
-      avatarIcon: 'ri-money-dollar-circle-line',
+      avatarIcon: 'ri-coins-line',
       avatarColor: 'primary'
     },
     {
@@ -180,7 +180,7 @@ export const db: CardStatsType = {
   customerStats: [
     {
       color: 'primary',
-      avatarIcon: 'ri-money-dollar-circle-line',
+      avatarIcon: 'ri-coins-line',
       title: 'account balance',
       stats: '$7480',
       content: ' Credit Left',

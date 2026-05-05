@@ -72,7 +72,7 @@ const tabAvatars: TabAvatarType[] = [
 const tabContentData: TabContentDataType = {
   google: [
     {
-      revenue: '$42,857',
+      revenue: '42,857 ETB',
       profit: 'positive',
       profitValue: '+24%',
       parameter: 'Email Marketing Campaign',
@@ -80,7 +80,7 @@ const tabContentData: TabContentDataType = {
       chipColor: 'primary'
     },
     {
-      revenue: '$850',
+      revenue: '850 ETB',
       profit: 'negative',
       profitValue: '-12%',
       parameter: 'Google Workspace',
@@ -88,7 +88,7 @@ const tabContentData: TabContentDataType = {
       chipColor: 'success'
     },
     {
-      revenue: '$5,576',
+      revenue: '5,576 ETB',
       profit: 'positive',
       profitValue: '+24%',
       parameter: 'Affiliation Program',
@@ -96,7 +96,7 @@ const tabContentData: TabContentDataType = {
       chipColor: 'primary'
     },
     {
-      revenue: '$0',
+      revenue: '0 ETB',
       profit: 'positive',
       profitValue: '+0%',
       parameter: 'Google Adsense',
@@ -106,7 +106,7 @@ const tabContentData: TabContentDataType = {
   ],
   facebook: [
     {
-      revenue: '$322',
+      revenue: '322 ETB',
       profit: 'negative',
       profitValue: '-8%',
       parameter: 'Create Audiences in Ads Manager',
@@ -114,7 +114,7 @@ const tabContentData: TabContentDataType = {
       chipColor: 'primary'
     },
     {
-      revenue: '$5,634',
+      revenue: '5,634 ETB',
       profit: 'positive',
       profitValue: '+19%',
       parameter: 'Facebook page advertising',
@@ -122,7 +122,7 @@ const tabContentData: TabContentDataType = {
       chipColor: 'primary'
     },
     {
-      revenue: '$751',
+      revenue: '751 ETB',
       profit: 'negative',
       profitValue: '-23%',
       parameter: 'Messenger advertising',
@@ -130,7 +130,7 @@ const tabContentData: TabContentDataType = {
       chipColor: 'error'
     },
     {
-      revenue: '$3,585',
+      revenue: '3,585 ETB',
       profit: 'positive',
       profitValue: '+21%',
       parameter: 'Video campaign',
@@ -140,7 +140,7 @@ const tabContentData: TabContentDataType = {
   ],
   instagram: [
     {
-      revenue: '$599',
+      revenue: '599 ETB',
       profit: 'negative',
       profitValue: '-15%',
       parameter: 'Create shopping advertising',
@@ -148,7 +148,7 @@ const tabContentData: TabContentDataType = {
       chipColor: 'info'
     },
     {
-      revenue: '$1,467',
+      revenue: '1,467 ETB',
       profitValue: '+37%',
       profit: 'positive',
       parameter: 'IGTV advertising',
@@ -156,7 +156,7 @@ const tabContentData: TabContentDataType = {
       chipColor: 'success'
     },
     {
-      revenue: '$0',
+      revenue: '0 ETB',
       profitValue: '+0%',
       profit: 'positive',
       parameter: 'Collection advertising',
@@ -164,7 +164,7 @@ const tabContentData: TabContentDataType = {
       chipColor: 'info'
     },
     {
-      revenue: '$4,546',
+      revenue: '4,546 ETB',
       profitValue: '+29%',
       profit: 'positive',
       parameter: 'Stories advertising',
@@ -174,7 +174,7 @@ const tabContentData: TabContentDataType = {
   ],
   reddit: [
     {
-      revenue: '$404',
+      revenue: '404 ETB',
       profitValue: '+2%',
       profit: 'positive',
       parameter: 'Interests advertising',
@@ -182,7 +182,7 @@ const tabContentData: TabContentDataType = {
       chipColor: 'error'
     },
     {
-      revenue: '$399',
+      revenue: '399 ETB',
       profitValue: '+25%',
       profit: 'positive',
       parameter: 'Community advertising',
@@ -190,7 +190,7 @@ const tabContentData: TabContentDataType = {
       chipColor: 'primary'
     },
     {
-      revenue: '$177',
+      revenue: '177 ETB',
       profitValue: '+21%',
       profit: 'positive',
       parameter: 'Device advertising',
@@ -198,7 +198,7 @@ const tabContentData: TabContentDataType = {
       chipColor: 'success'
     },
     {
-      revenue: '$1,139',
+      revenue: '1,139 ETB',
       profitValue: '-5%',
       profit: 'negative',
       parameter: 'Campaigning',

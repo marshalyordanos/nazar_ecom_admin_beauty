@@ -103,7 +103,7 @@ const TotalTransactions = () => {
         <Grid size={{ xs: 12, sm: 5 }} className='flex flex-col'>
           <CardHeader
             title='Report'
-            subheader='Last month transactions $234.40k'
+            subheader='Last month transactions 234.40k ETB'
             action={<OptionMenu options={['Refresh', 'Update', 'Share']} />}
           />
           <CardContent className='flex grow flex-col justify-center'>
@@ -123,7 +123,7 @@ const TotalTransactions = () => {
                 <Divider orientation='vertical' flexItem />
                 <div className='flex flex-col gap-3 items-center'>
                   <CustomAvatar skin='light' color='primary' variant='rounded'>
-                    <i className='ri-money-dollar-circle-line' />
+                    <i className='ri-coins-line' />
                   </CustomAvatar>
                   <div className='flex flex-col items-center gap-0.5'>
                     <Typography>Last Week</Typography>

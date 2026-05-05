@@ -302,7 +302,7 @@ const PaymentsManagement = () => {
               <HorizontalWithSubtitle
                 title='Total recorded'
                 stats={pay.totalPaymentAmount.toFixed(2)}
-                avatarIcon='ri-money-dollar-circle-line'
+                avatarIcon='ri-coins-line'
                 avatarColor='info'
                 trend=''
                 subtitle={`Avg ${pay.avgPaymentAmount.toFixed(2)} per payment`}
@@ -332,7 +332,7 @@ const PaymentsManagement = () => {
               <HorizontalWithSubtitle
                 title='Refunded'
                 stats={String(pay.refundedPayments)}
-                avatarIcon='ri-exchange-dollar-line'
+                avatarIcon='ri-exchange-line'
                 avatarColor='secondary'
                 trend=''
                 subtitle={`Volume ${pay.refundedVolume.toFixed(2)}`}

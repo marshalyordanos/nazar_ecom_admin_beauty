@@ -8,9 +8,9 @@ export function formatCompact(n: number): string {
 
 export function formatCurrencyCompact(n: number): string {
   const abs = Math.abs(n)
-  if (abs >= 1_000_000) return `$${(n / 1_000_000).toFixed(2)}M`
-  if (abs >= 1_000) return `$${(n / 1_000).toFixed(1)}k`
-  return `$${Math.round(n)}`
+  if (abs >= 1_000_000) return `ETB ${(n / 1_000_000).toFixed(2)}M`
+  if (abs >= 1_000) return `ETB ${(n / 1_000).toFixed(1)}k`
+  return `ETB ${Math.round(n)}`
 }
 
 /** Trend string like "+22%" or "-3%" */

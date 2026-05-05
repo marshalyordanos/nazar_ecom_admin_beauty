@@ -30,6 +30,8 @@ import type { ColumnDef, FilterFn } from '@tanstack/react-table'
 // Component Imports
 import Link from '@components/Link'
 
+import { formatAmountEt } from '@/libs/currency'
+
 // Style Imports
 import tableStyles from '@core/styles/table.module.css'
 
@@ -140,7 +142,7 @@ const OrderTable = () => {
       }),
       columnHelper.accessor('price', {
         header: 'Price',
-        cell: ({ row }) => <Typography>{`$${row.original.price}`}</Typography>
+        cell: ({ row }) => <Typography>{formatAmountEt(row.original.price)}</Typography>
       }),
       columnHelper.accessor('quantity', {
         header: 'Qty',
@@ -148,7 +150,7 @@ const OrderTable = () => {
       }),
       columnHelper.accessor('total', {
         header: 'Total',
-        cell: ({ row }) => <Typography>{`$${row.original.total}`}</Typography>
+        cell: ({ row }) => <Typography>{formatAmountEt(row.original.total)}</Typography>
       })
     ],
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -264,7 +266,7 @@ const OrderDetailsCard = () => {
               Subtotal:
             </Typography>
             <Typography color='text.primary' className='font-medium'>
-              $2,093
+              {formatAmountEt(2093)}
             </Typography>
           </div>
           <div className='flex items-center gap-12'>
@@ -272,7 +274,7 @@ const OrderDetailsCard = () => {
               Shipping Fee:
             </Typography>
             <Typography color='text.primary' className='font-medium'>
-              $2
+              {formatAmountEt(2)}
             </Typography>
           </div>
           <div className='flex items-center gap-12'>
@@ -280,7 +282,7 @@ const OrderDetailsCard = () => {
               Tax:
             </Typography>
             <Typography color='text.primary' className='font-medium'>
-              $28
+              {formatAmountEt(28)}
             </Typography>
           </div>
           <div className='flex items-center gap-12'>
@@ -288,7 +290,7 @@ const OrderDetailsCard = () => {
               Total:
             </Typography>
             <Typography color='text.primary' className='font-medium'>
-              $2113
+              {formatAmountEt(2113)}
             </Typography>
           </div>
         </div>

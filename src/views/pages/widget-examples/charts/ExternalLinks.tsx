@@ -33,13 +33,13 @@ type DataType = {
 // Vars
 const data: DataType[] = [
   {
-    sales: '$845k',
+    sales: '845k ETB',
     title: 'Google Analytics',
     trendNumber: '82%',
     trend: 'down'
   },
   {
-    sales: '$12.5k',
+    sales: '12.5k ETB',
     title: 'Facebook Ads',
     trendNumber: '52%',
     trend: 'up'

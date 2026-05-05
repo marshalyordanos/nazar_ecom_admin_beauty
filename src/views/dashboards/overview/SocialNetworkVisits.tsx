@@ -55,7 +55,7 @@ const SocialNetworkVisits = ({ topProducts }: { topProducts: any[] }) => {
                 // If loading or no data at all, show skeleton, else show value
                 rows[0] === null
                   ? <Skeleton variant='text' width={80} height={36} />
-                  : `$${formatCurrency(totalRevenue)}`
+                  : `${formatCurrency(totalRevenue)} ETB`
               }
             </Typography>
             {
@@ -100,7 +100,7 @@ const SocialNetworkVisits = ({ topProducts }: { topProducts: any[] }) => {
                   </div>
                   <div className='flex items-center gap-2'>
                     <Typography color='text.primary' className='font-medium'>
-                      ${formatCurrency(item.revenue)}
+                      {formatCurrency(item.revenue)} ETB
                     </Typography>
                     {/* Demo Chip: Show +/– if revenue above/below avg; here we show positive if revenue > 0 */}
                     <Chip

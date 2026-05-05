@@ -193,7 +193,7 @@ const AddUserDrawer = (props: Props) => {
         await api.patch(`/shops/locations/${locationId}`, payload)
         toast.success('Location updated successfully!')
       } else {
-        await api.post(`/shops/${shopId}/locations`, payload)
+        // await api.post(`/shops/${shopId}/locations`, payload)
         toast.success('Location saved successfully!')
       }
       handleClose()

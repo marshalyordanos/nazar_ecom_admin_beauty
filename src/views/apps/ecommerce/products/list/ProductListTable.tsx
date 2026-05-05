@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { api } from '@/libs/api'
+import { formatAmountEt } from '@/libs/currency'
 
 // MUI Imports
 import Card from '@mui/material/Card'
@@ -298,7 +299,11 @@ const ProductListTable = () => {
       columnHelper.accessor(row => row.variants?.[0]?.price ?? '', {
         id: 'price',
         header: 'Price',
-        cell: ({ row }) => <Typography>{row.original.variants?.[0]?.price != null ? `$${row.original.variants[0].price}` : ''}</Typography>
+        cell: ({ row }) => (
+          <Typography>
+            {row.original.variants?.[0]?.price != null ? formatAmountEt(row.original.variants[0].price) : ''}
+          </Typography>
+        )
       }),
       columnHelper.accessor('status', {
         header: 'Status',

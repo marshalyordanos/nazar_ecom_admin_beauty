@@ -71,7 +71,7 @@ const EditActions = ({ id }: { id: string }) => {
               variant='contained'
               className='capitalize'
               onClick={() => setPaymentDrawerOpen(true)}
-              startIcon={<i className='ri-money-dollar-circle-line' />}
+              startIcon={<i className='ri-coins-line' />}
             >
               Add Payment
             </Button>

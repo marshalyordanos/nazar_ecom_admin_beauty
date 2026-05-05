@@ -118,18 +118,18 @@ const WeeklySales = () => {
             <div className='flex flex-col'>
               <Typography>Net Income</Typography>
               <Typography color='text.primary' className='font-medium'>
-                $438.5k
+                ETB 438.5k
               </Typography>
             </div>
           </div>
           <div className='flex gap-3'>
             <CustomAvatar skin='light' color='warning' variant='rounded'>
-              <i className='ri-money-dollar-circle-line' />
+              <i className='ri-coins-line' />
             </CustomAvatar>
             <div className='flex flex-col'>
               <Typography>Expense</Typography>
               <Typography color='text.primary' className='font-medium'>
-                $22.4k
+                ETB 22.4k
               </Typography>
             </div>
           </div>

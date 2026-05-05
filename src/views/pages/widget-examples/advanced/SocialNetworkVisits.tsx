@@ -73,7 +73,7 @@ const SocialNetworkVisits = () => {
       <CardContent className='flex flex-col gap-7'>
         <div>
           <div className='flex items-center'>
-            <Typography variant='h4'>$24,895</Typography>
+            <Typography variant='h4'>24,895 ETB</Typography>
             <i className='ri-arrow-up-s-line text-2xl text-success' />
             <Typography color='success.main'>62%</Typography>
           </div>

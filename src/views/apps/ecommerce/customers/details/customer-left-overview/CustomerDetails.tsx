@@ -45,7 +45,7 @@ const CustomerDetails = ({ customerData }: { customerData?: Customer }) => {
             </div>
             <div className='flex items-center gap-4'>
               <CustomAvatar variant='rounded' skin='light' color='primary'>
-                <i className='ri-money-dollar-circle-line' />
+                <i className='ri-coins-line' />
               </CustomAvatar>
               <div>
                 <Typography variant='h5'>${customerData?.totalSpent}</Typography>

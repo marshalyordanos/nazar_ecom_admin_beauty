@@ -29,7 +29,7 @@ type DataType = {
 // Vars
 const data: DataType[] = [
   {
-    sales: '$54,234',
+    sales: '54,234 ETB',
     title: 'Profit',
     color: 'primary',
     trendNumber: '+42%',
@@ -64,7 +64,7 @@ const SocialNetworkVisits = () => {
             <i className='ri-bank-card-line text-[24px]' />
           </CustomAvatar>
           <div>
-            <Typography variant='h3'>$89,522</Typography>
+            <Typography variant='h3'>89,522 ETB</Typography>
             <Typography>Last 6 Month Profit </Typography>
           </div>
         </div>

@@ -17,12 +17,11 @@ const AppReactApexCharts = dynamic(() => import('@/libs/styles/AppReactApexChart
 
 // Helper to format currency values
 const formatCurrency = (value: number) => {
-  if (typeof value !== 'number' || isNaN(value)) return '$0'
-  // Show as $x.xk if > 999
+  if (typeof value !== 'number' || isNaN(value)) return '0 ETB'
   if (value >= 1000 || value <= -1000) {
-    return `$${(value / 1000).toFixed(1)}k`
+    return `${(value / 1000).toFixed(1)}k ETB`
   }
-  return `$${value}`
+  return `${value} ETB`
 }
 
 // Helper to format percentage, e.g. 18% or -18%

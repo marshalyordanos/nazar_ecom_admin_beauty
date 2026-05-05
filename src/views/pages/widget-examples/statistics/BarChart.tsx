@@ -142,7 +142,7 @@ const BarChart = () => {
     <Card>
       <CardContent>
         <div className='flex flex-wrap items-center gap-1'>
-          <Typography variant='h5'>$42.5k</Typography>
+          <Typography variant='h5'>ETB 42.5k</Typography>
           <Typography color='error.main'>-22%</Typography>
         </div>
         <Typography variant='subtitle1'>Total Revenue</Typography>

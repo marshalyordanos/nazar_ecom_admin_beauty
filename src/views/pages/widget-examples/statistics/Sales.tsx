@@ -28,7 +28,7 @@ const data: DataType[] = [
     icon: 'ri-user-star-line'
   },
   {
-    stats: '$28.5k',
+    stats: 'ETB 28.5k',
     color: 'warning',
     icon: 'ri-pie-chart-2-line',
     title: 'Total Profit'

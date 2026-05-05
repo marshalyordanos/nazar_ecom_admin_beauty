@@ -137,7 +137,7 @@ const CardWidgetsSalesCountry = () => {
     <Card>
       <CardHeader
         title='Sales Country'
-        subheader='Total $42,580 Sales'
+        subheader='Total 42,580 ETB Sales'
         action={<OptionMenu options={['Last 28 Days', 'Last Month', 'Last Year']} />}
       />
       <CardContent>

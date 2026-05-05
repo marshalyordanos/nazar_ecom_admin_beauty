@@ -203,7 +203,7 @@ const VerticalMenu = ({ dictionary, scrollMenu }: Props) => {
               </MenuItem>
             )}
             {cr('payments') && (
-              <MenuItem icon={<i className='ri-money-dollar-circle-line' />} href={`/${locale}/apps/ecommerce/payments`}>
+              <MenuItem icon={<i className='ri-coins-line' />} href={`/${locale}/apps/ecommerce/payments`}>
                 Payments
               </MenuItem>
             )}

@@ -19,7 +19,7 @@ export const db: InvoiceType[] = [
     avatar: '',
     avatarColor: 'primary',
     invoiceStatus: 'Paid',
-    balance: '$724',
+    balance: '724 ETB',
     dueDate: `23 ${currentMonth} ${now.getFullYear()}`
   },
   {
@@ -83,7 +83,7 @@ export const db: InvoiceType[] = [
     total: 4056,
     avatar: '/images/avatars/4.png',
     invoiceStatus: 'Draft',
-    balance: '$815',
+    balance: '815 ETB',
     dueDate: `30 ${currentMonth} ${now.getFullYear()}`
   },
   {
@@ -117,7 +117,7 @@ export const db: InvoiceType[] = [
     avatar: '',
     avatarColor: 'success',
     invoiceStatus: 'Draft',
-    balance: '$407',
+    balance: '407 ETB',
     dueDate: `22 ${currentMonth} ${now.getFullYear()}`
   },
   {
@@ -133,7 +133,7 @@ export const db: InvoiceType[] = [
     total: 4309,
     avatar: '/images/avatars/5.png',
     invoiceStatus: 'Paid',
-    balance: '-$205',
+    balance: '-205 ETB',
     dueDate: `10 ${currentMonth} ${now.getFullYear()}`
   },
   {
@@ -165,7 +165,7 @@ export const db: InvoiceType[] = [
     total: 4776,
     avatar: '/images/avatars/7.png',
     invoiceStatus: 'Downloaded',
-    balance: '$305',
+    balance: '305 ETB',
     dueDate: `02 ${currentMonth} ${now.getFullYear()}`
   },
   {
@@ -181,7 +181,7 @@ export const db: InvoiceType[] = [
     total: 3789,
     avatar: '/images/avatars/8.png',
     invoiceStatus: 'Partial Payment',
-    balance: '$666',
+    balance: '666 ETB',
     dueDate: `18 ${currentMonth} ${now.getFullYear()}`
   },
   {
@@ -245,7 +245,7 @@ export const db: InvoiceType[] = [
     total: 5285,
     avatar: '/images/avatars/4.png',
     invoiceStatus: 'Partial Payment',
-    balance: '-$202',
+    balance: '-202 ETB',
     dueDate: `02 ${currentMonth} ${now.getFullYear()}`
   },
   {
@@ -261,7 +261,7 @@ export const db: InvoiceType[] = [
     total: 3668,
     avatar: '/images/avatars/5.png',
     invoiceStatus: 'Downloaded',
-    balance: '$731',
+    balance: '731 ETB',
     dueDate: `15 ${currentMonth} ${now.getFullYear()}`
   },
   {
@@ -278,7 +278,7 @@ export const db: InvoiceType[] = [
     avatar: '',
     avatarColor: 'warning',
     invoiceStatus: 'Sent',
-    balance: '-$344',
+    balance: '-344 ETB',
     dueDate: `17 ${currentMonth} ${now.getFullYear()}`
   },
   {
@@ -294,7 +294,7 @@ export const db: InvoiceType[] = [
     total: 3198,
     avatar: '/images/avatars/6.png',
     invoiceStatus: 'Partial Payment',
-    balance: '-$253',
+    balance: '-253 ETB',
     dueDate: `16 ${currentMonth} ${now.getFullYear()}`
   },
   {
@@ -327,7 +327,7 @@ export const db: InvoiceType[] = [
     total: 5612,
     avatar: '/images/avatars/7.png',
     invoiceStatus: 'Downloaded',
-    balance: '$883',
+    balance: '883 ETB',
     dueDate: `12 ${currentMonth} ${now.getFullYear()}`
   },
   {
@@ -490,7 +490,7 @@ export const db: InvoiceType[] = [
     avatar: '',
     avatarColor: 'secondary',
     invoiceStatus: 'Paid',
-    balance: '$951',
+    balance: '951 ETB',
     dueDate: `30 ${currentMonth} ${now.getFullYear()}`
   },
   {
@@ -506,7 +506,7 @@ export const db: InvoiceType[] = [
     total: 3102,
     avatar: '/images/avatars/7.png',
     invoiceStatus: 'Partial Payment',
-    balance: '-$153',
+    balance: '-153 ETB',
     dueDate: `25 ${currentMonth} ${now.getFullYear()}`
   },
   {
@@ -538,7 +538,7 @@ export const db: InvoiceType[] = [
     total: 2825,
     avatar: '/images/avatars/1.png',
     invoiceStatus: 'Partial Payment',
-    balance: '-$459',
+    balance: '-459 ETB',
     dueDate: `14 ${currentMonth} ${now.getFullYear()}`
   },
   {
@@ -687,7 +687,7 @@ export const db: InvoiceType[] = [
     avatar: '',
     avatarColor: 'primary',
     invoiceStatus: 'Paid',
-    balance: '$361',
+    balance: '361 ETB',
     dueDate: `02 ${currentMonth} ${now.getFullYear()}`
   },
   {
@@ -804,7 +804,7 @@ export const db: InvoiceType[] = [
     avatar: '',
     avatarColor: 'info',
     invoiceStatus: 'Draft',
-    balance: '$762',
+    balance: '762 ETB',
     dueDate: `12 ${currentMonth} ${now.getFullYear()}`
   },
   {
@@ -820,7 +820,7 @@ export const db: InvoiceType[] = [
     total: 3171,
     avatar: '/images/avatars/8.png',
     invoiceStatus: 'Paid',
-    balance: '-$205',
+    balance: '-205 ETB',
     dueDate: `25 ${currentMonth} ${now.getFullYear()}`
   }
 ]

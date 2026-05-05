@@ -14,6 +14,8 @@ import { RootState } from '@/redux-store'
 import { useSelector } from 'react-redux'
 import React, { useEffect, useState } from 'react'
 
+import { formatAmountEt } from '@/libs/currency'
+
 const Award = ({ shopKPI }: { shopKPI: any }) => {
   const theme = useTheme()
   
@@ -34,9 +36,14 @@ const Award = ({ shopKPI }: { shopKPI: any }) => {
     : "Total transactions made"
 
   // Metric value and description
-  const mainValue = showMode === 0
-    ? (shopKPI?.revenue !== undefined ? `$${shopKPI?.revenue}` : '--')
-    : (shopKPI?.totalTransactions !== undefined ? shopKPI?.totalTransactions : '--')
+  const mainValue =
+    showMode === 0
+      ? shopKPI?.revenue !== undefined
+        ? formatAmountEt(Number(shopKPI.revenue))
+        : '--'
+      : shopKPI?.totalTransactions !== undefined
+        ? shopKPI.totalTransactions
+        : '--'
   const subValue = showMode === 0
     ? 'Revenue'
     : 'Transaction Count'

@@ -31,48 +31,48 @@ type DataType = {
 // Vars
 const data: DataType[] = [
   {
-    spend: '-$2,820',
-    balance: '$10,450',
+    spend: '-2,820 ETB',
+    balance: '10,450 ETB',
     cardType: 'Credit Card',
     cardNumber: '*4399',
     imgName: 'visa',
     date: '05/Jan'
   },
   {
-    spend: '-$345',
-    balance: '$8,709',
+    spend: '-345 ETB',
+    balance: '8,709 ETB',
     cardType: 'Debit Card',
     cardNumber: '*5545',
     imgName: 'mastercard',
     date: '12/Feb'
   },
   {
-    spend: '-$2,820',
-    balance: '$10,450',
+    spend: '-2,820 ETB',
+    balance: '10,450 ETB',
     cardType: 'ATM Card',
     cardNumber: '*9860',
     imgName: 'american-express',
     date: '24/Feb'
   },
   {
-    spend: '-$2,820',
-    balance: '$10,450',
+    spend: '-2,820 ETB',
+    balance: '10,450 ETB',
     cardType: 'Credit Card',
     cardNumber: '*4300',
     imgName: 'visa',
     date: '08/Mar'
   },
   {
-    spend: '-$2,820',
-    balance: '$10,450',
+    spend: '-2,820 ETB',
+    balance: '10,450 ETB',
     cardType: 'Debit Card',
     cardNumber: '*5545',
     imgName: 'mastercard',
     date: '15/Apr'
   },
   {
-    spend: '-$2,820',
-    balance: '$10,450',
+    spend: '-2,820 ETB',
+    balance: '10,450 ETB',
     cardType: 'Credit Card',
     cardNumber: '*4399',
     imgName: 'visa',

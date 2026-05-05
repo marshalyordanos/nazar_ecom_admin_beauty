@@ -65,7 +65,7 @@ const SalesMonth = () => {
       <CardContent className='flex flex-col gap-4 pbe-0'>
         <div>
           <Typography>Total Sales This Month</Typography>
-          <Typography variant='h5'>$28,450</Typography>
+          <Typography variant='h5'>28,450 ETB</Typography>
         </div>
         <AppReactApexCharts type='line' height={115} width='100%' options={options} series={series} />
       </CardContent>

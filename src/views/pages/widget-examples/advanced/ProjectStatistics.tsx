@@ -32,7 +32,7 @@ const data: DataType[] = [
   {
     title: '3D Illustration',
     subtitle: 'Blender Illustration',
-    budget: '$6,500',
+    budget: '6,500 ETB',
     transaction: 'debit',
     avatarSrc: '/images/icons/3d-illustration.png',
     alt: '3d-illustration'
@@ -40,7 +40,7 @@ const data: DataType[] = [
   {
     title: 'Finance App Design',
     subtitle: 'Figma UI Kit',
-    budget: '$4,290',
+    budget: '4,290 ETB',
     transaction: 'credit',
     avatarSrc: '/images/icons/finance-app-design.png',
     alt: 'finance-app-design'
@@ -48,7 +48,7 @@ const data: DataType[] = [
   {
     title: '4 Square',
     subtitle: 'Android Application',
-    budget: '$44,500',
+    budget: '44,500 ETB',
     transaction: 'debit',
     avatarSrc: '/images/icons/4-square.png',
     alt: '4-square'
@@ -56,7 +56,7 @@ const data: DataType[] = [
   {
     title: 'Delta Web App',
     subtitle: 'React Dashboard',
-    budget: '$12,690',
+    budget: '12,690 ETB',
     transaction: 'debit',
     avatarSrc: '/images/icons/delta-web-app.png',
     alt: 'delta-web-app'
@@ -64,7 +64,7 @@ const data: DataType[] = [
   {
     title: 'eCommerce Website',
     subtitle: 'Vue + Laravel',
-    budget: '$10,850',
+    budget: '10,850 ETB',
     transaction: 'credit',
     avatarSrc: '/images/icons/ecommerce-website.png',
     alt: 'ecommerce-website'

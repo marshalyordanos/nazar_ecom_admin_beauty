@@ -9,6 +9,8 @@ import Box from '@mui/material/Box'
 
 import type { SalesFromShopStats } from '@/api/sales/useSaleFromShop'
 
+import { DEFAULT_CURRENCY_CODE } from '@/libs/currency'
+
 type Props = {
   stats?: SalesFromShopStats
   isLoading: boolean
@@ -24,7 +26,7 @@ const iconStyles = [
     color: '#fff' 
   },
   { 
-    icon: <i className="ri-money-dollar-circle-line ri-2x" />, 
+    icon: <i className='ri-coins-line ri-2x' />, 
     bg: 'linear-gradient(135deg, #FF6B6B, #FFD36E)', 
     color: '#fff' 
   },
@@ -40,7 +42,7 @@ const iconStyles = [
   }
 ]
 
-const SalesFromShopStatsCards = ({ stats, isLoading, isError, currency = 'USD' }: Props) => {
+const SalesFromShopStatsCards = ({ stats, isLoading, isError, currency = DEFAULT_CURRENCY_CODE }: Props) => {
   const fmtMoney = (n: number) =>
     new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(n)
 

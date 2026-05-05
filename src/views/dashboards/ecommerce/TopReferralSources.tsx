@@ -40,7 +40,7 @@ type HighlightType = {
 }
 
 const formatCurrency = (value: number) =>
-  `${new Intl.NumberFormat('en', { maximumFractionDigits: value >= 1000 ? 0 : 2 }).format(value)} Br`
+  `${new Intl.NumberFormat('en', { maximumFractionDigits: value >= 1000 ? 0 : 2 }).format(value)} ETB`
 
 const formatCompactNumber = (value: number) =>
   new Intl.NumberFormat('en', { notation: 'compact', maximumFractionDigits: 1 }).format(value)

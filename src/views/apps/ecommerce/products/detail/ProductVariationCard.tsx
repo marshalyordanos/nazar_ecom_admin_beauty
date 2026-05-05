@@ -20,6 +20,7 @@ import { Icon } from '@iconify/react'
 // Component Imports
 import CustomAvatar from '@core/components/mui/Avatar'
 import { useProduct } from '@/api/products/useProduct'
+import { formatAmountEt } from '@/libs/currency'
 
 type CardStat = {
   title: string
@@ -44,13 +45,13 @@ const PRODUCT_CARDS: CardStat[] = [
   {
     title: 'Min Price',
     value: 0,
-    icon: 'mdi:currency-usd',
+    icon: 'mdi:cash-multiple',
     color: '#ffc107', // amber (warning)
   },
   {
     title: 'Max Price',
     value: 0,
-    icon: 'mdi:currency-usd',
+    icon: 'mdi:cash-multiple',
     color: '#e53935', // red (error)
   },
 ];
@@ -126,8 +127,8 @@ const ProductVariationCard = () => {
                       <Typography variant='h4'>
                         {
                           // Format prices for Min Price and Max Price cards
-                          (item.title === 'Min Price' || item.title === 'Max Price')
-                            ? `$${item.value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                          item.title === 'Min Price' || item.title === 'Max Price'
+                            ? formatAmountEt(item.value)
                             : item.value
                         }
                       </Typography>

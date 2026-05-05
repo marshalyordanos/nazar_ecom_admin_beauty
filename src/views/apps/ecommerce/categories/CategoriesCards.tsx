@@ -30,7 +30,7 @@ import { useCategoriesTree, useDeleteCategory } from '@/api/categories/useCatego
 
 import type { CategoryTreeNode } from '@/types/category'
 
-function formatMoney(n: number, currency = 'USD') {
+function formatMoney(n: number, currency = 'ETB') {
   return n.toLocaleString(undefined, { style: 'currency', currency, maximumFractionDigits: 0 })
 }
 

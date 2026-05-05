@@ -55,7 +55,7 @@ const SmoothLineChart = () => {
     <Card>
       <CardContent>
         <div className='flex flex-wrap items-center gap-1'>
-          <Typography variant='h5'>$22.6k</Typography>
+          <Typography variant='h5'>ETB 22.6k</Typography>
           <Typography color='success.main'>+38%</Typography>
         </div>
         <Typography variant='subtitle1'>Total Sales</Typography>

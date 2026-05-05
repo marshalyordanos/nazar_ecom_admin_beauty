@@ -52,9 +52,9 @@ type TrendPoint = {
 }
 
 function formatBirr(n: number): string {
-  if (!Number.isFinite(n)) return '0 Br'
+  if (!Number.isFinite(n)) return '0 ETB'
   const r = Math.round(n)
-  return `${r.toLocaleString()} Br`
+  return `${r.toLocaleString()} ETB`
 }
 
 function defaultYearOptions(): number[] {

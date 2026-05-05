@@ -57,7 +57,7 @@ type SearchData = {
 //     name: 'Pricing Front',
 //     url: '/front-pages/pricing',
 //     excludeLang: true,
-//     icon: 'ri-money-dollar-circle-line',
+//     icon: 'ri-coins-line',
 //     section: 'Front Pages'
 //   },
 //   {
@@ -312,7 +312,7 @@ type SearchData = {
 //     id: '42',
 //     name: 'Pricing',
 //     url: '/pages/pricing',
-//     icon: 'ri-money-dollar-circle-line',
+//     icon: 'ri-coins-line',
 //     section: 'Pages'
 //   },
 //   {

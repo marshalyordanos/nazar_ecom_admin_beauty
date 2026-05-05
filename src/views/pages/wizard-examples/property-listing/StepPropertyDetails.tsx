@@ -52,7 +52,7 @@ const data: CustomInputVerticalData[] = [
         Unlimited free listing.
       </Content>
     ),
-    asset: 'ri-money-dollar-circle-line',
+    asset: 'ri-coins-line',
     isSelected: true
   },
   {

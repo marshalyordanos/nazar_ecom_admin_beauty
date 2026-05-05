@@ -66,11 +66,11 @@ const TotalEarnings = ({ serverMode }: { serverMode: SystemMode }) => {
       <CardContent className='flex flex-col gap-14 pbs-0.5'>
         <div>
           <div className='flex items-center'>
-            <Typography variant='h3'>$24,895</Typography>
+            <Typography variant='h3'>24,895 ETB</Typography>
             <i className='ri-arrow-up-s-line text-2xl text-success' />
             <Typography color='success.main'>22%</Typography>
           </div>
-          <Typography>Compared to $84,325 last year</Typography>
+          <Typography>Compared to 84,325 ETB last year</Typography>
         </div>
         <div className='flex flex-col gap-7'>
           {Data.map((item, index) => (
@@ -94,7 +94,7 @@ const TotalEarnings = ({ serverMode }: { serverMode: SystemMode }) => {
               </div>
               <div className='flex flex-col items-center gap-2'>
                 <Typography className='font-medium' color='text.primary'>
-                  ${item.progress}
+                  {item.progress} ETB
                 </Typography>
                 <LinearProgress
                   variant='determinate'

@@ -7,6 +7,7 @@ import { useEffect, useMemo, useState } from 'react'
 import Link from 'next/link'
 import { useParams, useSearchParams } from 'next/navigation'
 import { api } from '@/libs/api'
+import { formatAmountEt } from '@/libs/currency'
 
 // MUI Imports
 import Card from '@mui/material/Card'
@@ -263,20 +264,23 @@ const ProductVariationDetailTable = () => {
       }),
       columnHelper.accessor('price', {
         header: 'Price',
-        cell: ({ row }) => <Typography>{row.original.price != null ? `$${row.original.price}` : '-'}</Typography>
+        cell: ({ row }) => (
+          <Typography>{row.original.price != null ? formatAmountEt(row.original.price) : '-'}</Typography>
+        )
       }),
       columnHelper.accessor('comparePrice', {
         header: 'Compare Price',
         cell: ({ row }) =>
           row.original.comparePrice != null ? (
-            <Typography><s>${row.original.comparePrice}</s></Typography>
+            <Typography><s>{formatAmountEt(row.original.comparePrice)}</s></Typography>
           ) : (
             <span>-</span>
           )
       }),
       columnHelper.accessor('costPrice', {
         header: 'Cost Price',
-        cell: ({ row }) => row.original.costPrice != null ? <Typography>${row.original.costPrice}</Typography> : <span>-</span>
+        cell: ({ row }) =>
+          row.original.costPrice != null ? <Typography>{formatAmountEt(row.original.costPrice)}</Typography> : <span>-</span>
       }),
       columnHelper.accessor(row => getOptionSummary(row), {
         id: 'options',

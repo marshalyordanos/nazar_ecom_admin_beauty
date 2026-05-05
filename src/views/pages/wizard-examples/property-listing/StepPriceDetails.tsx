@@ -36,7 +36,7 @@ const StepPriceDetails = ({ activeStep, handleNext, handlePrev, steps }: Props) 
             input: {
               endAdornment: (
                 <InputAdornment position='end'>
-                  <i className='ri-money-dollar-circle-line' />
+                  <i className='ri-coins-line' />
                 </InputAdornment>
               )
             }
@@ -53,7 +53,7 @@ const StepPriceDetails = ({ activeStep, handleNext, handlePrev, steps }: Props) 
             input: {
               endAdornment: (
                 <InputAdornment position='end'>
-                  <i className='ri-money-dollar-circle-line' />
+                  <i className='ri-coins-line' />
                 </InputAdornment>
               )
             }
@@ -70,7 +70,7 @@ const StepPriceDetails = ({ activeStep, handleNext, handlePrev, steps }: Props) 
             input: {
               endAdornment: (
                 <InputAdornment position='end'>
-                  <i className='ri-money-dollar-circle-line' />
+                  <i className='ri-coins-line' />
                 </InputAdornment>
               )
             }
@@ -99,7 +99,7 @@ const StepPriceDetails = ({ activeStep, handleNext, handlePrev, steps }: Props) 
             input: {
               endAdornment: (
                 <InputAdornment position='end'>
-                  <i className='ri-money-dollar-circle-line' />
+                  <i className='ri-coins-line' />
                 </InputAdornment>
               )
             }
@@ -116,7 +116,7 @@ const StepPriceDetails = ({ activeStep, handleNext, handlePrev, steps }: Props) 
             input: {
               endAdornment: (
                 <InputAdornment position='end'>
-                  <i className='ri-money-dollar-circle-line' />
+                  <i className='ri-coins-line' />
                 </InputAdornment>
               )
             }

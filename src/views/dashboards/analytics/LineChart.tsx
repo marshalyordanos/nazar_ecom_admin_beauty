@@ -90,7 +90,7 @@ const LineChart = () => {
     <Card>
       <CardContent>
         <div className='flex flex-wrap items-center gap-1'>
-          <Typography variant='h5'>$38.5k</Typography>
+          <Typography variant='h5'>ETB 38.5k</Typography>
           <Typography color='success.main'>+62%</Typography>
         </div>
         <Typography variant='subtitle1'>Sessions</Typography>

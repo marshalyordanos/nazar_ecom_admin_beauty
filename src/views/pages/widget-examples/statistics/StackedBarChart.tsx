@@ -163,7 +163,7 @@ const StackedBarChart = () => {
     <Card>
       <CardContent>
         <div className='flex flex-wrap items-center gap-1'>
-          <Typography variant='h5'>$88.5k</Typography>
+          <Typography variant='h5'>ETB 88.5k</Typography>
           <Typography color='error.main'>-18%</Typography>
         </div>
         <Typography variant='subtitle1'>Total Profit</Typography>

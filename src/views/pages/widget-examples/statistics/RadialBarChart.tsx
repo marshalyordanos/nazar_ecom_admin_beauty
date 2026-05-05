@@ -55,7 +55,7 @@ const RadialBarChart = () => {
     <Card>
       <CardContent className='pbe-0'>
         <div className='flex flex-wrap items-center gap-1'>
-          <Typography variant='h5'>$67.1k</Typography>
+          <Typography variant='h5'>ETB 67.1k</Typography>
           <Typography color='success.main'>+49%</Typography>
         </div>
         <Typography variant='subtitle1'>Overview</Typography>

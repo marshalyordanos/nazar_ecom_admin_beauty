@@ -45,7 +45,7 @@ const data: CustomInputVerticalData[] = [
     title: 'I am the broker',
     value: 'broker',
     content: 'Earn highest commission by listing your clients properties at the best price.',
-    asset: 'ri-money-dollar-circle-line'
+    asset: 'ri-coins-line'
   }
 ]
 

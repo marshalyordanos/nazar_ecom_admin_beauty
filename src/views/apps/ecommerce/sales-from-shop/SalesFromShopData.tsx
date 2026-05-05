@@ -12,6 +12,8 @@ import {
   useUpdateSaleFromShop
 } from '@/api/sales/useSaleFromShop'
 
+import { DEFAULT_CURRENCY_CODE } from '@/libs/currency'
+
 import SalesFromShopStatsCards from './SalesFromShopStatsCards'
 import SalesFromShopTable from './SalesFromShopTable'
 
@@ -37,7 +39,7 @@ const SalesFromShopData = () => {
 
   const { data: shopsRes } = useShops({ page: 1, pageSize: 50 })
   const shops = shopsRes?.data ?? []
-  const currency = shops[0]?.currency ?? 'USD'
+  const currency = shops[0]?.currency ?? DEFAULT_CURRENCY_CODE
 
   const { data: listRes, isLoading, isError } = useSalesFromShopList(listParams)
   const { data: stats, isLoading: statsLoading, isError: statsError } = useSalesFromShopStats()

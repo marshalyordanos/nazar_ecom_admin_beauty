@@ -99,7 +99,7 @@ const TopBrands = () => {
             <Typography variant='h4'>
               {isLoading
                 ? <Skeleton variant='text' width={80} height={36} />
-                : `$${formatCurrency(totalRevenue)}`}
+                : `${formatCurrency(totalRevenue)} ETB`}
             </Typography>
             {isLoading ? (
               <Skeleton variant='circular' width={32} height={32} sx={{ ml: 1, mr: 1 }} />
@@ -136,7 +136,7 @@ const TopBrands = () => {
                   </div>
                   <div className='flex items-center gap-2'>
                     <Typography color='text.primary' className='font-medium'>
-                      ${formatCurrency(item.revenue)}
+                      {formatCurrency(item.revenue)} ETB
                     </Typography>
                     <Chip
                       label={item.revenue > 0 ? `+${item.orderCount}` : `-${item.orderCount}`}

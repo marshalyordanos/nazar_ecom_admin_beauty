@@ -71,7 +71,7 @@ const SalesInCountries = () => {
       <CardContent className='flex flex-col gap-11'>
         <div className='flex flex-col gap-1.5'>
           <div className='flex items-center gap-2'>
-            <Typography variant='h1'>$24,895</Typography>
+            <Typography variant='h1'>24,895 ETB</Typography>
             <Chip variant='tonal' color='success' label='+42%' size='small' />
           </div>
           <Typography>Sales Last 90 Days</Typography>

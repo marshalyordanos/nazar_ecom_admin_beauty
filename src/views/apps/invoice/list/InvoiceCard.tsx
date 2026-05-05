@@ -35,7 +35,7 @@ const data = [
   {
     title: '$876',
     subtitle: 'Unpaid',
-    icon: 'ri-money-dollar-circle-line'
+    icon: 'ri-coins-line'
   }
 ]
 

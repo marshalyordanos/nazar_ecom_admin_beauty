@@ -75,7 +75,7 @@ const Slides = () => {
               Weekly Sales
             </Typography>
             <div className='flex items-center gap-2 pbe-5'>
-              <Typography className='text-white'>Total $23.5k Earning</Typography>
+              <Typography className='text-white'>Total ETB 23.5k Earning</Typography>
               <div className='flex items-center text-success'>
                 <Typography className='font-medium' color='success.main'>
                   +62%

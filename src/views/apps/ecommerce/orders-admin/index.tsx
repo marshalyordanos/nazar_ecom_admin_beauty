@@ -289,7 +289,7 @@ const OrdersAdminManagement = () => {
 
   const [openCreate, setOpenCreate] = useState(false)
   const [payload, setPayload] = useState(
-    '{\n  "shopId": "",\n  "userId": "",\n  "subtotal": 0,\n  "grandTotal": 0,\n  "currency": "USD",\n  "items": [],\n  "address": {\n    "name": "",\n    "phone": "",\n    "addressLine1": "",\n    "city": "",\n    "country": ""\n  }\n}'
+    '{\n  "shopId": "",\n  "userId": "",\n  "subtotal": 0,\n  "grandTotal": 0,\n  "currency": "ETB",\n  "items": [],\n  "address": {\n    "name": "",\n    "phone": "",\n    "addressLine1": "",\n    "city": "",\n    "country": ""\n  }\n}'
   )
 
   const listParams = useMemo(() => {
@@ -352,7 +352,7 @@ const OrdersAdminManagement = () => {
               <HorizontalWithSubtitle
                 title='Gross revenue'
                 stats={ord.totalRevenue.toFixed(2)}
-                avatarIcon='ri-money-dollar-circle-line'
+                avatarIcon='ri-coins-line'
                 avatarColor='info'
                 trend=''
                 subtitle={`Discounts ${ord.totalDiscounts.toFixed(2)} · Tax ${ord.totalTax.toFixed(2)}`}

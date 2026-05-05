@@ -131,7 +131,7 @@ const MonthlyBudget = () => {
           options={options}
           series={[{ name: 'Traffic Rate', data: [0, 85, 25, 125, 90, 250, 200, 350] }]}
         />
-        <Typography>Last month you had $2.42 expense transactions, 12 savings entries and 4 bills.</Typography>
+        <Typography>Last month you had 2.42 expense transactions, 12 savings entries and 4 bills.</Typography>
       </CardContent>
     </Card>
   )
